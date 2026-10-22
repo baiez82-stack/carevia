@@ -318,7 +318,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v10';
+    <script>const STORAGE_KEY = 'carevia-static-v11';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -338,6 +338,24 @@ const defaultState = {
 
 let state = loadState();
 let toastTimer;
+let territorialStats = {
+  asl_rows: 7898,
+  unique_comuni_asl: 7896,
+  health_authorities: 110,
+  ats_rows: 7900,
+  social_areas: 610,
+  health_source_updated: '28 mag 2026',
+  social_source_updated: '06 mar 2025',
+  sync: 'settimanale'
+};
+
+async function loadTerritorialStats(){
+  try{
+    const res=await fetch('data/territorial_stats.json',{cache:'no-cache'});
+    if(res.ok) territorialStats={...territorialStats,...await res.json()};
+  }catch{}
+  render();
+}
 
 function loadState() {
   try {
@@ -1067,6 +1085,15 @@ function overview() {
       ${resume}
     </section>
     <section class="home-section">
+      <div class="home-section-head"><span class="eyebrow">Copertura nazionale</span><h3>Il territorio non è più un buco nero.</h3><p>Carevia usa registri ministeriali incorporati nel progetto per risolvere Comune→ASL e Comune→Ambito Territoriale Sociale, poi aggiunge il livello locale verificato quando disponibile.</p></div>
+      <div class="home-grid">
+        <article class="home-card">${icon('search',23)}<h4>${Number(territorialStats.unique_comuni_asl).toLocaleString('it-IT')} Comuni</h4><p>corrispondenze Comune→ASL dal dataset ufficiale del Ministero della Salute.</p></article>
+        <article class="home-card">${icon('shield',23)}<h4>${Number(territorialStats.health_authorities).toLocaleString('it-IT')} aziende sanitarie</h4><p>anagrafica nazionale con recapiti e fonte ministeriale.</p></article>
+        <article class="home-card">${icon('tasks',23)}<h4>${Number(territorialStats.social_areas).toLocaleString('it-IT')} Ambiti sociali</h4><p>Registro nazionale degli Ambiti Territoriali Sociali del Ministero del Lavoro.</p></article>
+      </div>
+      <div class="source-note">${icon('info',18)}<div><strong>Dati aggiornabili, non hard-coded</strong><p>La sincronizzazione dei dataset territoriali viene eseguita automaticamente ogni settimana. Carevia mostra sempre quando il dato nazionale è risolto e quando serve una verifica locale più profonda.</p></div></div>
+    </section>
+    <section class="home-section">
       <div class="home-section-head"><span class="eyebrow">Cosa ti aiuta a fare</span><h3>Una sola mappa per problemi che oggi sono sparsi.</h3><p>Carevia non promette un bonus: collega la situazione familiare ai percorsi che vale la pena controllare.</p></div>
       <div class="home-grid">
         <article class="home-card">${icon('wallet',23)}<h4>Prestazioni e tutele</h4><p>Invalidità, accompagnamento, Legge 104, congedi, Prestazione Universale, Home Care Premium, Disability Card e altre misure da verificare.</p></article>
@@ -1372,12 +1399,14 @@ async function wizardNext(){
 function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); persistDraft(false); render(); }
 function updateDraft(key,value){ state.draft[key]=value; if(['city','region','province'].includes(key)){ state.draft.healthAuthority=null; state.draft.socialArea=null; } persistDraft(false); }
 function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; persistDraft(false); render(); }
-function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; clearDraft(); saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
+async function completeWizard(){ await resolveDraftTerritoryData(false); state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; clearDraft(); saveState(); render(); showToast('Percorso aggiornato con ASL e Ambito Sociale'); }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
 window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary;
 
 render();
+loadTerritorialStats();
+resolveProfileTerritoryData().then(()=>render()).catch(()=>{});
 </script>
   </body>
 </html>
