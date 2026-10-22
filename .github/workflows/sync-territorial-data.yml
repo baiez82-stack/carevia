@@ -26,7 +26,11 @@ jobs:
           curl -fL --retry 4 --retry-delay 3             "https://www.dati.salute.gov.it/sites/default/files/2026-05/ASL_comuni_popolazione_2024.csv"             -o data/asl_comuni.csv
           test -s data/asl_comuni.csv
 
-      - name: Validate dataset
+      - name: Prepare XLSX reader
+        shell: bash
+        run: python -m pip install --quiet openpyxl
+
+      - name: Validate and normalize datasets
         shell: python
         run: |
           from pathlib import Path
@@ -72,6 +76,30 @@ jobs:
               raise SystemExit("ASL registry dataset unexpectedly small")
           print(f"Validated ASL registry with {len(asl_text.splitlines())-1} rows")
 
+          from openpyxl import load_workbook
+          ats_path = Path("data/ats_registry.xlsx")
+          wb = load_workbook(ats_path, read_only=True, data_only=True)
+          ws = wb[wb.sheetnames[0]]
+          raw_rows = list(ws.iter_rows(values_only=True))
+          header_idx = None
+          for i, row in enumerate(raw_rows[:30]):
+              vals = [str(v).strip() if v is not None else "" for v in row]
+              joined = " ".join(vals).lower()
+              if "ambit" in joined and ("region" in joined or "codic" in joined or "comun" in joined):
+                  header_idx = i
+                  break
+          if header_idx is None:
+              raise SystemExit("Unable to identify ATS registry header")
+          rows = raw_rows[header_idx:]
+          out = Path("data/ats_registry.csv")
+          with out.open("w", encoding="utf-8", newline="") as fh:
+              writer = csv.writer(fh, delimiter=";")
+              for row in rows:
+                  writer.writerow(["" if v is None else str(v).strip() for v in row])
+          if out.stat().st_size < 1000:
+              raise SystemExit("ATS registry CSV unexpectedly small")
+          print(f"Normalized ATS registry: {len(rows)-1} data rows from sheet {ws.title!r}")
+
       - name: Write source metadata
         shell: bash
         run: |
@@ -83,7 +111,10 @@ jobs:
             "source_page": "https://www.dati.salute.gov.it/it/dataset/corrispondenze-asl-comuni-e-popolazione-residente-anno-2024/",
             "asl_registry_last_updated": "2026-04-23",
             "asl_registry_source_page": "https://www.dati.salute.gov.it/it/dataset/aziende-sanitarie-locali-asl/",
-            "license": "Italian Open Data Licence v2.0",
+            "ats_registry_source": "Ministero del Lavoro e delle Politiche Sociali - Registro Ambiti Territoriali Sociali",
+            "ats_registry_extract_date": "2025-03-06",
+            "ats_registry_source_page": "https://www.lavoro.gov.it/strumenti-e-servizi/Sistema-informativo-servizi-sociali/Pagine/Ambiti-Territoriali-del-SIUSS",
+            "license": "Italian Open Data Licence v2.0 where applicable; see source datasets",
             "sync": "automated weekly by GitHub Actions"
           }
           EOF
@@ -94,7 +125,7 @@ jobs:
           set -euo pipefail
           git config user.name "carevia-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/asl_comuni.csv data/asl_elenco.csv data/asl_source.json
+          git add data/asl_comuni.csv data/asl_elenco.csv data/ats_registry.xlsx data/ats_registry.csv data/asl_source.json
           if git diff --cached --quiet; then
             echo "No territorial dataset changes"
             exit 0
