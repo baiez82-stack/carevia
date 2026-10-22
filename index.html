@@ -220,6 +220,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .support-value { text-align: right; }.support-value > span, .support-value > strong { display: block; }.support-value > span { color: var(--muted); font-size: 10px; }.support-value > strong { margin: 7px 0 20px; font-size: 15px; }.support-value a { display: inline-flex; align-items: center; gap: 5px; color: #59645e; font-size: 10px; font-weight: 700; text-decoration: none; }.support-value a:hover { color: var(--accent); }
 .source-note { display: flex; align-items: flex-start; gap: 14px; max-width: 800px; margin-top: 26px; padding: 18px 0; color: #59605b; }.source-note svg { flex: 0 0 auto; color: var(--accent); }.source-note strong { font-size: 12px; }.source-note p { margin: 4px 0 0; font-size: 11px; line-height: 1.55; }
 
+.national-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0 28px; }
+.national-source-card { padding:16px 17px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.national-source-card strong,.national-source-card span,.national-source-card a { display:block; }
+.national-source-card strong { margin-bottom:5px; font-size:11px; }
+.national-source-card span { min-height:44px; color:var(--muted); font-size:10px; line-height:1.45; }
+.national-source-card a { margin-top:10px; color:#486057; font-size:9px; font-weight:780; text-decoration:none; }
+.authority-resolution { margin:14px 0 0; padding:12px 14px; border-radius:6px; background:#eef3ef; }
+.authority-resolution.warning { background:#fff4dd; }
+.authority-resolution strong,.authority-resolution span { display:block; }
+.authority-resolution strong { margin-bottom:4px; font-size:10px; }
+.authority-resolution span { color:var(--muted); font-size:9px; line-height:1.45; }
 .coverage-banner { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:24px; padding:18px 20px; border:1px solid #d8ddd7; border-radius:8px; background:#fff; }
 .coverage-banner strong,.coverage-banner span { display:block; }
 .coverage-banner strong { margin-bottom:4px; font-size:12px; }
@@ -284,7 +295,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 @media (max-width: 780px) {
-  .service-intro { padding: 38px 0 34px; }.service-intro-grid { grid-template-columns: 1fr; gap: 30px; }.service-intro-actions { align-items: stretch; }.service-intro-actions .primary-button { width: 100%; }.home-grid { grid-template-columns:1fr; }.home-card { min-height:0; border-right:0; border-bottom:1px solid var(--line); }.home-card:last-child { border-bottom:0; }.official-source { grid-template-columns:1fr; gap:9px; }.official-source a { justify-self:start; }.home-resume { align-items:stretch; flex-direction:column; }.decision-summary { grid-template-columns:1fr; }.support-explain { grid-template-columns:1fr; }.excluded-item { grid-template-columns:1fr; gap:4px; }
+  .service-intro { padding: 38px 0 34px; }.service-intro-grid { grid-template-columns: 1fr; gap: 30px; }.service-intro-actions { align-items: stretch; }.service-intro-actions .primary-button { width: 100%; }.home-grid { grid-template-columns:1fr; }.home-card { min-height:0; border-right:0; border-bottom:1px solid var(--line); }.home-card:last-child { border-bottom:0; }.official-source { grid-template-columns:1fr; gap:9px; }.official-source a { justify-self:start; }.home-resume { align-items:stretch; flex-direction:column; }.decision-summary { grid-template-columns:1fr; }.support-explain { grid-template-columns:1fr; }.excluded-item { grid-template-columns:1fr; gap:4px; }.national-grid { grid-template-columns:1fr; }
   .app-shell { display: block; }.main-area { width: 100%; }.sidebar { transform: translateX(-100%); transition: transform .25s ease; box-shadow: 15px 0 40px rgba(20,25,21,.2); }.sidebar.mobile-open { transform: translateX(0); }.mobile-close { display: inline-grid !important; }.menu-button { display: inline-grid; }
   .topbar { height: 70px; padding: 0 17px; }.topbar > div:nth-child(2) { margin-right: auto; margin-left: 8px; }.topbar .eyebrow, .topbar .secondary-button, .user-chip div, .topbar-actions > .icon-button { display: none; }.user-chip { margin: 0; padding: 0; border: 0; }
   .workspace { padding: 24px 17px 38px; }.page-heading { align-items: stretch; flex-direction: column; margin-bottom: 22px; }.page-heading .primary-button { width: 100%; }
@@ -307,7 +318,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v9';
+    <script>const STORAGE_KEY = 'carevia-static-v10';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -318,7 +329,7 @@ const defaultState = {
     region: 'Seleziona', province: '', city: '', condition: 'Anziano non autosufficiente',
     living: 'Con familiari', invalidity: 'No', law104: 'No', law104Level: 'Non so', allowance: 'No',
     caregiverWork: 'Non lavoro', isee: 'Non disponibile', publicEmployee: 'Non so',
-    needs: [],
+    healthAuthority: null, needs: [],
   },
   tasks: [],
   documents: [],
@@ -552,6 +563,117 @@ function ulssTerritoryNode(profile) {
   };
 }
 
+
+const MINISTRY_ASL_CSV = 'https://www.dati.salute.gov.it/sites/default/files/2026-05/ASL_comuni_popolazione_2024.csv';
+const MINISTRY_ASL_DATASET_PAGE = 'https://www.dati.salute.gov.it/it/dataset/corrispondenze-asl-comuni-e-popolazione-residente-anno-2024/';
+const AGENAS_FIND_STRUCTURES = 'https://trovastrutture.agenas.it/';
+const AGENAS_PNRR_MAP = 'https://geopnrr.agenas.it/web/';
+const MLPS_ATS_REGISTRY = 'https://www.lavoro.gov.it/strumenti-e-servizi/Sistema-informativo-servizi-sociali/Pagine/Ambiti-Territoriali-del-SIUSS';
+
+let ministryAslRowsCache = null;
+
+function parseCsvRows(text) {
+  const first=(text.split(/\r?\n/,1)[0]||'');
+  const candidates=[';','\t',','];
+  const delimiter=candidates.sort((a,b)=>(first.split(b).length-first.split(a).length))[0];
+  const rows=[]; let row=[],field='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i],next=text[i+1];
+    if(ch==='"'){
+      if(quoted && next==='"'){ field+='"'; i++; }
+      else quoted=!quoted;
+    } else if(ch===delimiter && !quoted){ row.push(field.trim()); field=''; }
+    else if((ch==='\n' || ch==='\r') && !quoted){
+      if(ch==='\r' && next==='\n') i++;
+      row.push(field.trim()); field='';
+      if(row.some(v=>v!=='')) rows.push(row);
+      row=[];
+    } else field+=ch;
+  }
+  if(field || row.length){ row.push(field.trim()); if(row.some(v=>v!=='')) rows.push(row); }
+  return rows;
+}
+
+function normalizeHeader(value=''){ return normalizePlace(value).replace(/[^a-z0-9 ]/g,'').trim(); }
+
+async function loadNationalAslRows() {
+  if(ministryAslRowsCache) return ministryAslRowsCache;
+  const res=await fetch(MINISTRY_ASL_CSV,{cache:'force-cache'});
+  if(!res.ok) throw new Error('dataset ministeriale non disponibile');
+  const buffer=await res.arrayBuffer();
+  let text=new TextDecoder('utf-8').decode(buffer);
+  if((text.match(/�/g)||[]).length>5) text=new TextDecoder('windows-1252').decode(buffer);
+  const rows=parseCsvRows(text);
+  if(rows.length<2) throw new Error('dataset ministeriale vuoto');
+  const headers=rows[0].map(normalizeHeader);
+  const idx={
+    region:headers.findIndex(h=>h==='denominazione regione'),
+    code:headers.findIndex(h=>h==='codice azienda'),
+    authority:headers.findIndex(h=>h==='denominazione azienda'),
+    city:headers.findIndex(h=>h==='comune')
+  };
+  if(Object.values(idx).some(v=>v<0)) throw new Error('campi dataset non riconosciuti');
+  ministryAslRowsCache=rows.slice(1).map(r=>({
+    region:r[idx.region]||'', code:r[idx.code]||'', authority:r[idx.authority]||'', city:r[idx.city]||''
+  }));
+  return ministryAslRowsCache;
+}
+
+async function resolveNationalHealthAuthority(profile) {
+  const city=normalizePlace(profile.city), region=normalizePlace(profile.region);
+  if(!city || !region) return null;
+  try {
+    const rows=await loadNationalAslRows();
+    const matches=rows.filter(r=>normalizePlace(r.city)===city && normalizePlace(r.region)===region);
+    const unique=[];
+    for(const row of matches){
+      const key=(row.code||'')+'|'+(row.authority||'');
+      if(!unique.some(x=>x.key===key)) unique.push({key,code:row.code,name:row.authority});
+    }
+    if(!unique.length) return {status:'not-found',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE};
+    if(unique.length===1) return {status:'resolved',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,authorities:unique.map(({code,name})=>({code,name}))};
+    return {status:'multiple',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,authorities:unique.map(({code,name})=>({code,name}))};
+  } catch(e) {
+    return {status:'unavailable',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,error:String(e?.message||e)};
+  }
+}
+
+function nationalHealthAuthorityNode(profile) {
+  const ha=profile.healthAuthority;
+  if(!ha || ha.status==='unavailable' || ha.status==='not-found') return null;
+  if(ha.status==='multiple'){
+    return {
+      id:'national-asl-multiple',scope:'Ministero Salute',region:profile.region,city:profile.city,type:'Afferenza sanitaria',
+      title:'Comune servito da piu aziende sanitarie',status:'Serve risoluzione sub-comunale',verifiedAt:ha.checked,
+      conditions:null,minAge:0,
+      purpose:`Il dataset nazionale associa ${profile.city} a piu aziende sanitarie: ${ha.authorities.map(a=>a.name).join(', ')}. Carevia non sceglie automaticamente.`,
+      access:'Usa AGENAS Trova Strutture o il portale sanitario regionale per individuare l’azienda corretta in base a municipio/circoscrizione o indirizzo.',
+      url:ha.source
+    };
+  }
+  const a=ha.authorities?.[0];
+  if(!a) return null;
+  return {
+    id:'national-asl',scope:'Ministero Salute',region:profile.region,city:profile.city,type:'Azienda sanitaria di afferenza',
+    title:a.name,status:'Afferenza Comune→ASL risolta',verifiedAt:ha.checked,
+    conditions:null,minAge:0,
+    purpose:`Azienda sanitaria associata ufficialmente dal Ministero della Salute al Comune di ${profile.city} (codice ${a.code||'n.d.'}).`,
+    access:'Apri la fonte ministeriale o usa AGENAS Trova Strutture per individuare Distretto, PUA, ADI, Case della Comunita e strutture vicine.',
+    url:ha.source
+  };
+}
+
+async function resolveDraftHealthAuthority(showMessage=false){
+  if(!state.draft?.city || !state.draft?.region || state.draft.region==='Seleziona') return;
+  state.draft.healthAuthority=await resolveNationalHealthAuthority(state.draft);
+  persistDraft(false);
+  if(showMessage){
+    const s=state.draft.healthAuthority?.status;
+    if(s==='resolved') showToast('Azienda sanitaria risolta dal dataset del Ministero');
+    else if(s==='multiple') showToast('Il Comune ha piu ASL: serve il territorio sub-comunale');
+  }
+}
+
 function territoryNodeMatches(node, profile) {
   if(node.region && node.region !== profile.region) return false;
   if(node.city && normalizePlace(node.city) !== normalizePlace(profile.city)) return false;
@@ -562,8 +684,10 @@ function territoryNodeMatches(node, profile) {
 
 function verifiedTerritoryNodes(profile) {
   const nodes=territorialRegistry.filter(node=>territoryNodeMatches(node,profile));
-  const resolved=ulssTerritoryNode(profile);
-  if(resolved && !nodes.some(n=>n.title===resolved.title)) nodes.push(resolved);
+  const venetoResolved=ulssTerritoryNode(profile);
+  if(venetoResolved && !nodes.some(n=>n.title===venetoResolved.title)) nodes.push(venetoResolved);
+  const nationalResolved=nationalHealthAuthorityNode(profile);
+  if(nationalResolved && !nodes.some(n=>n.title===nationalResolved.title)) nodes.push(nationalResolved);
   return nodes;
 }
 
@@ -571,11 +695,14 @@ function coverageFor(profile) {
   const local = territorialRegistry.filter(n=>n.city && normalizePlace(n.city)===normalizePlace(profile.city) && n.region===profile.region);
   const regional = territorialRegistry.filter(n=>!n.city && n.region===profile.region);
   const ulss=resolveVenetoUlss(profile);
+  const national=profile.healthAuthority;
   if(local.length) return {grade:'Verificata locale',tone:'full',text:`${local.length} nodi locali + ${regional.length} regionali verificati da Carevia il ${TERRITORY_CHECKED}.`};
   if(ulss && !ulss.split) return {grade:'Territorio risolto',tone:'full',text:`Misure regionali + azienda sanitaria (${ulss.name}) risolte; i servizi comunali specifici sono in espansione.`};
+  if(national?.status==='resolved') return {grade:'Sanita territoriale risolta',tone:'full',text:`Comune→ASL risolto tramite open data del Ministero della Salute; servizi sociali comunali/ATS e singoli sportelli sono in espansione.`};
+  if(national?.status==='multiple') return {grade:'Risoluzione sanitaria parziale',tone:'partial',text:'Il dataset ministeriale associa il Comune a più aziende sanitarie: serve municipio/circoscrizione o una verifica locale.'};
   if(ulss?.split) return {grade:'Verificata regionale',tone:'partial',text:'La provincia indicata è servita da più ULSS: Carevia non assegna automaticamente l’azienda finché il registro comunale non è verificato.'};
   if(regional.length) return {grade:'Verificata regionale',tone:'partial',text:`${regional.length} nodi regionali verificati; Comune/ASL specifici sono ancora da completare per questo territorio.`};
-  return {grade:'Copertura base',tone:'partial',text:'Carevia conosce i percorsi nazionali, ma non ha ancora completato il registro territoriale verificato per questa area.'};
+  return {grade:'Copertura nazionale base',tone:'partial',text:'Carevia usa fonti nazionali ufficiali per sanita e servizi sociali; il registro locale specifico è ancora da completare.'};
 }
 
 function regionSource(profile) {
@@ -862,14 +989,21 @@ function territoryView() {
   const coverage = coverageFor(p);
   const localVerified = nodes.length > 0;
   const fallback = [
-    {scope:'Comune / Ambito',type:'Accesso sociale',title:`Servizi sociali per ${p.city}`,status:'Da verificare',verifiedAt:'non ancora verificato',purpose:'SAD, pasti, trasporto, sollievo e contributi possono dipendere da Comune/Ambito.',access:'Cerca il portale istituzionale e chiedi Segretariato sociale o Punto Unico di Accesso.',url:`https://www.google.com/search?q=${encodeURIComponent('"' + p.city + '" "' + p.province + '" servizi sociali sito istituzionale')}`},
-    {scope:'ASL / Distretto',type:'Assistenza sanitaria territoriale',title:`Distretto/ASL per ${p.province}`,status:'Da verificare',verifiedAt:'non ancora verificato',purpose:'ADI, UVM/UVMD, PUA, Case della Comunita, ausili e continuita assistenziale.',access:'Chiedi al medico di base o cerca il sito ufficiale dell’azienda sanitaria territoriale.',url:`https://www.google.com/search?q=${encodeURIComponent('"' + p.province + '" ASL ADI PUA sito ufficiale')}`}
+    {scope:'AGENAS',type:'Trova strutture',title:'Trova strutture sanitarie sul territorio',status:'Directory nazionale ufficiale',verifiedAt:'fonte nazionale',purpose:'Ricerca strutture sanitarie per territorio e tipologia senza passare da motori di ricerca generici.',access:'Apri AGENAS Trova Strutture e seleziona territorio/tipologia di struttura.',url:AGENAS_FIND_STRUCTURES},
+    {scope:'AGENAS',type:'Rete territoriale PNRR',title:'Case della Comunita, COT e Ospedali di Comunita',status:'Mappa nazionale ufficiale',verifiedAt:'fonte nazionale',purpose:'Mappa dei progetti e delle strutture territoriali PNRR: Case della Comunita, Centrali Operative Territoriali e Ospedali di Comunita.',access:'Apri la mappa AGENAS e cerca il territorio interessato.',url:AGENAS_PNRR_MAP},
+    {scope:'Ministero Lavoro',type:'Servizi sociali',title:'Registro Ambiti Territoriali Sociali (ATS)',status:'Registro nazionale ufficiale',verifiedAt:'registro 06 mar 2025',purpose:'Gli ATS sono il livello principale di programmazione e coordinamento locale dei servizi sociali.',access:'Apri il registro ministeriale per identificare l’Ambito competente e i servizi/interventi territoriali disponibili.',url:MLPS_ATS_REGISTRY}
   ];
-  const services = localVerified ? nodes : [...nodes,...fallback];
+  const services = localVerified ? [...nodes] : [...nodes,...fallback];
 
   return `<div class="page enter">
     ${heading('Registro territoriale Carevia',`Percorso locale per ${esc(p.city)}`,`Carevia distingue fonti territoriali verificate da indicazioni ancora generiche. L’obiettivo e arrivare dal bisogno al servizio competente senza rimbalzi tra enti.`)}
+    <div class="national-grid">
+      <div class="national-source-card"><strong>Comune → ASL</strong><span>Resolver nazionale basato sull’open data del Ministero della Salute, aggiornato il 28 maggio 2026.</span><a href="${MINISTRY_ASL_DATASET_PAGE}" target="_blank" rel="noreferrer">Fonte Ministero Salute</a></div>
+      <div class="national-source-card"><strong>Strutture sanitarie</strong><span>AGENAS integra informazioni nazionali, regionali e locali e offre una directory ufficiale delle strutture.</span><a href="${AGENAS_FIND_STRUCTURES}" target="_blank" rel="noreferrer">Trova strutture AGENAS</a></div>
+      <div class="national-source-card"><strong>Servizi sociali</strong><span>Il Registro ATS del Ministero del Lavoro identifica gli ambiti che coordinano i servizi sociali locali.</span><a href="${MLPS_ATS_REGISTRY}" target="_blank" rel="noreferrer">Registro ATS</a></div>
+    </div>
     <div class="coverage-banner"><div><strong>Livello di copertura: ${esc(coverage.grade)}</strong><span>${esc(coverage.text)}</span><div class="verified-meta"><span class="verified-node">${icon('check',12)} fonti istituzionali</span><span class="verified-node">${icon('shield',12)} data di verifica esposta</span><span class="verified-node">${icon('search',12)} territorio risolto</span></div></div><span class="coverage-grade ${coverage.tone==='full'?'':'partial'}">${esc(coverage.grade)}</span></div>
+    ${p.healthAuthority ? `<div class="authority-resolution ${p.healthAuthority.status==='resolved'?'':'warning'}"><strong>${p.healthAuthority.status==='resolved'?'Azienda sanitaria risolta':'Risoluzione sanitaria da completare'}</strong><span>${p.healthAuthority.status==='resolved' ? esc(p.healthAuthority.authorities?.map(a=>a.name).join(', ')||'') : p.healthAuthority.status==='multiple' ? 'Il Comune risulta associato a più aziende sanitarie nel dataset ministeriale.' : 'Il dataset nazionale non è stato risolto automaticamente; usa le fonti AGENAS/Regione qui sotto.'}</span></div>` : ''}
     <div class="territory-summary">
       <div>${icon('search',22)}<span><b>${esc(p.city)}</b><small>${esc(p.province)}, ${esc(p.region)}</small></span></div>
       <div>${icon('tasks',22)}<span><b>${services.length} nodi</b><small>${localVerified?'verificati/pertinenti':'misti verificati + fallback'}</small></span></div>
@@ -945,7 +1079,8 @@ async function detectLocation(){
       if(region) state.draft.region=region;
       if(province) state.draft.province=province;
       if(city) state.draft.city=city;
-      persistDraft(false); render(); showToast('Localita compilata automaticamente');
+      state.draft.healthAuthority=await resolveNationalHealthAuthority(state.draft);
+      persistDraft(false); render(); showToast('Localita e azienda sanitaria aggiornate');
     }catch(e){
       if(status) status.textContent='Non riesco a completare automaticamente la localita. Inseriscila manualmente.';
       showToast('Localita non rilevata');
@@ -969,7 +1104,8 @@ async function completeFromMunicipality(){
     state.draft.region=mapRegionName(a.state||a.region||state.draft.region);
     state.draft.province=(a.province||a.county||a.state_district||state.draft.province||'').replace(/^Provincia di\s+/i,'');
     state.draft.city=a.city||a.town||a.village||a.municipality||city;
-    persistDraft(false); render(); showToast('Provincia e Regione completate dal Comune');
+    state.draft.healthAuthority=await resolveNationalHealthAuthority(state.draft);
+    persistDraft(false); render(); showToast('Territorio completato dal Comune');
   }catch{
     showToast('Comune non trovato automaticamente');
   }
@@ -1061,14 +1197,15 @@ function persistDraft(showMessage=false){
   if(showMessage) showToast('Compilazione salvata su questo dispositivo');
 }
 function clearDraft(){ localStorage.removeItem(DRAFT_KEY); }
-function wizardNext(){
+async function wizardNext(){
   const f=state.draft;
   if(state.wizardStep===0 && (!String(f.assistedName||'').trim() || !Number(f.age))){ showToast('Inserisci nome della persona assistita ed eta.'); return; }
   if(state.wizardStep===1 && (f.region==='Seleziona' || !String(f.province||'').trim() || !String(f.city||'').trim())){ showToast('Indica Regione, Provincia e Comune per costruire il percorso territoriale.'); return; }
+  if(state.wizardStep===1){ await resolveDraftHealthAuthority(false); }
   state.wizardStep=Math.min(4,state.wizardStep+1); persistDraft(false); render();
 }
 function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); persistDraft(false); render(); }
-function updateDraft(key,value){ state.draft[key]=value; persistDraft(false); }
+function updateDraft(key,value){ state.draft[key]=value; if(['city','region','province'].includes(key)) state.draft.healthAuthority=null; persistDraft(false); }
 function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; persistDraft(false); render(); }
 function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; clearDraft(); saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
