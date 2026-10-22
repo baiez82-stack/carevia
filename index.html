@@ -184,6 +184,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .human-help .dark-button { width: 100%; }
 .disclaimer { display: flex; align-items: flex-start; gap: 7px; margin: 16px 3px; color: #858a85; font-size: 10px; line-height: 1.5; }.disclaimer svg { flex: 0 0 auto; margin-top: 1px; }
 
+.decision-summary { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr); gap:22px; margin-bottom:34px; }
+.next-action-card { padding:24px 26px; border:1px solid #d9ddd7; border-radius:9px; background:#fff; box-shadow:0 12px 30px rgba(30,35,31,.05); }
+.next-action-card .eyebrow { color:var(--accent); }
+.next-action-card h3 { margin:8px 0 8px; font-family:Georgia,serif; font-size:26px; font-weight:500; }
+.next-action-card p { margin:0; color:var(--muted); font-size:12px; line-height:1.6; }
+.next-action-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:17px; }
+.evidence-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 8px; border-radius:5px; background:#eef1ed; color:#526059; font-size:9px; font-weight:760; }
+.evidence-chip.attention { background:#fff2d7; color:#76531c; }
+.evidence-chip.current { background:#e8f2ec; color:#3d6c54; }
+.decision-side { display:grid; gap:10px; }
+.decision-side > div { padding:17px 18px; border:1px solid var(--line); border-radius:8px; background:#f8f9f6; }
+.decision-side strong,.decision-side span { display:block; }
+.decision-side strong { margin-bottom:4px; font-size:11px; }
+.decision-side span { color:var(--muted); font-size:10px; line-height:1.45; }
+.support-explain { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; }
+.support-explain > div { padding:11px 12px; border-radius:6px; background:#f4f6f2; }
+.support-explain b,.support-explain span { display:block; }
+.support-explain b { margin-bottom:4px; color:#465048; font-size:9px; text-transform:uppercase; letter-spacing:.04em; }
+.support-explain span { color:var(--muted); font-size:10px; line-height:1.45; }
+.support-evidence { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; margin-top:11px; }
+.excluded-section { margin-top:38px; padding-top:26px; border-top:1px solid var(--line); }
+.excluded-section h3 { margin:5px 0 16px; font-size:18px; }
+.excluded-list { display:grid; gap:8px; }
+.excluded-item { display:grid; grid-template-columns:180px 1fr; gap:14px; padding:12px 0; border-bottom:1px solid #e2e5df; }
+.excluded-item strong { font-size:11px; }.excluded-item span { color:var(--muted); font-size:10px; line-height:1.5; }
+.watch-card { margin-top:30px; padding:20px 22px; border:1px solid #e8dcc5; border-radius:8px; background:#fffaf0; }
+.watch-card h3 { margin:5px 0 8px; font-size:17px; }.watch-card p { margin:0; color:#6f6044; font-size:11px; line-height:1.55; }
 .support-list { border-top: 1px solid var(--line); }
 .support-row { display: grid; grid-template-columns: 46px minmax(0,1fr) 190px; gap: 22px; align-items: start; padding: 27px 8px 27px 0; border-bottom: 1px solid var(--line); animation: rowIn .4s ease both; animation-delay: var(--delay); }
 @keyframes rowIn { from { opacity: 0; transform: translateX(-7px); } to { opacity: 1; transform: translateX(0); } }
@@ -247,7 +274,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 @media (max-width: 780px) {
-  .service-intro { padding: 38px 0 34px; }.service-intro-grid { grid-template-columns: 1fr; gap: 30px; }.service-intro-actions { align-items: stretch; }.service-intro-actions .primary-button { width: 100%; }.home-grid { grid-template-columns:1fr; }.home-card { min-height:0; border-right:0; border-bottom:1px solid var(--line); }.home-card:last-child { border-bottom:0; }.official-source { grid-template-columns:1fr; gap:9px; }.official-source a { justify-self:start; }.home-resume { align-items:stretch; flex-direction:column; }
+  .service-intro { padding: 38px 0 34px; }.service-intro-grid { grid-template-columns: 1fr; gap: 30px; }.service-intro-actions { align-items: stretch; }.service-intro-actions .primary-button { width: 100%; }.home-grid { grid-template-columns:1fr; }.home-card { min-height:0; border-right:0; border-bottom:1px solid var(--line); }.home-card:last-child { border-bottom:0; }.official-source { grid-template-columns:1fr; gap:9px; }.official-source a { justify-self:start; }.home-resume { align-items:stretch; flex-direction:column; }.decision-summary { grid-template-columns:1fr; }.support-explain { grid-template-columns:1fr; }.excluded-item { grid-template-columns:1fr; gap:4px; }
   .app-shell { display: block; }.main-area { width: 100%; }.sidebar { transform: translateX(-100%); transition: transform .25s ease; box-shadow: 15px 0 40px rgba(20,25,21,.2); }.sidebar.mobile-open { transform: translateX(0); }.mobile-close { display: inline-grid !important; }.menu-button { display: inline-grid; }
   .topbar { height: 70px; padding: 0 17px; }.topbar > div:nth-child(2) { margin-right: auto; margin-left: 8px; }.topbar .eyebrow, .topbar .secondary-button, .user-chip div, .topbar-actions > .icon-button { display: none; }.user-chip { margin: 0; padding: 0; border: 0; }
   .workspace { padding: 24px 17px 38px; }.page-heading { align-items: stretch; flex-direction: column; margin-bottom: 22px; }.page-heading .primary-button { width: 100%; }
@@ -270,7 +297,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v5';
+    <script>const STORAGE_KEY = 'carevia-static-v6';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -279,7 +306,7 @@ const defaultState = {
   profile: {
     caregiverName: '', assistedName: '', relationship: 'Altro familiare', age: '',
     region: 'Seleziona', province: '', city: '', condition: 'Anziano non autosufficiente',
-    living: 'Con familiari', invalidity: 'No', law104: 'No', allowance: 'No',
+    living: 'Con familiari', invalidity: 'No', law104: 'No', law104Level: 'Non so', allowance: 'No',
     caregiverWork: 'Non lavoro', isee: 'Non disponibile', publicEmployee: 'Non so',
     needs: [],
   },
@@ -385,6 +412,48 @@ function regionSource(profile) {
   return regionalSources[profile.region] || null;
 }
 
+
+const SUPPORT_CHECKED = '22 ott 2026';
+
+function supportDetails(id, profile) {
+  const details = {
+    civil: {sourceLabel:'INPS', legalState:isReformProvince(profile)?'Procedura sperimentale 2026':'Procedura vigente', missing:'Certificato medico introduttivo e verifica dell’iter applicabile nella provincia.'},
+    universal: {sourceLabel:'INPS', legalState:'Sperimentale fino al 31 dic 2026', missing:'Bisogno assistenziale gravissimo; inoltre accompagnamento e ISEE sociosanitario entro soglia devono essere confermati.'},
+    law104work: {sourceLabel:'INPS', legalState:'Misura vigente', missing:profile.law104Level==='Art. 3 comma 3 (gravita)'?'Verificare relazione, condizioni lavorative e domanda INPS.':'Serve verificare che il verbale riconosca la situazione di gravita ex art. 3 comma 3.'},
+    leave: {sourceLabel:'INPS', legalState:'Misura vigente', missing:'Gravita ex art. 3 comma 3, ordine di priorita, convivenza quando richiesta e requisiti lavorativi.'},
+    hcp: {sourceLabel:'INPS', legalState:'Bando 2025-2028', missing:'Iscrizione alla Gestione Unitaria, condizione di non autosufficienza e requisiti specifici del bando.'},
+    dementia: {sourceLabel:'ISS', legalState:'Servizio sanitario territoriale', missing:'Individuare il CDCD competente e le modalita locali di accesso.'},
+    palliative: {sourceLabel:'Ministero Salute', legalState:'Rete SSN', missing:'Valutazione clinica e attivazione attraverso medico/struttura territoriale.'},
+    aids: {sourceLabel:'SSN', legalState:'LEA', missing:'Prescrizione e verifica che l’ausilio rientri nel percorso di assistenza protesica.'},
+    auu: {sourceLabel:'INPS', legalState:'Misura vigente', missing:'Verificare posizione del figlio a carico e dati della domanda AUU.'},
+    afterus: {sourceLabel:'Ministero Lavoro', legalState:'Misura vigente con attuazione territoriale', missing:'Disabilita grave e requisiti/programma dell’Ambito territoriale.'},
+    adi: {sourceLabel:'SSN', legalState:'Servizio territoriale', missing:'Valutazione multidimensionale e presa in carico da parte del servizio competente.'},
+    regional: {sourceLabel:profile.region, legalState:(regionSource(profile)?.status||'Misura regionale'), missing:'Requisiti del bando o servizio, Ambito/Distretto competente e disponibilita attuale.'}
+  };
+  return details[id] || {sourceLabel:'Fonte ufficiale',legalState:'Da verificare',missing:'Verificare i requisiti completi sulla fonte ufficiale.'};
+}
+
+function enrichSupports(results, profile) {
+  return results.map((item,index)=>({ ...item, rank:index+1, checked:SUPPORT_CHECKED, ...supportDetails(item.id,profile) }));
+}
+
+function excludedChecks(profile) {
+  const out=[];
+  const age=Number(profile.age)||0;
+  if(age<80) out.push({title:'Prestazione Universale',reason:'Non compare tra le priorita perche richiede almeno 80 anni.'});
+  if(profile.publicEmployee==='No') out.push({title:'Home Care Premium',reason:'Non compare perche non hai indicato un dipendente/pensionato pubblico potenzialmente collegato alla Gestione Unitaria INPS.'});
+  if(profile.caregiverWork!=='Dipendente') out.push({title:'Permessi 104 / congedo',reason:'Le tutele lavorative considerate da Carevia riguardano principalmente il lavoro dipendente; per altre situazioni servono percorsi diversi.'});
+  if(profile.law104!=='Si') out.push({title:'Tutele collegate alla 104',reason:'Non vengono proposte come attive perche il riconoscimento Legge 104 non risulta indicato come gia ottenuto.'});
+  return out.slice(0,4);
+}
+
+function priorityAction(profile, supports) {
+  if(!supports.length) return {title:'Completa le verifiche di base',text:'Non emergono ancora percorsi prioritari: aggiorna i dati o verifica il territorio.'};
+  const urgentOrder=['palliative','dementia','civil','universal','law104work','leave','adi','regional','hcp','aids','afterus','auu'];
+  const top=[...supports].sort((a,b)=>urgentOrder.indexOf(a.id)-urgentOrder.indexOf(b.id))[0] || supports[0];
+  return {title:top.next || top.title,text:`Prima priorita: ${top.title}. Carevia la mette davanti alle altre in base alle informazioni inserite.`,support:top};
+}
+
 function evaluateSupport(profile) {
   const age = Number(profile.age) || 0;
   const results = [];
@@ -447,7 +516,7 @@ function evaluateSupport(profile) {
     results.push({id:'regional',title:regional.title,status:regional.status,tone:'positive',value:profile.region,reason:regional.text,next:'Apri la fonte regionale e verifica requisiti, Ambito/Distretto competente e disponibilita attuale.',source:regional.url});
   }
 
-  return results;
+  return enrichSupports(results, profile);
 }
 
 function statusBadge(item) { return `<span class="status-badge ${item.tone}"><i></i>${esc(item.status)}</span>`; }
@@ -484,7 +553,7 @@ function overview() {
         <div>
           <span class="eyebrow">Carevia</span>
           <h2>Prendersi cura di qualcuno è già abbastanza difficile.</h2>
-          <p class="lead">Carevia mette ordine tra prestazioni, documenti, servizi territoriali e prossimi passi. Ti fa poche domande, costruisce un percorso operativo e ti porta sempre alla fonte ufficiale da verificare.</p>
+          <p class="lead">Carevia non ti mostra un catalogo di bonus. Incrocia situazione familiare, territorio e riconoscimenti, elimina ciò che non è pertinente e costruisce il prossimo passo con motivazione, ostacoli da verificare e fonte ufficiale.</p>
           <div class="service-intro-actions">
             ${button('primary-button',state.profileConfigured?'Aggiorna il percorso':'Inizia il percorso','openWizard()','spark')}
             <button class="secondary-button" onclick="navigateTo('sources')">Esplora le fonti ${icon('arrow',15)}</button>
@@ -506,7 +575,7 @@ function overview() {
     <section class="home-section">
       <div class="home-section-head"><span class="eyebrow">Cosa ti aiuta a fare</span><h3>Una sola mappa per problemi che oggi sono sparsi.</h3><p>Carevia non promette un bonus: collega la situazione familiare ai percorsi che vale la pena controllare.</p></div>
       <div class="home-grid">
-        <article class="home-card">${icon('wallet',23)}<h4>Prestazioni e tutele</h4><p>Invalidità, accompagnamento, Legge 104, congedi, Prestazione Universale, HCP, Disability Card e altre misure da verificare.</p></article>
+        <article class="home-card">${icon('wallet',23)}<h4>Prestazioni e tutele</h4><p>Invalidità, accompagnamento, Legge 104, congedi, Prestazione Universale, Home Care Premium, Disability Card e altre misure da verificare.</p></article>
         <article class="home-card">${icon('home',23)}<h4>Assistenza e territorio</h4><p>ADI, Case della Comunità, PUA, servizi sociali, cure palliative, demenze, ausili e assistenza domiciliare.</p></article>
         <article class="home-card">${icon('tasks',23)}<h4>Prossimi passi</h4><p>Documenti da recuperare, domande da fare, fonti da consultare e attività da non perdere.</p></article>
       </div>
@@ -521,7 +590,53 @@ function profileGate(title, text) {
 function supportView() {
   if (!state.profileConfigured) return profileGate('Prima conosciamo la situazione.','Per proporti sostegni sensati servono poche informazioni sulla persona assistita e sul contesto familiare.');
   const supports = evaluateSupport(state.profile);
-  return `<div class="page enter">${heading('Valutazione preliminare','Percorsi da verificare',`Risultati basati sui dati inseriti per ${esc(state.profile.assistedName)}. Carevia ordina le opportunita, ma l’ente competente conferma requisiti e diritto.`)}<div class="result-actions">${button('secondary-button','Salva / Stampa PDF','printSummary()','file')}${button('primary-button','Aggiorna dati','openWizard()','search')}</div><div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms"><div class="support-symbol">${icon('wallet',21)}</div><div class="support-main">${statusBadge(s)}<h3>${esc(s.title)}</h3><p>${esc(s.reason)}</p><div class="support-next"><strong>Cosa fare</strong><span>${esc(s.next)}</span></div></div><div class="support-value"><span>Valore indicativo</span><strong>${esc(s.value)}</strong><a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a></div></article>`).join('')}</div><div class="source-note">${icon('help',20)}<div><strong>Perche non diamo un esito definitivo?</strong><p>Molte misure dipendono da verbali, valutazioni sanitarie, bandi territoriali e fondi disponibili. Carevia organizza il percorso; l’ente competente conferma il diritto.</p></div></div></div>`;
+  const priority = priorityAction(state.profile,supports);
+  const excluded = excludedChecks(state.profile);
+  return `<div class="page enter">
+    ${heading('Motore decisionale Carevia','Il tuo percorso, in ordine',`Non un elenco di bonus: priorita, motivazioni, ostacoli e fonti per ${esc(state.profile.assistedName)}.`)}
+    <div class="result-actions">${button('secondary-button','Salva / Stampa PDF','printSummary()','file')}${button('primary-button','Aggiorna dati','openWizard()','search')}</div>
+    <section class="decision-summary">
+      <div class="next-action-card">
+        <span class="eyebrow">Prossima azione consigliata</span>
+        <h3>${esc(priority.title)}</h3>
+        <p>${esc(priority.text)}</p>
+        <div class="next-action-meta">
+          <span class="evidence-chip current">${icon('check',12)} fonti ufficiali</span>
+          <span class="evidence-chip">${icon('search',12)} ${esc(state.profile.city)}, ${esc(state.profile.province)}</span>
+          <span class="evidence-chip attention">${icon('info',12)} ultimo controllo ${SUPPORT_CHECKED}</span>
+        </div>
+      </div>
+      <div class="decision-side">
+        <div><strong>Logica Carevia</strong><span>Prima salute e riconoscimenti abilitanti, poi prestazioni economiche e servizi successivi.</span></div>
+        <div><strong>Esito</strong><span>Carevia non certifica il diritto: esplicita cosa sappiamo e cosa manca ancora.</span></div>
+      </div>
+    </section>
+    <div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms">
+      <div class="support-symbol">${icon('wallet',21)}</div>
+      <div class="support-main">
+        ${statusBadge(s)}
+        <h3>${esc(s.title)}</h3>
+        <p>${esc(s.reason)}</p>
+        <div class="support-explain">
+          <div><b>Perche te lo segnaliamo</b><span>${esc(s.reason)}</span></div>
+          <div><b>Cosa manca da verificare</b><span>${esc(s.missing)}</span></div>
+        </div>
+        <div class="support-next"><strong>Prossimo passo</strong><span>${esc(s.next)}</span></div>
+      </div>
+      <div class="support-value">
+        <span>Valore / tipo</span><strong>${esc(s.value)}</strong>
+        <a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a>
+        <div class="support-evidence">
+          <span class="evidence-chip">${esc(s.sourceLabel)}</span>
+          <span class="evidence-chip">${esc(s.legalState)}</span>
+          <span class="evidence-chip">verificato ${esc(s.checked)}</span>
+        </div>
+      </div>
+    </article>`).join('')}</div>
+    ${excluded.length ? `<section class="excluded-section"><span class="eyebrow">Rumore eliminato</span><h3>Perche alcune misure non compaiono tra le priorita</h3><div class="excluded-list">${excluded.map(x=>`<div class="excluded-item"><strong>${esc(x.title)}</strong><span>${esc(x.reason)}</span></div>`).join('')}</div></section>` : ''}
+    <section class="watch-card"><span class="eyebrow">Monitoraggio normativo</span><h3>Caregiver nazionale: attenzione alle novita 2027</h3><p>Il disegno di legge nazionale sul caregiver e ancora in iter parlamentare. Il testo approvato dalla Camera prevede una piattaforma INPS per il riconoscimento formale entro il 2 gennaio 2027: Carevia non presenta queste tutele come gia disponibili e le separa dalle misure oggi operative.</p></section>
+    <div class="source-note">${icon('help',20)}<div><strong>Il principio di Carevia</strong><p>Ogni suggerimento deve poter rispondere a quattro domande: perche riguarda te, cosa manca, chi decide davvero e quando la fonte e stata controllata.</p></div></div>
+  </div>`;
 }
 
 function tasksView() {
@@ -655,7 +770,7 @@ function wizard() {
   let body = '';
   if (step === 0) body = `<div class="form-step"><h3>Chi stai assistendo?</h3><p>Poche informazioni per distinguere il tipo di percorso, senza chiedere dettagli clinici non necessari.</p><div class="field-grid">${field('Il tuo nome',input('caregiverName',f.caregiverName))}${field('Nome della persona assistita',input('assistedName',f.assistedName))}${field('Tu sei',select('relationship',f.relationship,['Figlio/a','Coniuge o partner','Genitore','Fratello o sorella','Altro familiare']))}${field('Eta della persona assistita',input('age',f.age,'number'))}</div></div>`;
   if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Possiamo compilare automaticamente Regione, Provincia e Comune usando la posizione del dispositivo, oppure puoi inserire il Comune e completare gli altri campi.</p><div class="field-grid"><div class="location-tools">${button('secondary-button','Usa la posizione','detectLocation()','search')}<span id="location-status" class="location-status">La posizione viene usata solo per compilare questi campi e non viene salvata come coordinate.</span></div>${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',`<input type="text" value="${esc(f.city)}" oninput="updateDraft('city',this.value)" onblur="if(this.value.trim()) completeFromMunicipality()"><span class="field-help">Scrivi il Comune: Carevia prova a completare Provincia e Regione automaticamente.</span>`)}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
-  if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
+  if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Se 104 gia riconosciuta: quale verbale?',select('law104Level',f.law104Level,['Non so','Art. 3 comma 1','Art. 3 comma 3 (gravita)']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
   if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${field('Nel nucleo c’è un dipendente o pensionato pubblico?',`${select('publicEmployee',f.publicEmployee,['No','Si','Non so'])}<span class="field-help"><b>Perché lo chiediamo:</b> potrebbe aprire l’accesso a Home Care Premium (HCP), programma INPS per assistenza domiciliare rivolto agli iscritti alla Gestione Unitaria delle prestazioni creditizie e sociali e ai loro familiari non autosufficienti.</span>`)}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
   if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
   return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<div class="wizard-save"><button class="text-button" onclick="persistDraft(true)">Salva e continua dopo</button><span>Passaggio ${step+1} di 5</span></div>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
