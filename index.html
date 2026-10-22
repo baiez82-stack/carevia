@@ -307,7 +307,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v8';
+    <script>const STORAGE_KEY = 'carevia-static-v9';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -727,7 +727,7 @@ function statusBadge(item) { return `<span class="status-badge ${item.tone}"><i>
 function button(cls, label, action, iconName = '') { return `<button class="${cls}" onclick="${action}">${iconName ? icon(iconName, 17) : ''}${label}</button>`; }
 
 function sidebar() {
-  const nav = [['overview','Home','home'],['support','Sostegni','wallet'],['territory','Territorio','search'],['tasks','Attivita','tasks'],['documents','Documenti','folder'],['sources','Fonti ufficiali','info']];
+  const nav = [['overview','Home','home'],['support','Percorso','wallet'],['territory','Territorio','search'],['tasks','Attivita','tasks'],['documents','Documenti','folder'],['sources','Fonti ufficiali','info']];
   const caseBlock = state.profileConfigured
     ? `<div class="sidebar-case"><div class="avatar">${esc(state.profile.assistedName[0] || 'P')}</div><div><strong>${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}</span></div><span>...</span></div>`
     : `<div class="sidebar-case"><div class="avatar">+</div><div><strong>Inizia il percorso</strong><span>Nessun profilo ancora</span></div><span>...</span></div>`;
@@ -749,7 +749,7 @@ function heading(kicker, title, text, action = '') { return `<section class="pag
 
 function overview() {
   const resume = state.profileConfigured
-    ? `<div class="home-resume"><div><strong>Il percorso di ${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}, ${esc(state.profile.region)} · riprendi dalla valutazione già salvata</span></div>${button('primary-button','Apri i sostegni',"navigateTo('support')",'arrow')}</div>`
+    ? `<div class="home-resume"><div><strong>Il percorso di ${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}, ${esc(state.profile.region)} · riprendi dalla valutazione già salvata</span></div>${button('primary-button','Apri il percorso',"navigateTo('support')",'arrow')}</div>`
     : '';
   return `<div class="page enter">
     <section class="service-intro">
