@@ -59,6 +59,19 @@ jobs:
 
           print(f"Validated {len(rows)-1} municipality/ASL rows")
 
+          asl_path = Path("data/asl_elenco.csv")
+          asl_raw = asl_path.read_bytes()
+          asl_text = None
+          for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
+              try:
+                  asl_text = asl_raw.decode(enc)
+                  break
+              except UnicodeDecodeError:
+                  pass
+          if not asl_text or len(asl_text.splitlines()) < 100:
+              raise SystemExit("ASL registry dataset unexpectedly small")
+          print(f"Validated ASL registry with {len(asl_text.splitlines())-1} rows")
+
       - name: Write source metadata
         shell: bash
         run: |
@@ -68,6 +81,8 @@ jobs:
             "dataset_reference_year": 2024,
             "source_last_updated": "2026-05-28",
             "source_page": "https://www.dati.salute.gov.it/it/dataset/corrispondenze-asl-comuni-e-popolazione-residente-anno-2024/",
+            "asl_registry_last_updated": "2026-04-23",
+            "asl_registry_source_page": "https://www.dati.salute.gov.it/it/dataset/aziende-sanitarie-locali-asl/",
             "license": "Italian Open Data Licence v2.0",
             "sync": "automated weekly by GitHub Actions"
           }
@@ -79,7 +94,7 @@ jobs:
           set -euo pipefail
           git config user.name "carevia-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/asl_comuni.csv data/asl_source.json
+          git add data/asl_comuni.csv data/asl_elenco.csv data/asl_source.json
           if git diff --cached --quiet; then
             echo "No territorial dataset changes"
             exit 0
