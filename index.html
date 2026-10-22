@@ -772,8 +772,8 @@ async function resolveNationalHealthAuthority(profile) {
     const rows=await loadNationalAslRows();
     const regions=datasetRegionCandidates(profile,'health');
     const matches=rows.filter(r=>{
-      const rowCity=normalizeDatasetPlace(r.city);
-      const sameCity=rowCity===city || rowCity.startsWith(city+' (');
+      const rowCity=normalizeDatasetPlace(String(r.city||'').replace(/\s*\(.*$/,''));
+      const sameCity=rowCity===city;
       return sameCity && regions.includes(normalizeDatasetPlace(r.region));
     });
     const unique=[];
