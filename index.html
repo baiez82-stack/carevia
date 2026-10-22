@@ -623,12 +623,20 @@ async function loadNationalAslRows() {
   return ministryAslRowsCache;
 }
 
+function normalizeDatasetPlace(value=''){
+  return normalizePlace(value).replace(/-/g,' ').replace(/\s+/g,' ').trim();
+}
+
 async function resolveNationalHealthAuthority(profile) {
-  const city=normalizePlace(profile.city), region=normalizePlace(profile.region);
+  const city=normalizeDatasetPlace(profile.city), region=normalizeDatasetPlace(profile.region);
   if(!city || !region) return null;
   try {
     const rows=await loadNationalAslRows();
-    const matches=rows.filter(r=>normalizePlace(r.city)===city && normalizePlace(r.region)===region);
+    const matches=rows.filter(r=>{
+      const rowCity=normalizeDatasetPlace(r.city);
+      const sameCity=rowCity===city || rowCity.startsWith(city+' (');
+      return sameCity && normalizeDatasetPlace(r.region)===region;
+    });
     const unique=[];
     for(const row of matches){
       const key=(row.code||'')+'|'+(row.authority||'');
