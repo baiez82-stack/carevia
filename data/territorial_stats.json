@@ -1,6 +1,6 @@
 {
   "asl_rows": 7898,
-  "unique_comuni_asl": 7896,
+  "unique_comuni_asl": 7897,
   "health_authorities": 110,
   "ats_rows": 7900,
   "unique_comuni_ats": 7900,
@@ -8,5 +8,5 @@
   "health_source_updated": "28 mag 2026",
   "social_source_updated": "06 mar 2025",
   "sync": "settimanale",
-  "last_sync_utc": "2026-10-22T16:49:00Z"
+  "last_sync_utc": "2026-10-22T16:55:09.134404+00:00"
 }
