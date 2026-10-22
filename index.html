@@ -219,7 +219,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .wizard { width: min(840px, 100%); max-height: calc(100vh - 48px); display: flex; flex-direction: column; overflow: hidden; border-radius: 10px; background: #fbfbf9; box-shadow: 0 30px 80px rgba(20,24,21,.28); animation: modalIn .28s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes modalIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .wizard > header { display: flex; align-items: flex-start; justify-content: space-between; padding: 25px 29px 18px; border-bottom: 1px solid var(--line); }.wizard h2, .help-drawer h2 { margin: 5px 0 0; font-family: Georgia, serif; font-size: 28px; font-weight: 500; }
-.wizard-progress { display: grid; grid-template-columns: repeat(4,1fr); padding: 18px 29px 0; }.wizard-progress > div { display: flex; align-items: center; gap: 8px; position: relative; color: #9a9f9a; font-size: 10px; }.wizard-progress > div::after { content: ''; height: 1px; position: absolute; left: 27px; right: 7px; top: 11px; background: #d7dad5; }.wizard-progress > div:last-child::after { display: none; }.wizard-progress span { width: 22px; height: 22px; display: grid; place-items: center; z-index: 1; border: 1px solid #c9cdc7; border-radius: 50%; background: #fbfbf9; font-weight: 750; }.wizard-progress b { z-index: 1; padding-right: 8px; background: #fbfbf9; }.wizard-progress .active { color: var(--ink); }.wizard-progress .active span { border-color: var(--accent); color: white; background: var(--accent); }
+.wizard-progress { display: grid; grid-template-columns: repeat(5,1fr); padding: 18px 29px 0; }.wizard-progress > div { display: flex; align-items: center; gap: 8px; position: relative; color: #9a9f9a; font-size: 10px; }.wizard-progress > div::after { content: ''; height: 1px; position: absolute; left: 27px; right: 7px; top: 11px; background: #d7dad5; }.wizard-progress > div:last-child::after { display: none; }.wizard-progress span { width: 22px; height: 22px; display: grid; place-items: center; z-index: 1; border: 1px solid #c9cdc7; border-radius: 50%; background: #fbfbf9; font-weight: 750; }.wizard-progress b { z-index: 1; padding-right: 8px; background: #fbfbf9; }.wizard-progress .active { color: var(--ink); }.wizard-progress .active span { border-color: var(--accent); color: white; background: var(--accent); }
 .wizard-body { min-height: 390px; overflow-y: auto; padding: 34px 29px; }.form-step h3 { margin: 0 0 6px; font-size: 20px; }.form-step > p { margin: 0 0 26px; color: var(--muted); font-size: 12px; }.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }.field-grid.single { grid-template-columns: 1fr; }.field { display: grid; gap: 7px; }.field > span { color: #555c56; font-size: 11px; font-weight: 700; }.field input, .field select { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5cf; border-radius: 6px; color: var(--ink); background: #fff; outline: none; }.field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(237,104,74,.1); }
 .info-box, .privacy-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 24px; padding: 15px; border-radius: 7px; color: #6f571f; background: var(--yellow-soft); font-size: 11px; line-height: 1.5; }.privacy-note { color: #3f5c4d; background: var(--green-soft); }.privacy-note strong, .privacy-note span { display: block; }.privacy-note span { margin-top: 3px; }
 .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.choice { min-height: 54px; display: flex; align-items: center; gap: 11px; padding: 10px 13px; border: 1px solid #d4d8d2; border-radius: 7px; color: #4d544f; background: white; text-align: left; font-size: 12px; font-weight: 650; }.choice > span { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #b9beb8; border-radius: 5px; }.choice.active { border-color: #dea08f; color: #863b29; background: var(--accent-soft); }.choice.active > span { border-color: var(--accent); color: white; background: var(--accent); }
@@ -259,15 +259,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v3';
+    <script>const STORAGE_KEY = 'carevia-static-v4';
 
 const defaultState = {
   active: 'overview',
   profileConfigured: false,
   profile: {
     caregiverName: '', assistedName: '', relationship: 'Altro familiare', age: '',
-    region: 'Seleziona', city: '', living: 'Con familiari', invalidity: 'No',
-    law104: 'No', allowance: 'No', isee: 'Non disponibile', publicEmployee: 'Non so',
+    region: 'Seleziona', province: '', city: '', condition: 'Anziano non autosufficiente',
+    living: 'Con familiari', invalidity: 'No', law104: 'No', allowance: 'No',
+    caregiverWork: 'Non lavoro', isee: 'Non disponibile', publicEmployee: 'Non so',
     needs: [],
   },
   tasks: [],
@@ -321,23 +322,119 @@ function esc(value = '') {
   return String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 }
 
+
+const reformProvinces = new Set([
+  'brescia','catanzaro','firenze','forli-cesena','frosinone','perugia','salerno','sassari','trieste',
+  'alessandria','genova','isernia','lecce','macerata','matera','palermo','teramo','vicenza','trento','aosta',
+  'ancona','arezzo','ascoli piceno','asti','bergamo','bologna','brindisi','cagliari','caltanissetta','campobasso',
+  'caserta','catania','chieti','como','cosenza','crotone','cuneo','la spezia','mantova','massa carrara','messina',
+  'milano','pavia','piacenza','pordenone','potenza','ravenna','reggio calabria','rimini','roma','savona','sondrio',
+  'terni','torino','treviso','udine','venezia','verona','vibo valentia','bolzano'
+]);
+
+const regionalSources = {
+  'Abruzzo': {title:'Piano regionale non autosufficienza 2026-2028', status:'Programmazione 2026-2028', text:'La Regione ha programmato risorse per domiciliarita, percorsi personalizzati, vita indipendente e potenziamento dei PUA.', url:'https://www.regione.abruzzo.it/notizie/giunta-i-principali-provvedimenti-adottati-data-16-settembre'},
+  'Basilicata': {title:'Portale Regione Basilicata', status:'Fonte regionale', text:'Verifica sul portale regionale bandi e servizi sociali per disabilita e non autosufficienza.', url:'https://www.regione.basilicata.it/'},
+  'Calabria': {title:'Assegno di cura e caregiver', status:'Avvisi territoriali 2026', text:'La Regione ha comunicato risorse e linee guida agli Ambiti; gli avvisi territoriali sono in pubblicazione.', url:'https://www.regione.calabria.it/caregiver-straface-lo-stato-riconosce-la-figura-la-regione-calabria-mette-le-risorse/'},
+  'Campania': {title:'Portale Regione Campania', status:'Fonte regionale', text:'Verifica sul portale regionale le misure sociosanitarie, gli assegni di cura e gli interventi degli Ambiti territoriali.', url:'https://www.regione.campania.it/'},
+  'Emilia-Romagna': {title:'Sostegno al caregiver familiare', status:'Sistema regionale caregiver', text:'Sportelli sociali, assegni di cura, sollievo, formazione e supporto territoriale dedicato ai caregiver.', url:'https://www.regione.emilia-romagna.it/caregiver/i-tuoi-diritti/sostegno'},
+  'Friuli-Venezia Giulia': {title:'Fondo Autonomia Possibile (FAP)', status:'Misura regionale', text:'Fondo regionale per persone non autosufficienti, inclusi assegno autonomia, aiuto familiare, vita indipendente e gravissima disabilita.', url:'https://disabilita.regione.fvg.it/it/schede/contributi_agevolazioni/fondo_autonomia_possibile_fap.html'},
+  'Lazio': {title:'Portale Regione Lazio', status:'Fonte regionale', text:'Verifica interventi per non autosufficienza, disabilita e caregiver tramite il portale e gli Ambiti territoriali.', url:'https://www.regione.lazio.it/'},
+  'Liguria': {title:'Fondo regionale non autosufficienza', status:'Misura regionale', text:'La Regione prevede interventi economici e sociosanitari per la permanenza a domicilio delle persone non autosufficienti.', url:'https://www.regione.liguria.it/'},
+  'Lombardia': {title:'Caregiver familiare', status:'Programmazione 2026', text:'Regione Lombardia riconosce il caregiver nel sistema territoriale e collega Fondo caregiver, FNA e progetto di vita.', url:'https://www.regione.lombardia.it/politiche-sociali-e-abitative/famiglia/caregiver/red-caregiver-familiare'},
+  'Marche': {title:'Portale Regione Marche', status:'Fonte regionale', text:'Verifica interventi regionali e degli Ambiti sociali per caregiver, disabilita e non autosufficienza.', url:'https://www.regione.marche.it/'},
+  'Molise': {title:'Portale Regione Molise', status:'Fonte regionale', text:'Verifica programmazione sociale, disabilita, non autosufficienza e misure gestite dagli Ambiti.', url:'https://www.regione.molise.it/'},
+  'Piemonte': {title:'Scelta Sociale - Buono domiciliarita', status:'Aperto fino al 2 novembre 2026', text:'Contributo di 700 euro mensili per 12 mesi per servizi di assistenza familiare a persone non autosufficienti aventi i requisiti del bando.', url:'https://bandi.regione.piemonte.it/contributi-finanziamenti/scelta-sociale-buono-domiciliarita-20262027'},
+  'Puglia': {title:'Disabilita e non autosufficienza', status:'Misure regionali', text:'Assegno di cura, Pro.Vi e Buoni servizio domiciliari/diurni sono tra i percorsi regionali da verificare.', url:'https://pr2127.regione.puglia.it/web/welfare-diritti-e-cittadinanza/disabilita-e-non-autosufficienza'},
+  'Sardegna': {title:'Non autosufficienza 2025-2027', status:'Programmazione attiva', text:'La Regione finanzia Ritornare a casa Plus, vita indipendente e altri piani personalizzati gestiti negli Ambiti PLUS.', url:'https://www.regione.sardegna.it/notizie/non-autosufficienza-la-giunta-approva-la-programmazione-2025-2027'},
+  'Sicilia': {title:'Portale Regione Siciliana', status:'Fonte regionale', text:'Verifica misure per disabilita gravissima, non autosufficienza e assistenza territoriale sul portale regionale.', url:'https://www.regione.sicilia.it/'},
+  'Toscana': {title:'Guida ai servizi per la non autosufficienza', status:'Guida regionale', text:'Percorsi UVM/PAI, domiciliarita, contributi per assistenza familiare, centri diurni, RSA e supporto nella ricerca di assistenti familiari.', url:'https://www.regione.toscana.it/documents/10180/221162480/Guida_non_autosufficienza_2025.pdf/b1ca97eb-568b-9b9e-b307-04a07b8a622d'},
+  'Trentino-Alto Adige': {title:'Servizi delle Province autonome', status:'Competenza provinciale', text:'In Trentino-Alto Adige molte misure sono gestite separatamente dalle Province autonome di Trento e Bolzano.', url:'https://www.regione.taa.it/'},
+  'Umbria': {title:'Portale Regione Umbria', status:'Fonte regionale', text:'Verifica non autosufficienza, disabilita e percorsi sociosanitari nel portale regionale e nei distretti.', url:'https://www.regione.umbria.it/'},
+  'Valle d’Aosta': {title:'Portale Regione Valle d’Aosta', status:'Normativa autonoma', text:'La Regione autonoma applica regole proprie in materia di servizi e accertamento della disabilita.', url:'https://www.regione.vda.it/'},
+  'Veneto': {title:'Disabilita, caregiver e sollievo', status:'Servizi regionali', text:'La Regione indirizza a ULSS, Distretti e Comuni per contributi caregiver, sollievo, residenzialita e servizi domiciliari.', url:'https://www.regione.veneto.it/web/rete-degli-urp-del-veneto/disabilita'}
+};
+
+function normalizePlace(value='') {
+  return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').replace(/\s+/g,' ').trim();
+}
+
+function isReformProvince(profile) {
+  const province = normalizePlace(profile.province);
+  return reformProvinces.has(province) || profile.region === 'Valle d’Aosta';
+}
+
+function regionSource(profile) {
+  if (profile.region === 'Trentino-Alto Adige') {
+    const p = normalizePlace(profile.province);
+    if (p.includes('trento')) return {title:'Contributo previdenziale per cura di familiari non autosufficienti',status:'Domande 2026',text:'La Provincia autonoma di Trento prevede un contributo sui versamenti previdenziali per chi assiste familiari non autosufficienti.',url:'https://www.provincia.tn.it/Amministrazione/Documenti/Domanda-contributo-previdenziale-per-assistenza-e-cura-familiari-non-autosufficienti'};
+    if (p.includes('bolzano')) return {title:'Portale Provincia autonoma di Bolzano',status:'Competenza provinciale',text:'Verifica servizi sociali e misure per non autosufficienza e disabilita della Provincia autonoma.',url:'https://www.provincia.bz.it/'};
+  }
+  return regionalSources[profile.region] || null;
+}
+
 function evaluateSupport(profile) {
   const age = Number(profile.age) || 0;
   const results = [];
-  const universalFit = age >= 80 && profile.allowance === 'Si' && profile.isee === '0-6.000';
-  results.push({
-    id: 'universal', title: 'Prestazione Universale', status: universalFit ? 'Alta compatibilita' : 'Requisiti da verificare', tone: universalFit ? 'positive' : 'warning', value: 'Accompagnamento + quota integrativa di 850 euro/mese',
-    reason: universalFit ? 'Eta, fascia ISEE e accompagnamento risultano compatibili. Va verificato il bisogno assistenziale gravissimo. La sperimentazione termina il 31 dicembre 2026.' : 'La misura sperimentale, prevista fino al 31 dicembre 2026, richiede almeno 80 anni, accompagnamento, bisogno assistenziale gravissimo e ISEE sociosanitario entro la soglia prevista.',
-    next: universalFit ? 'Controlla il verbale e prepara la domanda INPS.' : 'Verifica ISEE, accompagnamento e verbale sanitario.',
-    source: 'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html',
-  });
-  if (profile.invalidity === 'Si') {
-    results.push({ id: 'law104', title: 'Benefici collegati alla Legge 104', status: profile.law104 === 'Si' ? 'Attiva' : 'Possibile', tone: profile.law104 === 'Si' ? 'positive' : 'warning', value: 'Permessi e tutele', reason: profile.law104 === 'Si' ? 'Il riconoscimento e gia indicato nel profilo.' : 'L’invalidita non comporta automaticamente il riconoscimento di handicap grave: serve verifica separata.', next: profile.law104 === 'Si' ? 'Verifica quali familiari possono usare i permessi.' : 'Controlla il verbale o richiedi una valutazione dedicata.', source: 'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.permessi-retribuiti-legge-104-1992.html' });
-  } else {
-    results.push({ id: 'civil', title: 'Invalidita civile e accompagnamento', status: profile.invalidity === 'In corso' ? 'Domanda in corso' : 'Da valutare', tone: 'neutral', value: 'Prestazioni variabili', reason: 'Il riconoscimento sanitario e il punto di partenza per diverse tutele economiche e assistenziali.', next: 'Raccogli certificato medico introduttivo e documentazione clinica.', source: 'https://www.inps.it/it/it/sostegni-sussidi-indennita/per-disabili-invalidi-inabili.html' });
+  const reform = isReformProvince(profile);
+  const regional = regionSource(profile);
+
+  if (profile.invalidity !== 'Si') {
+    results.push({
+      id:'civil', title:'Accertamento della disabilita', status: reform ? 'Nuovo iter sperimentale' : 'Percorso ordinario 2026', tone: reform ? 'warning' : 'neutral', value:'Procedura INPS',
+      reason: reform ? `${profile.province || 'La provincia indicata'} rientra nei territori della sperimentazione 2026: il procedimento parte con il certificato medico introduttivo trasmesso all’INPS.` : 'Nel 2026 il nuovo sistema non e ancora nazionale: dal 1 gennaio 2027 e prevista l’entrata a regime in tutta Italia.',
+      next: reform ? 'Contatta un medico certificatore abilitato e verifica la procedura INPS prevista per la provincia.' : 'Parti dal medico certificatore e verifica su INPS la procedura ancora applicabile nel territorio.',
+      source:'https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2026.02.riforma-della-disabilit-al-via-la-terza-fase-sperimentale.html'
+    });
   }
-  results.push({ id: 'adi', title: 'Assistenza Domiciliare Integrata', status: 'Accesso territoriale', tone: 'neutral', value: 'Prestazioni domiciliari', reason: `Il percorso dipende dai servizi disponibili in ${profile.region || 'Regione'} e dalla valutazione sanitaria e sociale.`, next: 'Chiedi al medico di base o alla ASST/ASL come avviare la valutazione.', source: 'https://www.agenas.gov.it/pnrr/missione-6-salute/monitoraggio-adi' });
-  if (profile.publicEmployee === 'Si') results.push({ id: 'hcp', title: 'Home Care Premium', status: 'Possibile', tone: 'positive', value: 'Contributi e servizi', reason: 'Il nucleo include un dipendente o pensionato pubblico, requisito rilevante per il programma.', next: 'Verifica il bando INPS attivo e la posizione del titolare.', source: 'https://www.inps.it/it/it/welfare-assistenza-e-mutualita/welfare-assistenza-e-mutualita/home-care-premium.html' });
+
+  if (age >= 80) {
+    const universalFit = profile.allowance === 'Si' && profile.isee === '0-6.000';
+    results.push({
+      id:'universal', title:'Prestazione Universale', status: universalFit ? 'Da approfondire subito' : 'Requisiti da verificare', tone: universalFit ? 'positive' : 'warning', value:'Quota integrativa 850 euro/mese',
+      reason: universalFit ? 'Eta, accompagnamento e fascia ISEE indicata sono compatibili con alcuni requisiti. Resta indispensabile la verifica del bisogno assistenziale gravissimo.' : 'La sperimentazione termina il 31 dicembre 2026 e richiede almeno 80 anni, accompagnamento, bisogno assistenziale gravissimo e ISEE sociosanitario entro la soglia prevista.',
+      next:'Verifica la scheda INPS e il requisito di bisogno assistenziale gravissimo.',
+      source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html'
+    });
+  }
+
+  if (profile.law104 === 'Si' && profile.caregiverWork === 'Dipendente') {
+    results.push({id:'law104work',title:'Permessi Legge 104',status:'Potenzialmente rilevanti',tone:'positive',value:'Permessi retribuiti',reason:'Hai indicato un caregiver lavoratore dipendente e un riconoscimento Legge 104. Vanno verificati gravita, relazione e condizioni previste.',next:'Controlla requisiti e domanda INPS per i permessi.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'});
+    results.push({id:'leave',title:'Congedo straordinario',status:'Da verificare',tone:'neutral',value:'Assenza retribuita',reason:'Per lavoratori dipendenti che assistono familiari con disabilita grave esiste un congedo specifico, soggetto a priorita e requisiti.',next:'Verifica convivenza, ordine di priorita e requisiti INPS.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'});
+  }
+
+  if (profile.publicEmployee === 'Si') {
+    results.push({id:'hcp',title:'Home Care Premium 2025-2028',status:'Possibile',tone:'positive',value:'Contributi e servizi',reason:'Hai indicato un collegamento con dipendente o pensionato pubblico. L’accesso dipende dall’iscrizione alla Gestione Unitaria e dagli altri requisiti del bando.',next:'Verifica posizione del titolare e requisiti nel bando INPS.',source:'https://www.inps.it/it/it/inps-comunica/notizie/dettaglio-news-page.news.2025.03.home-care-premium-pubblicato-il-bando-2025-2028.html'});
+  }
+
+  if (profile.condition === 'Demenza o declino cognitivo') {
+    results.push({id:'dementia',title:'CDCD e rete demenze',status:'Percorso sanitario',tone:'positive',value:'Centri territoriali',reason:'Per disturbi cognitivi e demenze esiste una mappa nazionale ISS di CDCD, centri diurni e strutture residenziali.',next:'Individua il CDCD piu vicino e verifica modalita di accesso con medico di base/servizio territoriale.',source:'https://www.epicentro.iss.it/demenza/mappa-cdcd'});
+  }
+
+  if (profile.condition === 'Malattia oncologica' || profile.condition === 'Cure palliative') {
+    results.push({id:'palliative',title:'Rete di cure palliative',status:'Percorso sanitario',tone:'positive',value:'Domicilio, hospice e rete territoriale',reason:'La rete di cure palliative prende in carico persona e famiglia attraverso servizi domiciliari, ambulatoriali, ospedalieri e hospice.',next:'Parlane con il medico curante o con la struttura che segue la persona per l’attivazione della rete.',source:'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/'});
+  }
+
+  if (profile.needs.includes('Adeguamento della casa') || ['Disabilita fisica','Malattia neurologica'].includes(profile.condition)) {
+    results.push({id:'aids',title:'Ausili e assistenza protesica SSN',status:'Da verificare',tone:'neutral',value:'Ausili e dispositivi',reason:'Il SSN prevede assistenza protesica per dispositivi, ausili e tecnologie inclusi nei LEA, secondo prescrizione e requisiti.',next:'Chiedi al medico/servizio specialistico se e indicato un percorso di prescrizione.',source:'https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/'});
+  }
+
+  if (profile.relationship === 'Genitore' && age < 18 && (profile.invalidity === 'Si' || profile.law104 === 'Si')) {
+    results.push({id:'auu',title:'Assegno unico per figlio con disabilita',status:'Da verificare',tone:'positive',value:'Prestazione familiare',reason:'Per i figli con disabilita l’Assegno unico prevede regole e maggiorazioni specifiche; la prestazione puo spettare senza limite di eta per figli disabili a carico.',next:'Verifica la posizione del nucleo e la domanda AUU su INPS.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.assegno-unico-e-universale-per-i-figli-a-carico-55984.assegno-unico-e-universale-per-i-figli-a-carico.html'});
+  }
+
+  if (age >= 18 && age <= 64 && profile.law104 === 'Si' && !['Anziano non autosufficiente'].includes(profile.condition)) {
+    results.push({id:'afterus',title:'Dopo di noi',status:'Da valutare',tone:'neutral',value:'Autonomia e abitare',reason:'Per persone con disabilita grave prive del sostegno familiare sono previsti percorsi di autonomia, domiciliarita e soluzioni abitative.',next:'Verifica requisiti e programmazione del territorio presso servizi sociali/Ambito.',source:'https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/Dopo-di-noi/Pagine/default'});
+  }
+
+  if (profile.living !== 'In struttura' || profile.needs.includes('Assistenza a domicilio')) {
+    results.push({id:'adi',title:'Assistenza Domiciliare Integrata',status:'Accesso territoriale',tone:'neutral',value:'Prestazioni domiciliari',reason:`Il percorso dipende dalla valutazione multidimensionale e dall’organizzazione sanitaria di ${profile.region}.`,next:'Chiedi al medico di base, al Distretto o al PUA come avviare la valutazione.',source:'https://www.salute.gov.it/new/it/altro/assistenza-domiciliare-integrata-adi/'});
+  }
+
+  if (regional) {
+    results.push({id:'regional',title:regional.title,status:regional.status,tone:'positive',value:profile.region,reason:regional.text,next:'Apri la fonte regionale e verifica requisiti, Ambito/Distretto competente e disponibilita attuale.',source:regional.url});
+  }
+
   return results;
 }
 
@@ -412,7 +509,7 @@ function profileGate(title, text) {
 function supportView() {
   if (!state.profileConfigured) return profileGate('Prima conosciamo la situazione.','Per proporti sostegni sensati servono poche informazioni sulla persona assistita e sul contesto familiare.');
   const supports = evaluateSupport(state.profile);
-  return `<div class="page enter">${heading('Valutazione preliminare','Possibili sostegni',`Risultati basati sui dati inseriti per ${esc(state.profile.assistedName)}. Non costituiscono conferma di idoneita.`,button('primary-button','Fai verificare da un esperto','openHelp()','shield'))}<div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms"><div class="support-symbol">${icon('wallet',21)}</div><div class="support-main">${statusBadge(s)}<h3>${esc(s.title)}</h3><p>${esc(s.reason)}</p><div class="support-next"><strong>Cosa fare</strong><span>${esc(s.next)}</span></div></div><div class="support-value"><span>Valore indicativo</span><strong>${esc(s.value)}</strong><a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a></div></article>`).join('')}</div><div class="source-note">${icon('help',20)}<div><strong>Perche non diamo un esito definitivo?</strong><p>Molte misure dipendono da verbali, valutazioni sanitarie, bandi territoriali e fondi disponibili. Carevia organizza il percorso; l’ente competente conferma il diritto.</p></div></div></div>`;
+  return `<div class="page enter">${heading('Valutazione preliminare','Percorsi da verificare',`Risultati basati sui dati inseriti per ${esc(state.profile.assistedName)}. Carevia ordina le opportunita, ma l’ente competente conferma requisiti e diritto.`)}<div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms"><div class="support-symbol">${icon('wallet',21)}</div><div class="support-main">${statusBadge(s)}<h3>${esc(s.title)}</h3><p>${esc(s.reason)}</p><div class="support-next"><strong>Cosa fare</strong><span>${esc(s.next)}</span></div></div><div class="support-value"><span>Valore indicativo</span><strong>${esc(s.value)}</strong><a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a></div></article>`).join('')}</div><div class="source-note">${icon('help',20)}<div><strong>Perche non diamo un esito definitivo?</strong><p>Molte misure dipendono da verbali, valutazioni sanitarie, bandi territoriali e fondi disponibili. Carevia organizza il percorso; l’ente competente conferma il diritto.</p></div></div></div>`;
 }
 
 function tasksView() {
@@ -427,26 +524,46 @@ function documentsView() {
 }
 
 function territoryView() {
-  if (!state.profileConfigured) return profileGate('Il territorio cambia tutto.','Comune, Regione e situazione assistenziale servono per capire quali porte bussare per prime.');
+  if (!state.profileConfigured) return profileGate('Il territorio cambia tutto.','Comune, Provincia, Regione e situazione assistenziale servono per capire quali porte bussare per prime.');
   const p = state.profile;
+  const regional = regionSource(p);
+  const special = [];
+  if (p.condition === 'Demenza o declino cognitivo') special.push({type:'Demenze',name:'CDCD e servizi per le demenze',purpose:'Centri per disturbi cognitivi e demenze, centri diurni e strutture mappate dall’ISS.',action:'Cerca il servizio piu vicino nella mappa nazionale.',link:'https://www.epicentro.iss.it/demenza/mappa-cdcd'});
+  if (p.condition === 'Malattia oncologica' || p.condition === 'Cure palliative') special.push({type:'Cure palliative',name:'Rete locale di cure palliative',purpose:'Presa in carico domiciliare, ambulatoriale, ospedaliera e hospice.',action:'Chiedi al medico curante o alla struttura di riferimento come attivare la rete.',link:'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/'});
+  const officialSearch = encodeURIComponent(`"${p.city}" "${p.province}" servizi sociali disabilita non autosufficienza Comune`);
+  const healthSearch = encodeURIComponent(`"${p.province}" ASL ADI PUA Casa della Comunita sito ufficiale`);
   const services = [
-    { type: 'Comune', name: `Servizi sociali di ${p.city}`, purpose: 'Valutazione sociale, SAD, pasti, trasporto e contributi locali.', action: 'Chiedi il Punto Unico di Accesso o il Segretariato sociale.', link: `https://www.google.com/search?q=${encodeURIComponent('site:comune.' + p.city.toLowerCase() + '.it servizi sociali anziani')}` },
-    { type: 'ASL / ASST', name: `Assistenza territoriale in ${p.region}`, purpose: 'ADI, valutazione multidimensionale, ausili e continuita assistenziale.', action: 'Richiedi al medico di base l’attivazione del percorso territoriale.', link: 'https://www.salute.gov.it/new/it/altro/assistenza-domiciliare-integrata-adi/' },
-    { type: 'INPS', name: 'Prestazioni per non autosufficienza', purpose: 'Invalidita, accompagnamento, permessi e misure nazionali.', action: 'Accedi con SPID/CIE o prepara i documenti per un patronato.', link: 'https://www.inps.it/it/it/sostegni-sussidi-indennita/per-disabili-invalidi-inabili.html' },
-    { type: 'Patronato', name: `Assistenza pratiche vicino a ${p.city}`, purpose: 'Invio domande e verifica documentale tramite operatore abilitato.', action: 'Confronta disponibilita, tempi e costi prima di conferire l’incarico.', link: `https://www.google.com/search?q=${encodeURIComponent('patronato ' + p.city + ' invalidita accompagnamento')}` },
+    ...(regional ? [{ type:'Regione', name:regional.title, purpose:regional.text, action:'Verifica misura, requisiti e soggetto territoriale che gestisce l’accesso.', link:regional.url }] : []),
+    { type:'Comune / Ambito', name:`Servizi sociali per ${p.city}`, purpose:'SAD, pasti, trasporto, sollievo, contributi e presa in carico sociale dipendono spesso da Comune/Ambito.', action:'Cerca il portale istituzionale e chiedi Segretariato sociale o Punto Unico di Accesso.', link:`https://www.google.com/search?q=${officialSearch}` },
+    { type:'Distretto / ASL', name:`Assistenza territoriale in provincia di ${p.province || 'residenza'}`, purpose:'ADI, UVM, PUA, Case della Comunita, ausili e continuita assistenziale.', action:'Chiedi al medico di base o al Distretto quale e il punto di accesso corretto.', link:`https://www.google.com/search?q=${healthSearch}` },
+    { type:'INPS', name:'Prestazioni nazionali e accertamento', purpose:'Invalidita, accompagnamento, permessi, congedi e altre misure previdenziali/assistenziali.', action:'Usa la fonte ufficiale e, se necessario, patronato o associazione abilitata.', link:'https://www.inps.it/it/it/sostegni-sussidi-indennita/per-disabili-invalidi-inabili.html' },
+    ...special
   ];
-  return `<div class="page enter">${heading('Mappa locale',`Servizi per ${esc(p.city)}`,`Punti di accesso da verificare per il territorio ${esc(p.region)}. Carevia prepara la richiesta e registra ogni contatto.`)}<div class="territory-summary"><div>${icon('search',22)}<span><b>${esc(p.city)}</b><small>Comune indicato</small></span></div><div>${icon('tasks',22)}<span><b>4 canali</b><small>da coordinare</small></span></div><div>${icon('shield',22)}<span><b>Contatti verificabili</b><small>nessun esito automatico</small></span></div></div><div class="service-directory">${services.map((service,index)=>`<article class="service-row"><span class="service-number">0${index+1}</span><div><span class="eyebrow">${esc(service.type)}</span><h3>${esc(service.name)}</h3><p>${esc(service.purpose)}</p><div class="service-action"><b>Prossimo passo</b><span>${esc(service.action)}</span></div></div><a class="secondary-button" href="${service.link}" target="_blank" rel="noreferrer">Apri fonte ${icon('arrow',15)}</a></article>`).join('')}</div><div class="source-note">${icon('info',20)}<div><strong>Localizzazione dell’MVP</strong><p>Il prototipo individua il tipo di ente competente. Numeri, moduli e bandi comunali saranno pubblicati solo dopo verifica editoriale, con data dell’ultimo controllo.</p></div></div></div>`;
+  return `<div class="page enter">${heading('Mappa territoriale',`Da dove partire a ${esc(p.city)}`,`Percorso costruito per ${esc(p.province)}, ${esc(p.region)}. Carevia ordina i canali da verificare, ma il servizio competente conferma accesso e disponibilita.`)}
+    <div class="territory-summary">
+      <div>${icon('search',22)}<span><b>${esc(p.city)}</b><small>Comune indicato</small></span></div>
+      <div>${icon('tasks',22)}<span><b>${services.length} canali</b><small>ordinati per il caso</small></span></div>
+      <div>${icon('shield',22)}<span><b>${isReformProvince(p)?'Provincia sperimentale 2026':'Iter da verificare'}</b><small>riforma disabilita</small></span></div>
+    </div>
+    <div class="service-directory">${services.map((service,index)=>`<article class="service-row"><span class="service-number">${String(index+1).padStart(2,'0')}</span><div><span class="eyebrow">${esc(service.type)}</span><h3>${esc(service.name)}</h3><p>${esc(service.purpose)}</p><div class="service-action"><b>Prossimo passo</b><span>${esc(service.action)}</span></div></div><a class="secondary-button" href="${service.link}" target="_blank" rel="noreferrer">Apri ${icon('arrow',15)}</a></article>`).join('')}</div>
+    <div class="source-note">${icon('info',20)}<div><strong>Territorio: regola di sicurezza</strong><p>Carevia propone solo il canale e la fonte da verificare. Numeri, sportelli, bandi e disponibilita locali possono cambiare e vanno confermati sulla fonte istituzionale prima di agire.</p></div></div>
+  </div>`;
 }
 
 
 function buildInitialTasks(p) {
   const items = [];
   let id = 1;
-  if (p.invalidity === 'No' || p.invalidity === 'In corso') items.push({id:id++,title:'Verifica il percorso di accertamento della disabilita',meta:'La procedura cambia in base alla provincia durante la sperimentazione 2026',due:'Primo controllo',done:false,area:'Riconoscimenti'});
+  if (p.invalidity === 'No' || p.invalidity === 'In corso') items.push({id:id++,title:'Verifica il percorso di accertamento della disabilita',meta:isReformProvince(p)?'La provincia indicata rientra nella sperimentazione 2026':'Il nuovo sistema diventera nazionale dal 1 gennaio 2027',due:'Primo controllo',done:false,area:'Riconoscimenti'});
   if (p.isee === 'Non disponibile') items.push({id:id++,title:'Verifica se serve l’ISEE sociosanitario',meta:'Diverse misure per non autosufficienza lo utilizzano',due:'Questa settimana',done:false,area:'Economia'});
-  items.push({id:id++,title:'Individua il punto di accesso territoriale',meta:'Medico di base, PUA, Casa della Comunita o servizi sociali in base al bisogno',due:'Questa settimana',done:false,area:'Territorio'});
+  items.push({id:id++,title:'Individua il punto di accesso territoriale',meta:'Comune/Ambito, medico di base, PUA, Distretto o Casa della Comunita in base al bisogno',due:'Questa settimana',done:false,area:'Territorio'});
+  if (p.condition === 'Demenza o declino cognitivo') items.push({id:id++,title:'Individua il CDCD di riferimento',meta:'Consulta la mappa nazionale ISS dei servizi per le demenze',due:'Da verificare',done:false,area:'Salute'});
+  if (p.condition === 'Malattia oncologica' || p.condition === 'Cure palliative') items.push({id:id++,title:'Verifica l’accesso alla rete di cure palliative',meta:'Parlane con medico curante o struttura che segue la persona',due:'Priorita sanitaria',done:false,area:'Salute'});
+  if (p.law104 === 'Si' && p.caregiverWork === 'Dipendente') items.push({id:id++,title:'Controlla permessi 104 e congedo straordinario',meta:'Verifica requisiti specifici e priorita sul portale INPS',due:'Questa settimana',done:false,area:'Lavoro'});
   if (p.needs.includes('Ricerca di una badante')) items.push({id:id++,title:'Valuta un assistente familiare con contratto regolare',meta:'Controlla inquadramento, contributi e sostenibilita economica',due:'Da pianificare',done:false,area:'Assistenza'});
   if (p.needs.includes('Adeguamento della casa')) items.push({id:id++,title:'Verifica ausili e assistenza protesica SSN',meta:'Alcuni ausili possono essere prescritti ed erogati dal SSN',due:'Da verificare',done:false,area:'Casa'});
+  const regional = regionSource(p);
+  if (regional) items.push({id:id++,title:`Controlla: ${regional.title}`,meta:`Fonte ufficiale ${p.region}`,due:'Da verificare',done:false,area:'Regione'});
   return items;
 }
 
@@ -456,13 +573,14 @@ function input(name, value, type='text') { return `<input type="${type}" value="
 
 function wizard() {
   if (!state.wizard) return '';
-  const f = state.draft, step = state.wizardStep, labels = ['Persone','Situazione','Economia','Bisogni'];
+  const f = state.draft, step = state.wizardStep, labels = ['Persone','Territorio','Situazione','Lavoro/ISEE','Bisogni'];
   let body = '';
-  if (step === 0) body = `<div class="form-step"><h3>Chi stai assistendo?</h3><p>Queste informazioni servono a costruire un percorso familiare condiviso.</p><div class="field-grid">${field('Il tuo nome',input('caregiverName',f.caregiverName))}${field('Nome dell’assistito',input('assistedName',f.assistedName))}${field('Relazione',select('relationship',f.relationship,['Madre','Padre','Coniuge','Altro familiare']))}${field('Eta',input('age',f.age,'number'))}${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Comune',input('city',f.city))}</div></div>`;
-  if (step === 1) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Non servono termini medici: bastano le informazioni gia disponibili.</p><div class="field-grid">${field('L’assistito vive',select('living',f.living,['Sola','Con il coniuge','Con familiari','In struttura']))}${field('Invalidita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita, Legge 104 e accompagnamento sono riconoscimenti distinti. Il verbale completo permette di valutarli correttamente.</span></div></div>`;
-  if (step === 2) body = `<div class="form-step"><h3>Informazioni economiche essenziali</h3><p>Usiamo solo fasce indicative per individuare le misure da approfondire.</p><div class="field-grid single">${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}${field('Nel nucleo c’e un dipendente o pensionato pubblico?',select('publicEmployee',f.publicEmployee,['No','Si','Non so']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>In questa demo non chiediamo redditi puntuali, codici fiscali o dati sanitari dettagliati.</span></div></div></div>`;
-  if (step === 3) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Le useremo per ordinare il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
-  return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Aggiorna la situazione</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<span>Passaggio ${step+1} di 4</span>${button('primary-button',step===3?'Crea il piano':'Continua',step===3?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
+  if (step === 0) body = `<div class="form-step"><h3>Chi stai assistendo?</h3><p>Poche informazioni per distinguere il tipo di percorso, senza chiedere dettagli clinici non necessari.</p><div class="field-grid">${field('Il tuo nome',input('caregiverName',f.caregiverName))}${field('Nome della persona assistita',input('assistedName',f.assistedName))}${field('Tu sei',select('relationship',f.relationship,['Figlio/a','Coniuge o partner','Genitore','Fratello o sorella','Altro familiare']))}${field('Eta della persona assistita',input('age',f.age,'number'))}</div></div>`;
+  if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Regione e provincia cambiano servizi, bandi e perfino l’iter di accertamento della disabilita nel 2026.</p><div class="field-grid">${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',input('city',f.city))}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
+  if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
+  if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${field('Dipendente/pensionato pubblico nella platea HCP?',select('publicEmployee',f.publicEmployee,['No','Si','Non so']))}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
+  if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
+  return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<span>Passaggio ${step+1} di 5</span>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
 }
 
 function helpDrawer() {
@@ -505,6 +623,7 @@ function sourcesView() {
     ${heading('Base informativa','Fonti ufficiali per caregiver','Una raccolta nazionale verificata per orientarsi. Carevia usa queste fonti come punto di partenza e distingue sempre misure attive, servizi territoriali e norme ancora in iter.')}
     <div class="sources-meta"><span>Ultimo controllo: 22 ottobre 2026</span><span>·</span><span>Fonti: INPS, Ministeri, Parlamento, ISS, Agenzia delle Entrate</span></div>
     <div class="source-alert"><b>Importante:</b> disponibilita, requisiti e modalita operative possono cambiare. Per misure regionali e comunali Carevia deve verificare il territorio e la data dell’ultimo aggiornamento prima di proporre un’azione.</div>
+    ${state.profileConfigured && regionSource(state.profile) ? `<section class="source-group"><div class="source-group-title"><h3>La tua Regione</h3><span>${esc(state.profile.region)}</span></div><div class="official-sources"><article class="official-source"><span class="source-tag">Regione</span><div><h4>${esc(regionSource(state.profile).title)}</h4><p>${esc(regionSource(state.profile).text)} · ${esc(regionSource(state.profile).status)}</p></div><a href="${regionSource(state.profile).url}" target="_blank" rel="noreferrer">Apri fonte ${icon('arrow',14)}</a></article></div></section>` : ''}
     ${groups.map(group=>`<section class="source-group"><div class="source-group-title"><h3>${group}</h3><span>${sourceCatalog.filter(s=>s.group===group).length} fonti</span></div><div class="official-sources">${sourceCatalog.filter(s=>s.group===group).map(s=>`<article class="official-source"><span class="source-tag">${esc(s.tag)}</span><div><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p></div><a href="${s.url}" target="_blank" rel="noreferrer">Apri fonte ${icon('arrow',14)}</a></article>`).join('')}</div></section>`).join('')}
   </div>`;
 }
@@ -524,10 +643,10 @@ function triggerUpload(){ document.getElementById('file-input')?.click(); }
 function uploadFiles(event){ const files=[...event.target.files]; state.documents=[...files.map((f,i)=>({id:Date.now()+i,name:f.name,type:'Da classificare',status:'Caricato',date:'Oggi'})),...state.documents]; saveState(); render(); showToast(`${files.length} ${files.length===1?'documento caricato':'documenti caricati'}`); }
 function openWizard(){ state.wizard=true; state.wizardStep=0; state.draft=structuredClone(state.profile); render(); }
 function closeWizard(){ state.wizard=false; state.draft=null; render(); }
-function wizardNext(){ state.wizardStep=Math.min(3,state.wizardStep+1); render(); } function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); render(); }
+function wizardNext(){ state.wizardStep=Math.min(4,state.wizardStep+1); render(); } function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); render(); }
 function updateDraft(key,value){ state.draft[key]=value; }
 function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; render(); }
-function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; if(!state.tasks.length) state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; saveState(); render(); showToast('Percorso creato con le nuove informazioni'); }
+function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
 function openHelp(){ state.help=true; render(); } function closeHelp(){ state.help=false; render(); }
 function selectOffer(el){ document.querySelectorAll('.offer').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
 function submitHelp(){ state.help=false; render(); showToast('Richiesta inviata. Ti ricontatteremo entro 1 giorno lavorativo.'); }
