@@ -1406,7 +1406,8 @@ function socialAuthorityForPractice(profile,fallback){
 function hasPracticeTemplate(id){ return !!practiceTemplates[id]; }
 
 
-function applicationGuide(id,p){
+function applicationGuide(id,p,saved={}){
+  const effectiveSector=saved.sector||p.caregiverSector||'Non so';
   const commonPerson=[
     {id:'assistedName',label:'Persona assistita',type:'text',value:p.assistedName||'',required:true,help:'Controlla che corrisponda ai dati anagrafici usati nella pratica.'},
     {id:'relationship',label:'Rapporto con la persona assistita',type:'text',value:p.relationship||'',required:false,help:'Serve soprattutto per tutele lavorative e deleghe.'},
@@ -1414,14 +1415,14 @@ function applicationGuide(id,p){
   ];
   const guides={
     law104work:{
-      mode:p.caregiverSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
+      mode:effectiveSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
       intro:'Prepariamo i dati prima di entrare nel canale ufficiale. Per il settore privato la domanda è INPS; per il settore pubblico la gestione è presso l’amministrazione datrice di lavoro.',
       fields:[...commonPerson,
-        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:p.caregiverSector||'Non so',required:true,help:'Cambia il canale di presentazione.'},
+        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:effectiveSector,required:true,help:'Cambia il canale di presentazione.'},
         {id:'severity',label:'Verbale 104 grave',type:'select',options:['Non so','No','Si - art. 3 comma 3'],value:p.law104Level==='Art. 3 comma 3 (gravita)'?'Si - art. 3 comma 3':'Non so',required:true,help:'I permessi di assistenza richiedono la situazione di gravità.'},
         {id:'hospitalization',label:'Ricovero a tempo pieno',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Può incidere sul diritto, salvo eccezioni previste.'}
       ],
-      channels:p.caregiverSector==='Pubblico'
+      channels:effectiveSector==='Pubblico'
         ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Presenta la richiesta secondo la procedura interna dell’ente. INPS non concede questi permessi ai dipendenti pubblici.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'}]
         : [{name:'Servizio online INPS',text:'Accedi al servizio dedicato per la domanda di permessi 104.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
            {name:'Patronato',text:'Può presentare telematicamente la domanda per tuo conto.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
@@ -1429,15 +1430,15 @@ function applicationGuide(id,p){
       script:'Ho un familiare con riconoscimento di disabilità grave ex art. 3 comma 3 e vorrei verificare/presentare la richiesta dei permessi Legge 104. Vorrei sapere quali dati o allegati mancano nel mio caso.'
     },
     leave:{
-      mode:p.caregiverSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
+      mode:effectiveSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
       intro:'Il congedo straordinario ha requisiti più stringenti: gravità, ordine di priorità e spesso convivenza. Carevia ti fa arrivare al canale ufficiale con questi punti già controllati.',
       fields:[...commonPerson,
-        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:p.caregiverSector||'Non so',required:true,help:'Cambia il canale di domanda.'},
+        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:effectiveSector,required:true,help:'Cambia il canale di domanda.'},
         {id:'cohabitation',label:'Convivenza con la persona assistita',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Può essere richiesta in base al rapporto familiare.'},
         {id:'priority',label:'Hai verificato l’ordine di priorità?',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Coniuge/partner, genitori, figli, fratelli/sorelle e altri parenti seguono regole di priorità.'},
         {id:'requestedPeriod',label:'Periodo che vorresti richiedere',type:'text',value:'',required:false,help:'Preparalo prima dell’accesso al servizio.'}
       ],
-      channels:p.caregiverSector==='Pubblico'
+      channels:effectiveSector==='Pubblico'
         ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Per i dipendenti pubblici la domanda è gestita dal datore di lavoro pubblico.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'}]
         : [{name:'Servizio online INPS',text:'Presenta la domanda di congedo straordinario dal servizio dedicato.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
            {name:'Patronato',text:'Alternativa assistita per la presentazione telematica.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
@@ -1536,8 +1537,7 @@ function applicationGuide(id,p){
 }
 
 function hydrateApplicationGuide(id,p,saved={}){
-  const effectiveProfile=(['law104work','leave'].includes(id) && saved.sector) ? {...p,caregiverSector:saved.sector} : p;
-  const g=applicationGuide(id,effectiveProfile);
+  const g=applicationGuide(id,p,saved);
   return {...g,fields:g.fields.map(f=>({...f,value:saved[f.id]!==undefined?saved[f.id]:f.value}))};
 }
 
@@ -1548,12 +1548,37 @@ function applicationCompletion(ca){
   return Math.round(req.filter(f=>String(f.value||'').trim() && !['Non so'].includes(String(f.value))).length/req.length*100);
 }
 
+function adaptCaseStepsToApplication(ca){
+  const sector=ca.applicationData?.sector||state.profile.caregiverSector||'Non so';
+  if(ca.supportId==='law104work'){
+    const s=ca.steps?.find(x=>x.id==='submission');
+    if(s && sector==='Pubblico'){
+      s.title='Presenta la richiesta alla tua amministrazione';
+      s.text='Segui la procedura del datore di lavoro pubblico / ufficio personale. Non usare il servizio INPS dedicato ai dipendenti privati.';
+      s.url='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html';
+    } else if(s){
+      s.title='Presenta la domanda INPS';
+      s.text='Completa la domanda tramite servizio INPS, Patronato o Contact Center.';
+    }
+  }
+  if(ca.supportId==='leave'){
+    const s=ca.steps?.find(x=>x.id==='submission');
+    if(s && sector==='Pubblico'){
+      s.title='Presenta la richiesta alla tua amministrazione';
+      s.text='Segui la procedura del datore di lavoro pubblico / ufficio personale prevista per il congedo straordinario.';
+      s.url='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html';
+    } else if(s){
+      s.title='Presenta la domanda INPS';
+      s.text='Utilizza il servizio INPS, Patronato o Contact Center.';
+    }
+  }
+}
+
 function updateCaseApplicationField(caseId,fieldId,value){
   const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
   ca.applicationData=ca.applicationData||{}; ca.applicationData[fieldId]=value;
   if(fieldId==='sector' && ['law104work','leave'].includes(ca.supportId)){
-    const t=practiceTemplates[ca.supportId];
-    ca.steps=t.steps({...state.profile,caregiverSector:value}).map((s,i)=>({...s,done:ca.steps?.[i]?.done||false}));
+    adaptCaseStepsToApplication(ca);
   }
   ca.updatedAt=new Date().toISOString();
   saveState(); render();
@@ -1588,7 +1613,7 @@ function buildCaseFromSupport(support,profile){
   const t=practiceTemplates[support.id];
   if(!t) return null;
   const authority=t.authority(profile);
-  return {
+  const ca={
     id:support.id+'-'+Date.now(),
     supportId:support.id,
     title:t.humanTitle,
@@ -1596,13 +1621,15 @@ function buildCaseFromSupport(support,profile){
     type:t.type,
     source:support.source,
     authority,
-    applicationData:{},
+    applicationData:['law104work','leave'].includes(support.id)?{sector:profile.caregiverSector||'Non so'}:{},
     documents:t.documents(profile).map(d=>({...d})),
     steps:t.steps(profile).map(s=>({...s,done:false})),
     outcome:null,
     createdAt:new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
+  adaptCaseStepsToApplication(ca);
+  return ca;
 }
 
 function deriveCaseStatus(ca){
