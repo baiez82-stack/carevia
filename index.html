@@ -221,6 +221,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .wizard > header { display: flex; align-items: flex-start; justify-content: space-between; padding: 25px 29px 18px; border-bottom: 1px solid var(--line); }.wizard h2, .help-drawer h2 { margin: 5px 0 0; font-family: Georgia, serif; font-size: 28px; font-weight: 500; }
 .wizard-progress { display: grid; grid-template-columns: repeat(5,1fr); padding: 18px 29px 0; }.wizard-progress > div { display: flex; align-items: center; gap: 8px; position: relative; color: #9a9f9a; font-size: 10px; }.wizard-progress > div::after { content: ''; height: 1px; position: absolute; left: 27px; right: 7px; top: 11px; background: #d7dad5; }.wizard-progress > div:last-child::after { display: none; }.wizard-progress span { width: 22px; height: 22px; display: grid; place-items: center; z-index: 1; border: 1px solid #c9cdc7; border-radius: 50%; background: #fbfbf9; font-weight: 750; }.wizard-progress b { z-index: 1; padding-right: 8px; background: #fbfbf9; }.wizard-progress .active { color: var(--ink); }.wizard-progress .active span { border-color: var(--accent); color: white; background: var(--accent); }
 .wizard-body { min-height: 390px; overflow-y: auto; padding: 34px 29px; }.form-step h3 { margin: 0 0 6px; font-size: 20px; }.form-step > p { margin: 0 0 26px; color: var(--muted); font-size: 12px; }.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }.field-grid.single { grid-template-columns: 1fr; }.field { display: grid; gap: 7px; }.field > span { color: #555c56; font-size: 11px; font-weight: 700; }.field input, .field select { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5cf; border-radius: 6px; color: var(--ink); background: #fff; outline: none; }.field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(237,104,74,.1); }
+.location-tools { grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:-2px 0 5px; }
+.location-tools button { min-height:36px; }
+.location-status { color:var(--muted); font-size:10px; line-height:1.45; }
+.field-help { display:block; margin-top:5px; color:var(--muted); font-size:10px; line-height:1.45; }
+.wizard-save { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:10px; }
+.result-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:-10px 0 24px; }
+@media print {
+  .sidebar,.topbar,.result-actions,.text-button,.primary-button,.secondary-button,.task-check { display:none !important; }
+  .app-shell { display:block; }.main-area { width:100%; }.workspace { max-width:none; padding:0; }
+  body { background:#fff; }.page { animation:none !important; }
+}
 .info-box, .privacy-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 24px; padding: 15px; border-radius: 7px; color: #6f571f; background: var(--yellow-soft); font-size: 11px; line-height: 1.5; }.privacy-note { color: #3f5c4d; background: var(--green-soft); }.privacy-note strong, .privacy-note span { display: block; }.privacy-note span { margin-top: 3px; }
 .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.choice { min-height: 54px; display: flex; align-items: center; gap: 11px; padding: 10px 13px; border: 1px solid #d4d8d2; border-radius: 7px; color: #4d544f; background: white; text-align: left; font-size: 12px; font-weight: 650; }.choice > span { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #b9beb8; border-radius: 5px; }.choice.active { border-color: #dea08f; color: #863b29; background: var(--accent-soft); }.choice.active > span { border-color: var(--accent); color: white; background: var(--accent); }
 .wizard > footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 29px; border-top: 1px solid var(--line); background: #f4f5f1; }.wizard > footer > span { color: var(--muted); font-size: 10px; }
@@ -259,7 +270,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v4';
+    <script>const STORAGE_KEY = 'carevia-static-v5';
+const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
   active: 'overview',
@@ -509,7 +521,7 @@ function profileGate(title, text) {
 function supportView() {
   if (!state.profileConfigured) return profileGate('Prima conosciamo la situazione.','Per proporti sostegni sensati servono poche informazioni sulla persona assistita e sul contesto familiare.');
   const supports = evaluateSupport(state.profile);
-  return `<div class="page enter">${heading('Valutazione preliminare','Percorsi da verificare',`Risultati basati sui dati inseriti per ${esc(state.profile.assistedName)}. Carevia ordina le opportunita, ma l’ente competente conferma requisiti e diritto.`)}<div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms"><div class="support-symbol">${icon('wallet',21)}</div><div class="support-main">${statusBadge(s)}<h3>${esc(s.title)}</h3><p>${esc(s.reason)}</p><div class="support-next"><strong>Cosa fare</strong><span>${esc(s.next)}</span></div></div><div class="support-value"><span>Valore indicativo</span><strong>${esc(s.value)}</strong><a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a></div></article>`).join('')}</div><div class="source-note">${icon('help',20)}<div><strong>Perche non diamo un esito definitivo?</strong><p>Molte misure dipendono da verbali, valutazioni sanitarie, bandi territoriali e fondi disponibili. Carevia organizza il percorso; l’ente competente conferma il diritto.</p></div></div></div>`;
+  return `<div class="page enter">${heading('Valutazione preliminare','Percorsi da verificare',`Risultati basati sui dati inseriti per ${esc(state.profile.assistedName)}. Carevia ordina le opportunita, ma l’ente competente conferma requisiti e diritto.`)}<div class="result-actions">${button('secondary-button','Salva / Stampa PDF','printSummary()','file')}${button('primary-button','Aggiorna dati','openWizard()','search')}</div><div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms"><div class="support-symbol">${icon('wallet',21)}</div><div class="support-main">${statusBadge(s)}<h3>${esc(s.title)}</h3><p>${esc(s.reason)}</p><div class="support-next"><strong>Cosa fare</strong><span>${esc(s.next)}</span></div></div><div class="support-value"><span>Valore indicativo</span><strong>${esc(s.value)}</strong><a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a></div></article>`).join('')}</div><div class="source-note">${icon('help',20)}<div><strong>Perche non diamo un esito definitivo?</strong><p>Molte misure dipendono da verbali, valutazioni sanitarie, bandi territoriali e fondi disponibili. Carevia organizza il percorso; l’ente competente conferma il diritto.</p></div></div></div>`;
 }
 
 function tasksView() {
@@ -571,16 +583,82 @@ function field(label, control) { return `<label class="field"><span>${label}</sp
 function select(name, value, options) { return `<select onchange="updateDraft('${name}',this.value)">${options.map(o => `<option ${o===value?'selected':''}>${o}</option>`).join('')}</select>`; }
 function input(name, value, type='text') { return `<input type="${type}" value="${esc(value)}" oninput="updateDraft('${name}',this.value)">`; }
 
+
+function mapRegionName(value='') {
+  const v=normalizePlace(value);
+  const aliases={
+    'trentino alto adige':'Trentino-Alto Adige','trentino-alto adige':'Trentino-Alto Adige',
+    'friuli venezia giulia':'Friuli-Venezia Giulia','friuli-venezia giulia':'Friuli-Venezia Giulia',
+    'valle daosta':'Valle d’Aosta','vallee daoste':'Valle d’Aosta'
+  };
+  if(aliases[v]) return aliases[v];
+  const options=['Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto'];
+  return options.find(x=>normalizePlace(x)===v) || value;
+}
+
+async function reverseGeocode(lat,lon){
+  const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&addressdetails=1&accept-language=it`;
+  const res=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!res.ok) throw new Error('Geocoding non disponibile');
+  return res.json();
+}
+
+async function detectLocation(){
+  if(!navigator.geolocation){ showToast('Geolocalizzazione non supportata da questo browser'); return; }
+  const status=document.getElementById('location-status');
+  if(status) status.textContent='Rilevamento in corso...';
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    try{
+      const data=await reverseGeocode(pos.coords.latitude,pos.coords.longitude);
+      const a=data.address||{};
+      const city=a.city||a.town||a.village||a.municipality||'';
+      const province=(a.province||a.county||a.state_district||'').replace(/^Provincia di\s+/i,'');
+      const region=mapRegionName(a.state||a.region||'');
+      if(region) state.draft.region=region;
+      if(province) state.draft.province=province;
+      if(city) state.draft.city=city;
+      persistDraft(false); render(); showToast('Localita compilata automaticamente');
+    }catch(e){
+      if(status) status.textContent='Non riesco a completare automaticamente la localita. Inseriscila manualmente.';
+      showToast('Localita non rilevata');
+    }
+  },()=>{
+    if(status) status.textContent='Permesso posizione non concesso. Puoi compilare manualmente.';
+    showToast('Posizione non disponibile');
+  },{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+}
+
+async function completeFromMunicipality(){
+  const city=String(state.draft?.city||'').trim();
+  if(!city){ showToast('Scrivi prima il Comune'); return; }
+  try{
+    const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&country=Italia&city=${encodeURIComponent(city)}&addressdetails=1&limit=1&accept-language=it`;
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!res.ok) throw new Error('lookup');
+    const rows=await res.json();
+    if(!rows.length) throw new Error('notfound');
+    const a=rows[0].address||{};
+    state.draft.region=mapRegionName(a.state||a.region||state.draft.region);
+    state.draft.province=(a.province||a.county||a.state_district||state.draft.province||'').replace(/^Provincia di\s+/i,'');
+    state.draft.city=a.city||a.town||a.village||a.municipality||city;
+    persistDraft(false); render(); showToast('Provincia e Regione completate dal Comune');
+  }catch{
+    showToast('Comune non trovato automaticamente');
+  }
+}
+
+function printSummary(){ window.print(); }
+
 function wizard() {
   if (!state.wizard) return '';
   const f = state.draft, step = state.wizardStep, labels = ['Persone','Territorio','Situazione','Lavoro/ISEE','Bisogni'];
   let body = '';
   if (step === 0) body = `<div class="form-step"><h3>Chi stai assistendo?</h3><p>Poche informazioni per distinguere il tipo di percorso, senza chiedere dettagli clinici non necessari.</p><div class="field-grid">${field('Il tuo nome',input('caregiverName',f.caregiverName))}${field('Nome della persona assistita',input('assistedName',f.assistedName))}${field('Tu sei',select('relationship',f.relationship,['Figlio/a','Coniuge o partner','Genitore','Fratello o sorella','Altro familiare']))}${field('Eta della persona assistita',input('age',f.age,'number'))}</div></div>`;
-  if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Regione e provincia cambiano servizi, bandi e perfino l’iter di accertamento della disabilita nel 2026.</p><div class="field-grid">${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',input('city',f.city))}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
+  if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Possiamo compilare automaticamente Regione, Provincia e Comune usando la posizione del dispositivo, oppure puoi inserire il Comune e completare gli altri campi.</p><div class="field-grid"><div class="location-tools">${button('secondary-button','Usa la posizione','detectLocation()','search')}<span id="location-status" class="location-status">La posizione viene usata solo per compilare questi campi e non viene salvata come coordinate.</span></div>${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',`<input type="text" value="${esc(f.city)}" oninput="updateDraft('city',this.value)" onblur="if(this.value.trim()) completeFromMunicipality()"><span class="field-help">Scrivi il Comune: Carevia prova a completare Provincia e Regione automaticamente.</span>`)}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
   if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
-  if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${field('Dipendente/pensionato pubblico nella platea HCP?',select('publicEmployee',f.publicEmployee,['No','Si','Non so']))}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
+  if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${field('Nel nucleo c’è un dipendente o pensionato pubblico?',`${select('publicEmployee',f.publicEmployee,['No','Si','Non so'])}<span class="field-help"><b>Perché lo chiediamo:</b> potrebbe aprire l’accesso a Home Care Premium (HCP), programma INPS per assistenza domiciliare rivolto agli iscritti alla Gestione Unitaria delle prestazioni creditizie e sociali e ai loro familiari non autosufficienti.</span>`)}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
   if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
-  return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<span>Passaggio ${step+1} di 5</span>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
+  return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<div class="wizard-save"><button class="text-button" onclick="persistDraft(true)">Salva e continua dopo</button><span>Passaggio ${step+1} di 5</span></div>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
 }
 
 const sourceCatalog = [
@@ -635,21 +713,39 @@ function setTaskFilter(filter){ state.taskFilter=filter; render(); }
 function addTask(){ const el=document.getElementById('new-task'); if(!el?.value.trim())return; state.tasks.push({id:Date.now(),title:el.value.trim(),meta:'Attivita aggiunta manualmente',due:'Senza scadenza',done:false,area:'Personale'}); saveState(); render(); showToast('Attivita aggiunta al piano'); }
 function triggerUpload(){ document.getElementById('file-input')?.click(); }
 function uploadFiles(event){ const files=[...event.target.files]; state.documents=[...files.map((f,i)=>({id:Date.now()+i,name:f.name,type:'Da classificare',status:'Caricato',date:'Oggi'})),...state.documents]; saveState(); render(); showToast(`${files.length} ${files.length===1?'documento caricato':'documenti caricati'}`); }
-function openWizard(){ state.wizard=true; state.wizardStep=0; state.draft=structuredClone(state.profile); render(); }
+function openWizard(){
+  state.wizard=true;
+  const savedDraft = loadDraft();
+  if (!state.profileConfigured && savedDraft?.profile) {
+    state.draft = savedDraft.profile;
+    state.wizardStep = Math.min(4, Number(savedDraft.step)||0);
+  } else {
+    state.wizardStep=0;
+    state.draft=structuredClone(state.profile);
+  }
+  render();
+}
 function closeWizard(){ state.wizard=false; state.draft=null; render(); }
+function loadDraft(){ try { return JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch { return null; } }
+function persistDraft(showMessage=false){
+  if(!state.draft) return;
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({profile:state.draft,step:state.wizardStep,savedAt:new Date().toISOString()}));
+  if(showMessage) showToast('Compilazione salvata su questo dispositivo');
+}
+function clearDraft(){ localStorage.removeItem(DRAFT_KEY); }
 function wizardNext(){
   const f=state.draft;
   if(state.wizardStep===0 && (!String(f.assistedName||'').trim() || !Number(f.age))){ showToast('Inserisci nome della persona assistita ed eta.'); return; }
   if(state.wizardStep===1 && (f.region==='Seleziona' || !String(f.province||'').trim() || !String(f.city||'').trim())){ showToast('Indica Regione, Provincia e Comune per costruire il percorso territoriale.'); return; }
-  state.wizardStep=Math.min(4,state.wizardStep+1); render();
+  state.wizardStep=Math.min(4,state.wizardStep+1); persistDraft(false); render();
 }
-function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); render(); }
-function updateDraft(key,value){ state.draft[key]=value; }
-function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; render(); }
-function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
+function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); persistDraft(false); render(); }
+function updateDraft(key,value){ state.draft[key]=value; persistDraft(false); }
+function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; persistDraft(false); render(); }
+function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; clearDraft(); saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard;
+window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary;
 
 render();
 </script>
