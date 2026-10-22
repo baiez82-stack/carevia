@@ -1,0 +1,88 @@
+name: Sync national territorial data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+  push:
+    paths:
+      - ".github/workflows/sync-territorial-data.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-asl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Ministry Comune-ASL dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          curl -fL --retry 4 --retry-delay 3             "https://www.dati.salute.gov.it/sites/default/files/2026-05/ASL_comuni_popolazione_2024.csv"             -o data/asl_comuni.csv
+          test -s data/asl_comuni.csv
+
+      - name: Validate dataset
+        shell: python
+        run: |
+          from pathlib import Path
+          import csv, io
+
+          path = Path("data/asl_comuni.csv")
+          raw = path.read_bytes()
+          text = None
+          for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
+              try:
+                  text = raw.decode(enc)
+                  break
+              except UnicodeDecodeError:
+                  pass
+          if not text:
+              raise SystemExit("Unable to decode Ministry dataset")
+
+          first = text.splitlines()[0]
+          delimiter = max((";", ",", "\t"), key=lambda d: first.count(d))
+          reader = csv.reader(io.StringIO(text), delimiter=delimiter)
+          rows = list(reader)
+          if len(rows) < 1000:
+              raise SystemExit(f"Dataset unexpectedly small: {len(rows)} rows")
+
+          headers = [" ".join(h.lower().strip().split()) for h in rows[0]]
+          required = ["denominazione regione", "codice azienda", "denominazione azienda", "comune"]
+          missing = [x for x in required if x not in headers]
+          if missing:
+              raise SystemExit(f"Missing expected fields: {missing}")
+
+          print(f"Validated {len(rows)-1} municipality/ASL rows")
+
+      - name: Write source metadata
+        shell: bash
+        run: |
+          cat > data/asl_source.json <<'EOF'
+          {
+            "source": "Ministero della Salute - Corrispondenze ASL-Comuni e popolazione residente",
+            "dataset_reference_year": 2024,
+            "source_last_updated": "2026-05-28",
+            "source_page": "https://www.dati.salute.gov.it/it/dataset/corrispondenze-asl-comuni-e-popolazione-residente-anno-2024/",
+            "license": "Italian Open Data Licence v2.0",
+            "sync": "automated weekly by GitHub Actions"
+          }
+          EOF
+
+      - name: Commit changes if dataset changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "carevia-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/asl_comuni.csv data/asl_source.json
+          if git diff --cached --quiet; then
+            echo "No territorial dataset changes"
+            exit 0
+          fi
+          git commit -m "Sync Ministry Comune-ASL dataset"
+          git push
