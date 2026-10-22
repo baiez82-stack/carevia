@@ -1401,7 +1401,8 @@ function deriveCaseStatus(ca){
   const missingDocs=(ca.documents||[]).filter(d=>!d.ready).length;
   const next=(ca.steps||[]).find(s=>!s.done);
   if(!next) return 'In attesa dell’esito';
-  if(next.phase==='prepare') return missingDocs ? 'Documenti da preparare' : 'Preparazione';
+  if(missingDocs && ['prepare','submit'].includes(next.phase)) return 'Documenti da preparare';
+  if(next.phase==='prepare') return 'Preparazione';
   if(next.phase==='submit') return 'Pronta da inviare';
   if(next.phase==='wait') return 'In attesa / valutazione';
   if(next.phase==='outcome') return 'In attesa dell’ente';
