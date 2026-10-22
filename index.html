@@ -1285,7 +1285,7 @@ const practiceTemplates = {
     ]
   },
   adi: {
-    humanTitle:'Assistenza sanitaria a casa',
+    humanTitle:'Assistenza sanitaria a domicilio (ADI)',
     adminTitle:'Assistenza Domiciliare Integrata (ADI)',
     type:'Servizio sanitario',
     authority:p=>healthAuthorityForPractice(p,'Azienda sanitaria / Distretto'),
@@ -1634,7 +1634,7 @@ function supportView() {
       <div class="support-value">
         <span>Valore / tipo</span><strong>${esc(s.value)}</strong>
         <a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a>
-        ${hasPracticeTemplate(s.id)?`<button class="secondary-button case-open-button" onclick="openCaseFromSupport('${s.id}')">${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'Apri pratica':'Inizia pratica'} ${icon('arrow',14)}</button>`:''}
+        ${hasPracticeTemplate(s.id)?`<button class="${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'primary-button':'secondary-button'} case-open-button" onclick="openCaseFromSupport('${s.id}')">${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'Continua pratica':'Inizia pratica'} ${icon('arrow',14)}</button>`:''}
         <div class="support-evidence">
           <span class="evidence-chip">${esc(s.sourceLabel)}</span>
           <span class="evidence-chip">${esc(s.legalState)}</span>
