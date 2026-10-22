@@ -718,7 +718,8 @@ async function resolveNationalSocialArea(profile){
   try{
     const rows=await loadAtsRows();
     const regions=datasetRegionCandidates(profile,'social');
-    const matches=rows.filter(r=>normalizeDatasetPlace(r.city)===city && regions.includes(normalizeDatasetPlace(r.region)));
+    const atsCityKey=value=>normalizeDatasetPlace(String(value||'').split(/\s(?:\*|\/)\s/)[0]);
+    const matches=rows.filter(r=>atsCityKey(r.city)===city && regions.includes(normalizeDatasetPlace(r.region)));
     const unique=[];
     for(const row of matches){
       const key=row.area+'|'+row.lead;
@@ -780,7 +781,19 @@ async function resolveNationalHealthAuthority(profile) {
       const key=(row.code||'')+'|'+(row.authority||'');
       if(!unique.some(x=>x.key===key)) unique.push({key,code:row.code,name:row.authority});
     }
-    if(!unique.length) return {status:'not-found',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE};
+    if(!unique.length){
+      const province=normalizeDatasetPlace(profile.province);
+      let fallbackCode=null;
+      if(normalizeDatasetPlace(profile.region)==='trentino alto adige'){
+        if(province.includes('trento') || province==='tn') fallbackCode='101';
+        if(province.includes('bolzano') || province==='bz') fallbackCode='201';
+      } else if(normalizeDatasetPlace(profile.region)==='valle daosta') fallbackCode='101';
+      if(fallbackCode){
+        const detailed=await enrichHealthAuthorities([{code:fallbackCode,name:'Azienda sanitaria provinciale'}],profile);
+        if(detailed.length) return {status:'resolved',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,registrySource:MINISTRY_ASL_REGISTRY_PAGE,authorities:detailed,reason:'territorio autonomo con azienda sanitaria unica'};
+      }
+      return {status:'not-found',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE};
+    }
     const detailed=await enrichHealthAuthorities(unique.map(({code,name})=>({code,name})),profile);
     if(detailed.length===1) return {status:'resolved',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,registrySource:MINISTRY_ASL_REGISTRY_PAGE,authorities:detailed};
     return {status:'multiple',checked:'28 mag 2026',source:MINISTRY_ASL_DATASET_PAGE,registrySource:MINISTRY_ASL_REGISTRY_PAGE,authorities:detailed};
