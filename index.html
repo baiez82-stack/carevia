@@ -598,7 +598,11 @@ function normalizeHeader(value=''){ return normalizePlace(value).replace(/[^a-z0
 
 async function loadNationalAslRows() {
   if(ministryAslRowsCache) return ministryAslRowsCache;
-  const res=await fetch(MINISTRY_ASL_CSV,{cache:'force-cache'});
+  let res;
+  try { res=await fetch('data/asl_comuni.csv',{cache:'no-cache'}); } catch {}
+  if(!res?.ok){
+    res=await fetch(MINISTRY_ASL_CSV,{cache:'force-cache'});
+  }
   if(!res.ok) throw new Error('dataset ministeriale non disponibile');
   const buffer=await res.arrayBuffer();
   let text=new TextDecoder('utf-8').decode(buffer);
