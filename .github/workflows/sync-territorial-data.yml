@@ -186,4 +186,5 @@ jobs:
             exit 0
           fi
           git commit -m "Sync national health and social territorial data"
+          git pull --rebase origin main
           git push
