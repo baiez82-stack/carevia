@@ -18,13 +18,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Ministry Comune-ASL dataset
+      - name: Download national territorial datasets
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p data
-          curl -fL --retry 4 --retry-delay 3             "https://www.dati.salute.gov.it/sites/default/files/2026-05/ASL_comuni_popolazione_2024.csv"             -o data/asl_comuni.csv
+
+          curl -fL --retry 4 --retry-delay 3 \
+            "https://www.dati.salute.gov.it/sites/default/files/2026-05/ASL_comuni_popolazione_2024.csv" \
+            -o data/asl_comuni.csv
+
+          curl -fL --retry 4 --retry-delay 3 \
+            "https://www.dati.salute.gov.it/sites/default/files/2026-04/ASL_2010-2026.csv" \
+            -o data/asl_elenco.csv
+
+          curl -fL --retry 4 --retry-delay 3 \
+            "https://www.lavoro.gov.it/temi-e-priorita-poverta-ed-esclusione-sociale/focus/registro-ambiti-territoriali-siuss" \
+            -o data/ats_registry.xlsx
+
           test -s data/asl_comuni.csv
+          test -s data/asl_elenco.csv
+          test -s data/ats_registry.xlsx
 
       - name: Prepare XLSX reader
         shell: bash
@@ -130,5 +144,5 @@ jobs:
             echo "No territorial dataset changes"
             exit 0
           fi
-          git commit -m "Sync Ministry Comune-ASL dataset"
+          git commit -m "Sync national health and social territorial data"
           git push
