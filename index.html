@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#f4f5f2">
-    <meta name="description" content="Carevia, case manager familiare per caregiver.">
+    <meta name="description" content="Carevia aiuta i caregiver familiari a orientarsi tra prestazioni, servizi territoriali, documenti e prossimi passi usando fonti ufficiali.">
     <title>Carevia | Navigatore caregiver</title>
     <style>:root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -583,12 +583,6 @@ function wizard() {
   return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<span>Passaggio ${step+1} di 5</span>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
 }
 
-function helpDrawer() {
-  if (!state.help) return '';
-  return `<div class="drawer-backdrop" onclick="closeHelp()"><aside class="help-drawer" onclick="event.stopPropagation()"><header><div><span class="eyebrow">Assistenza Carevia</span><h2>Fai controllare la pratica</h2></div><button class="icon-button" onclick="closeHelp()">${icon('close',21)}</button></header><p class="drawer-intro">Un operatore esamina i dati di ${esc(state.profile.assistedName)}, segnala cosa manca e prepara i prossimi passi.</p><div class="offer-options"><button class="offer active" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Revisione della pratica</strong><small>Controllo requisiti e lista documenti</small></div><b>49 €</b></button><button class="offer" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Concierge operativo</strong><small>Revisione piu 30 giorni di supporto</small></div><b>149 €</b></button></div><ul class="included"><li>${icon('check',17)}Risposta entro un giorno lavorativo</li><li>${icon('check',17)}Riepilogo scritto e verificabile</li><li>${icon('check',17)}Nessun rinnovo automatico</li></ul><div class="contact-fields">${field('Email','<input type="email" placeholder="nome@email.it">')}${field('Telefono','<input type="tel" placeholder="+39 333 000 0000">')}</div>${button('dark-button wide','Invia la richiesta','submitHelp()','arrow')}<p class="drawer-legal">Demo commerciale: nessun pagamento viene effettuato e i campi email/telefono non vengono trasmessi in questa versione. Consulta <a href="privacy.html">Privacy & GDPR</a>.</p></aside></div>`;
-}
-
-
 const sourceCatalog = [
   {group:'Prestazioni e riconoscimenti', tag:'INPS', title:'Invalidita civile e accertamento sanitario', text:'Iter per invalidita civile, cecita, sordita e disabilita. Nel 2026 la procedura cambia nei territori coinvolti dalla riforma.', url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.domanda-invalidita-civile-e-accertamento-sanitario-50004.accertamento-sanitario.html'},
   {group:'Prestazioni e riconoscimenti', tag:'INPS', title:'Indennita di accompagnamento', text:'Prestazione economica per invalidi totali con impossibilita a deambulare autonomamente o a compiere gli atti quotidiani della vita.', url:'https://www.inps.it/it/it/dettaglio-approfondimento.schede-informative.indennit-di-accompagnamento-agli-invalidi-civili.html'},
@@ -631,7 +625,7 @@ function sourcesView() {
 function render() {
   const root = document.getElementById('root');
   const views = { overview, support: supportView, territory: territoryView, tasks: tasksView, documents: documentsView, sources: sourcesView };
-  root.innerHTML = `<div class="app-shell">${sidebar()}<main class="main-area">${topbar()}<div class="workspace">${views[state.active]()}</div></main>${wizard()}${helpDrawer()}</div>`;
+  root.innerHTML = `<div class="app-shell">${sidebar()}<main class="main-area">${topbar()}<div class="workspace">${views[state.active]()}</div></main>${wizard()}</div>`;
 }
 
 function navigateTo(view) { state.active = view; state.mobileNav = false; saveState(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -643,16 +637,19 @@ function triggerUpload(){ document.getElementById('file-input')?.click(); }
 function uploadFiles(event){ const files=[...event.target.files]; state.documents=[...files.map((f,i)=>({id:Date.now()+i,name:f.name,type:'Da classificare',status:'Caricato',date:'Oggi'})),...state.documents]; saveState(); render(); showToast(`${files.length} ${files.length===1?'documento caricato':'documenti caricati'}`); }
 function openWizard(){ state.wizard=true; state.wizardStep=0; state.draft=structuredClone(state.profile); render(); }
 function closeWizard(){ state.wizard=false; state.draft=null; render(); }
-function wizardNext(){ state.wizardStep=Math.min(4,state.wizardStep+1); render(); } function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); render(); }
+function wizardNext(){
+  const f=state.draft;
+  if(state.wizardStep===0 && (!String(f.assistedName||'').trim() || !Number(f.age))){ showToast('Inserisci nome della persona assistita ed eta.'); return; }
+  if(state.wizardStep===1 && (f.region==='Seleziona' || !String(f.province||'').trim() || !String(f.city||'').trim())){ showToast('Indica Regione, Provincia e Comune per costruire il percorso territoriale.'); return; }
+  state.wizardStep=Math.min(4,state.wizardStep+1); render();
+}
+function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); render(); }
 function updateDraft(key,value){ state.draft[key]=value; }
 function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; render(); }
 function completeWizard(){ state.profile=state.draft; state.profileConfigured=true; state.tasks=buildInitialTasks(state.profile); state.wizard=false; state.draft=null; state.active='support'; saveState(); render(); showToast('Percorso aggiornato con le nuove informazioni'); }
-function openHelp(){ state.help=true; render(); } function closeHelp(){ state.help=false; render(); }
-function selectOffer(el){ document.querySelectorAll('.offer').forEach(o=>o.classList.remove('active')); el.classList.add('active'); }
-function submitHelp(){ state.help=false; render(); showToast('Richiesta inviata. Ti ricontatteremo entro 1 giorno lavorativo.'); }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.openHelp=openHelp; window.closeHelp=closeHelp; window.selectOffer=selectOffer; window.submitHelp=submitHelp;
+window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard;
 
 render();
 </script>
