@@ -597,7 +597,7 @@ function parseCsvRows(text) {
   return rows;
 }
 
-function normalizeHeader(value=''){ return normalizePlace(value).replace(/[^a-z0-9 ]/g,'').trim(); }
+function normalizeHeader(value=''){ return normalizePlace(value).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim(); }
 
 async function loadNationalAslRows() {
   if(ministryAslRowsCache) return ministryAslRowsCache;
