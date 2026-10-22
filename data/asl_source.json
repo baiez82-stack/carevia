@@ -1,0 +1,8 @@
+{
+  "source": "Ministero della Salute - Corrispondenze ASL-Comuni e popolazione residente",
+  "dataset_reference_year": 2024,
+  "source_last_updated": "2026-05-28",
+  "source_page": "https://www.dati.salute.gov.it/it/dataset/corrispondenze-asl-comuni-e-popolazione-residente-anno-2024/",
+  "license": "Italian Open Data Licence v2.0",
+  "sync": "automated weekly by GitHub Actions"
+}
