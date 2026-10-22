@@ -307,7 +307,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v7';
+    <script>const STORAGE_KEY = 'carevia-static-v8';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -516,6 +516,42 @@ const territorialRegistry = [
   }
 ];
 
+
+const venetoUlssByProvince = {
+  'belluno': {name:'Azienda ULSS 1 Dolomiti', url:'https://www.aulss1.veneto.it/'},
+  'bl': {name:'Azienda ULSS 1 Dolomiti', url:'https://www.aulss1.veneto.it/'},
+  'treviso': {name:'Azienda ULSS 2 Marca Trevigiana', url:'https://www.aulss2.veneto.it/'},
+  'tv': {name:'Azienda ULSS 2 Marca Trevigiana', url:'https://www.aulss2.veneto.it/'},
+  'rovigo': {name:'Azienda ULSS 5 Polesana', url:'https://www.aulss5.veneto.it/'},
+  'ro': {name:'Azienda ULSS 5 Polesana', url:'https://www.aulss5.veneto.it/'},
+  'padova': {name:'Azienda ULSS 6 Euganea', url:'https://www.aulss6.veneto.it/'},
+  'pd': {name:'Azienda ULSS 6 Euganea', url:'https://www.aulss6.veneto.it/'},
+  'verona': {name:'Azienda ULSS 9 Scaligera', url:'https://www.aulss9.veneto.it/'},
+  'vr': {name:'Azienda ULSS 9 Scaligera', url:'https://www.aulss9.veneto.it/'}
+};
+
+function resolveVenetoUlss(profile) {
+  if(profile.region!=='Veneto') return null;
+  const p=normalizePlace(profile.province);
+  const direct=venetoUlssByProvince[p];
+  if(direct) return {...direct,verifiedAt:TERRITORY_CHECKED,source:'Regione Veneto - Tabella Comuni/Aziende'};
+  if(['venezia','ve','vicenza','vi'].includes(p)) return {split:true,verifiedAt:TERRITORY_CHECKED,source:'Regione Veneto - provincia suddivisa tra piu ULSS'};
+  return null;
+}
+
+function ulssTerritoryNode(profile) {
+  const ulss=resolveVenetoUlss(profile);
+  if(!ulss || ulss.split) return null;
+  return {
+    id:'resolved-ulss',scope:'ULSS',region:'Veneto',city:null,type:'Azienda sanitaria di afferenza',
+    title:ulss.name,status:'Afferenza territoriale risolta',verifiedAt:ulss.verifiedAt,
+    conditions:null,minAge:0,
+    purpose:'Azienda ULSS di riferimento per il Comune/provincia indicati, da usare come porta sanitaria territoriale per distretti, ADI, PUA/COT e altri percorsi.',
+    access:'Apri il sito aziendale e individua il Distretto competente per il Comune. Carevia mostrerà il servizio specifico quando il registro locale è disponibile.',
+    url:ulss.url
+  };
+}
+
 function territoryNodeMatches(node, profile) {
   if(node.region && node.region !== profile.region) return false;
   if(node.city && normalizePlace(node.city) !== normalizePlace(profile.city)) return false;
@@ -525,13 +561,19 @@ function territoryNodeMatches(node, profile) {
 }
 
 function verifiedTerritoryNodes(profile) {
-  return territorialRegistry.filter(node=>territoryNodeMatches(node,profile));
+  const nodes=territorialRegistry.filter(node=>territoryNodeMatches(node,profile));
+  const resolved=ulssTerritoryNode(profile);
+  if(resolved && !nodes.some(n=>n.title===resolved.title)) nodes.push(resolved);
+  return nodes;
 }
 
 function coverageFor(profile) {
   const local = territorialRegistry.filter(n=>n.city && normalizePlace(n.city)===normalizePlace(profile.city) && n.region===profile.region);
   const regional = territorialRegistry.filter(n=>!n.city && n.region===profile.region);
+  const ulss=resolveVenetoUlss(profile);
   if(local.length) return {grade:'Verificata locale',tone:'full',text:`${local.length} nodi locali + ${regional.length} regionali verificati da Carevia il ${TERRITORY_CHECKED}.`};
+  if(ulss && !ulss.split) return {grade:'Territorio risolto',tone:'full',text:`Misure regionali + azienda sanitaria (${ulss.name}) risolte; i servizi comunali specifici sono in espansione.`};
+  if(ulss?.split) return {grade:'Verificata regionale',tone:'partial',text:'La provincia indicata è servita da più ULSS: Carevia non assegna automaticamente l’azienda finché il registro comunale non è verificato.'};
   if(regional.length) return {grade:'Verificata regionale',tone:'partial',text:`${regional.length} nodi regionali verificati; Comune/ASL specifici sono ancora da completare per questo territorio.`};
   return {grade:'Copertura base',tone:'partial',text:'Carevia conosce i percorsi nazionali, ma non ha ancora completato il registro territoriale verificato per questa area.'};
 }
