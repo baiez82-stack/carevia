@@ -114,6 +114,47 @@ jobs:
               raise SystemExit("ATS registry CSV unexpectedly small")
           print(f"Normalized ATS registry: {len(rows)-1} data rows from sheet {ws.title!r}")
 
+          # Build coverage statistics used by the Carevia UI.
+          import json, datetime
+          asl_rows_count = len(list(csv.reader(io.StringIO(text), delimiter=delimiter))) - 1
+          health_rows = list(csv.reader(io.StringIO(text), delimiter=delimiter))[1:]
+          health_headers = [" ".join(h.lower().strip().split()) for h in list(csv.reader(io.StringIO(text), delimiter=delimiter))[0]]
+          h_region = health_headers.index("denominazione regione")
+          h_code = health_headers.index("codice azienda")
+          h_name = health_headers.index("denominazione azienda")
+          h_city = health_headers.index("comune")
+          unique_health_cities = {(r[h_region].strip(), r[h_city].strip()) for r in health_rows if len(r) > max(h_region,h_city)}
+          unique_health_authorities = {(r[h_region].strip(), r[h_code].strip(), r[h_name].strip()) for r in health_rows if len(r) > max(h_region,h_code,h_name)}
+
+          ats_csv = list(csv.reader(out.open("r", encoding="utf-8"), delimiter=";"))
+          ats_headers = [" ".join(h.lower().strip().split()) for h in ats_csv[0]]
+          a_region = ats_headers.index("regione")
+          a_area = next(i for i,h in enumerate(ats_headers) if "denominazione ambito territoriale sociale" in h)
+          a_city = next(i for i,h in enumerate(ats_headers) if "nome comune" in h and "istat" in h)
+          ats_data = ats_csv[1:]
+          unique_ats_cities = {(r[a_region].strip(), r[a_city].strip()) for r in ats_data if len(r) > max(a_region,a_city)}
+          unique_areas = {(r[a_region].strip(), r[a_area].strip()) for r in ats_data if len(r) > max(a_region,a_area)}
+
+          if len(unique_health_cities) < 7800:
+              raise SystemExit(f"National ASL municipality coverage unexpectedly low: {len(unique_health_cities)}")
+          if len(unique_ats_cities) < 7800:
+              raise SystemExit(f"ATS municipality coverage unexpectedly low: {len(unique_ats_cities)}")
+
+          stats = {
+              "asl_rows": asl_rows_count,
+              "unique_comuni_asl": len(unique_health_cities),
+              "health_authorities": len(unique_health_authorities),
+              "ats_rows": len(ats_data),
+              "unique_comuni_ats": len(unique_ats_cities),
+              "social_areas": len(unique_areas),
+              "health_source_updated": "28 mag 2026",
+              "social_source_updated": "06 mar 2025",
+              "sync": "settimanale",
+              "last_sync_utc": datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }
+          Path("data/territorial_stats.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+          print("Coverage stats:", stats)
+
       - name: Write source metadata
         shell: bash
         run: |
@@ -139,7 +180,7 @@ jobs:
           set -euo pipefail
           git config user.name "carevia-data-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/asl_comuni.csv data/asl_elenco.csv data/ats_registry.xlsx data/ats_registry.csv data/asl_source.json
+          git add data/asl_comuni.csv data/asl_elenco.csv data/ats_registry.xlsx data/ats_registry.csv data/asl_source.json data/territorial_stats.json
           if git diff --cached --quiet; then
             echo "No territorial dataset changes"
             exit 0
