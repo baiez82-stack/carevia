@@ -465,7 +465,7 @@ function topbar() {
   if (!state.profileConfigured) {
     return `<header class="topbar"><button class="icon-button menu-button" onclick="openMobileNav()" aria-label="Apri menu">${icon('menu',21)}</button><div><span class="eyebrow">Carevia</span><h1>Navigatore caregiver</h1></div><div class="topbar-actions">${button('primary-button','Inizia','openWizard()','spark')}</div></header>`;
   }
-  return `<header class="topbar"><button class="icon-button menu-button" onclick="openMobileNav()" aria-label="Apri menu">${icon('menu',21)}</button><div><span class="eyebrow">Pratica familiare</span><h1>${esc(state.profile.assistedName)}</h1></div><div class="topbar-actions">${button('secondary-button','Aggiorna','openWizard()','search')}<div class="user-chip"><span>${esc(state.profile.caregiverName[0] || 'C')}</span><div><strong>${esc(state.profile.caregiverName || 'Caregiver')}</strong><small>Familiare</small></div></div></div></header>`;
+  return `<header class="topbar"><button class="icon-button menu-button" onclick="openMobileNav()" aria-label="Apri menu">${icon('menu',21)}</button><div><span class="eyebrow">Pratica familiare</span><h1>${esc(state.profile.assistedName)}</h1></div><div class="topbar-actions">${button('secondary-button','Salva PDF','printSummary()','file')}${button('secondary-button','Aggiorna','openWizard()','search')}<div class="user-chip"><span>${esc(state.profile.caregiverName[0] || 'C')}</span><div><strong>${esc(state.profile.caregiverName || 'Caregiver')}</strong><small>Familiare</small></div></div></div></header>`;
 }
 
 function taskRow(task) {
