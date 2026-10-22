@@ -47,7 +47,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .sidebar-case strong, .sidebar-case span { display: block; }
 .sidebar-case strong { font-size: 13px; }
 .sidebar-case span { margin-top: 2px; color: #999f9a; font-size: 11px; }
-.sidebar-footer { display: flex; align-items: center; gap: 8px; padding: 16px 7px 0; color: #8e958f; font-size: 10px; line-height: 1.4; }
+.sidebar-footer { display: grid; gap: 7px; padding: 16px 7px 0; color: #8e958f; font-size: 10px; line-height: 1.4; }
+.sidebar-footer > span { display: flex; align-items: center; gap: 8px; }
+.sidebar-footer a { color: #c4cac5; text-decoration: none; font-weight: 700; }
+.sidebar-footer a:hover { color: #fff; }
 .mobile-close { display: none !important; position: absolute; right: 16px; top: 22px; color: white !important; }
 
 .main-area { grid-column: 2; min-width: 0; }
@@ -77,6 +80,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .page-heading h2 { margin: 6px 0 5px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(28px, 3vw, 38px); font-weight: 500; line-height: 1.06; letter-spacing: 0; }
 .page-heading p { margin: 0; max-width: 660px; color: var(--muted); font-size: 14px; line-height: 1.6; }
 
+.service-intro { margin-bottom: 38px; padding: 34px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 14px 34px rgba(30,35,31,.06); }
+.service-intro-grid { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(280px,.65fr); gap: 34px; align-items: start; }
+.service-intro h2 { max-width: 760px; margin: 8px 0 12px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(30px,4vw,48px); font-weight: 500; line-height: 1.05; }
+.service-intro .lead { max-width: 760px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.service-steps { display: grid; gap: 12px; }
+.service-step { padding: 17px 18px; border: 1px solid #e3e6e0; border-radius: 8px; background: #f8f9f6; }
+.service-step strong, .service-step span { display: block; }
+.service-step strong { margin-bottom: 5px; font-size: 13px; }
+.service-step span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.service-intro-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 23px; }
+.privacy-inline { display: flex; align-items: flex-start; gap: 9px; margin-top: 21px; padding-top: 18px; border-top: 1px solid var(--line); color: #59605b; font-size: 11px; line-height: 1.55; }
+.privacy-inline svg { flex: 0 0 auto; color: var(--green); }
+.privacy-inline a { color: #3f6252; font-weight: 750; }
+.demo-label { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 20px; padding: 6px 9px; border-radius: 5px; color: #76531c; background: #fff4d8; font-size: 10px; font-weight: 760; text-transform: uppercase; letter-spacing: .04em; }
 .status-strip { display: grid; grid-template-columns: 1.35fr repeat(3, 1fr); margin-bottom: 34px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .status-strip > div { min-height: 96px; padding: 20px 22px; border-right: 1px solid var(--line); }
 .status-strip > div:first-child { padding-left: 0; }.status-strip > div:last-child { border: 0; }
@@ -185,6 +202,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 @media (max-width: 780px) {
+  .service-intro { padding: 24px 20px; }.service-intro-grid { grid-template-columns: 1fr; gap: 22px; }.service-intro-actions { align-items: stretch; }.service-intro-actions .primary-button { width: 100%; }
   .app-shell { display: block; }.main-area { width: 100%; }.sidebar { transform: translateX(-100%); transition: transform .25s ease; box-shadow: 15px 0 40px rgba(20,25,21,.2); }.sidebar.mobile-open { transform: translateX(0); }.mobile-close { display: inline-grid !important; }.menu-button { display: inline-grid; }
   .topbar { height: 70px; padding: 0 17px; }.topbar > div:nth-child(2) { margin-right: auto; margin-left: 8px; }.topbar .eyebrow, .topbar .secondary-button, .user-chip div, .topbar-actions > .icon-button { display: none; }.user-chip { margin: 0; padding: 0; border: 0; }
   .workspace { padding: 24px 17px 38px; }.page-heading { align-items: stretch; flex-direction: column; margin-bottom: 22px; }.page-heading .primary-button { width: 100%; }
@@ -207,12 +225,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v1';
+    <script>const STORAGE_KEY = 'carevia-static-v2';
 
 const defaultState = {
   active: 'overview',
   profile: {
-    caregiverName: 'Giulia', assistedName: 'Anna', relationship: 'Madre', age: 82,
+    caregiverName: 'Caregiver', assistedName: 'Persona assistita', relationship: 'Altro familiare', age: 82,
     region: 'Lombardia', city: 'Milano', living: 'Sola', invalidity: 'In corso',
     law104: 'No', allowance: 'Si', isee: '0-6.000', publicEmployee: 'No',
     needs: ['Assistenza a domicilio', 'Pratiche e agevolazioni'],
@@ -224,8 +242,8 @@ const defaultState = {
     { id: 4, title: 'Aggiorna l’ISEE sociosanitario', meta: 'Ultimo ISEE indicato: fascia 0-6.000 euro', due: 'Completato', done: true, area: 'Documenti' },
   ],
   documents: [
-    { id: 1, name: 'ISEE sociosanitario 2026.pdf', type: 'ISEE', status: 'Verificato', date: '18 ott 2026' },
-    { id: 2, name: 'Carta identita Anna.pdf', type: 'Identita', status: 'Disponibile', date: '17 ott 2026' },
+    { id: 1, name: 'ISEE sociosanitario demo.pdf', type: 'ISEE', status: 'Esempio', date: 'Demo' },
+    { id: 2, name: 'Documento identita demo.pdf', type: 'Identita', status: 'Esempio', date: 'Demo' },
   ],
   taskFilter: 'Aperte', wizard: false, wizardStep: 0, draft: null, help: false, mobileNav: false,
 };
@@ -301,7 +319,7 @@ function button(cls, label, action, iconName = '') { return `<button class="${cl
 
 function sidebar() {
   const nav = [['overview','Riepilogo','home'],['support','Sostegni','wallet'],['territory','Territorio','search'],['tasks','Attivita','tasks'],['documents','Documenti','folder']];
-  return `<aside class="sidebar ${state.mobileNav ? 'mobile-open' : ''}"><div class="brand"><span class="brand-mark">${icon('heart',21)}</span><span>carevia</span></div><button class="mobile-close icon-button" onclick="closeMobileNav()" aria-label="Chiudi menu">${icon('close',20)}</button><nav><p class="nav-label">La pratica</p>${nav.map(([id,label,ico]) => `<button class="nav-item ${state.active === id ? 'active' : ''}" onclick="navigateTo('${id}')">${icon(ico,18)}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-case"><div class="avatar">${esc(state.profile.assistedName[0] || 'A')}</div><div><strong>${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}</span></div><span>...</span></div><div class="sidebar-footer">${icon('shield',16)}<span>Dati salvati su questo dispositivo</span></div></aside>`;
+  return `<aside class="sidebar ${state.mobileNav ? 'mobile-open' : ''}"><div class="brand"><span class="brand-mark">${icon('heart',21)}</span><span>carevia</span></div><button class="mobile-close icon-button" onclick="closeMobileNav()" aria-label="Chiudi menu">${icon('close',20)}</button><nav><p class="nav-label">La pratica</p>${nav.map(([id,label,ico]) => `<button class="nav-item ${state.active === id ? 'active' : ''}" onclick="navigateTo('${id}')">${icon(ico,18)}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-case"><div class="avatar">${esc(state.profile.assistedName[0] || 'A')}</div><div><strong>${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}</span></div><span>...</span></div><div class="sidebar-footer"><span>${icon('shield',16)}Dati salvati su questo dispositivo</span><a href="privacy.html">Privacy & GDPR</a></div></aside>`;
 }
 
 function topbar() {
@@ -318,7 +336,7 @@ function overview() {
   const p = state.profile, supports = evaluateSupport(p), top = supports[0];
   const open = state.tasks.filter(t => !t.done).length, done = state.tasks.length - open;
   const completion = Math.min(100, 62 + state.documents.length * 8 + done * 4);
-  return `<div class="page enter">${heading('Aggiornato oggi',`Buongiorno, ${esc(p.caregiverName)}.`,`Qui trovi i prossimi passi per la situazione di ${esc(p.assistedName)}.`,button('primary-button','Nuova valutazione','openWizard()','spark'))}<section class="status-strip"><div><span>Completezza pratica</span><strong>${completion}%</strong><div class="progress"><i style="width:${completion}%"></i></div></div><div><span>Possibili sostegni</span><strong>${supports.length}</strong><small>valutazione preliminare</small></div><div><span>Attivita aperte</span><strong>${open}</strong><small>${done} completate</small></div><div><span>Priorita</span><strong class="priority">Alta</strong><small>verifica entro 7 giorni</small></div></section>
+  return `<div class="page enter"><section class="service-intro"><div class="service-intro-grid"><div><span class="eyebrow">Carevia in breve</span><h2>Un navigatore operativo per chi si prende cura di un familiare.</h2><p class="lead">Carevia trasforma una situazione assistenziale complessa in un percorso più leggibile: raccoglie poche informazioni essenziali, segnala sostegni e servizi da verificare, organizza attività e documenti e indica il prossimo passo. Non sostituisce INPS, ASL, Comune, patronati, medici o professionisti e non certifica automaticamente il diritto a prestazioni.</p><div class="service-intro-actions">${button('primary-button','Inizia dalla tua situazione','openWizard()','spark')}<a class="secondary-button" href="privacy.html">Come proteggiamo i dati ${icon('arrow',15)}</a></div><div class="privacy-inline">${icon('shield',18)}<span><strong>MVP privacy-first.</strong> In questa versione i dati della pratica restano nel browser sul dispositivo. Non usiamo analytics o profilazione e i file selezionati non vengono caricati su server Carevia. <a href="privacy.html">Leggi Privacy & GDPR</a>.</span></div></div><div class="service-steps"><div class="service-step"><strong>1. Capisce la situazione</strong><span>Persona assistita, territorio, riconoscimenti e bisogni principali.</span></div><div class="service-step"><strong>2. Ordina cosa fare</strong><span>Priorità, attività, documenti e scadenze in un unico percorso.</span></div><div class="service-step"><strong>3. Porta alle fonti giuste</strong><span>Misure e servizi da verificare presso gli enti competenti, senza promettere esiti automatici.</span></div></div></div></section><span class="demo-label">${icon('info',14)} Esempio dimostrativo</span>${heading('Esempio di percorso','Dalla situazione al piano operativo.','Sotto trovi un esempio. Inserendo i tuoi dati, Carevia adatta il percorso alla situazione reale.',button('primary-button','Crea il mio percorso','openWizard()','spark'))}<section class="status-strip"><div><span>Completezza pratica</span><strong>${completion}%</strong><div class="progress"><i style="width:${completion}%"></i></div></div><div><span>Possibili sostegni</span><strong>${supports.length}</strong><small>valutazione preliminare</small></div><div><span>Attivita aperte</span><strong>${open}</strong><small>${done} completate</small></div><div><span>Priorita</span><strong class="priority">Alta</strong><small>verifica entro 7 giorni</small></div></section>
   <div class="overview-grid"><section class="main-column"><div class="section-title"><div><span class="eyebrow">In evidenza</span><h3>La prossima opportunita da verificare</h3></div><button class="text-button" onclick="navigateTo('support')">Tutti i sostegni ${icon('arrow',16)}</button></div><article class="featured-support"><div class="featured-icon">${icon('wallet',26)}</div><div class="featured-content">${statusBadge(top)}<h4>${esc(top.title)}</h4><strong>${esc(top.value)}</strong><p>${esc(top.reason)}</p><div class="next-step">${icon('tasks',17)}<span><b>Prossimo passo:</b> ${esc(top.next)}</span></div></div><button class="round-arrow" onclick="navigateTo('support')" aria-label="Apri sostegno">${icon('arrow',20)}</button></article><div class="section-title tasks-heading"><div><span class="eyebrow">Piano operativo</span><h3>Da fare adesso</h3></div><button class="text-button" onclick="navigateTo('tasks')">Apri il piano ${icon('arrow',16)}</button></div><div class="task-list compact">${state.tasks.slice(0,4).map(taskRow).join('')}</div></section>
   <aside class="context-column"><section class="case-summary"><div class="section-title"><div><span class="eyebrow">Profilo</span><h3>Situazione assistenziale</h3></div><button class="icon-button" onclick="openWizard()">...</button></div><dl><div><dt>Assistita</dt><dd>${esc(p.assistedName)}, ${esc(p.age)} anni</dd></div><div><dt>Vive</dt><dd>${esc(p.living)}</dd></div><div><dt>Invalidita</dt><dd>${esc(p.invalidity)}</dd></div><div><dt>Accompagnamento</dt><dd>${esc(p.allowance)}</dd></div><div><dt>Territorio</dt><dd>${esc(p.city)}, ${esc(p.region)}</dd></div></dl></section><section class="human-help"><div class="help-visual">${icon('help',28)}<span>${icon('user',18)}</span></div><span class="eyebrow">Serve una mano?</span><h3>Un esperto puo controllare la pratica con te.</h3><p>Revisione dei requisiti, documenti mancanti e piano personalizzato entro un giorno lavorativo.</p><div class="price-row"><strong>49 €</strong><span>una tantum</span></div>${button('dark-button','Richiedi la revisione','openHelp()','arrow')}</section><p class="disclaimer">${icon('info',15)}La valutazione e informativa e deve essere verificata con gli enti o i professionisti competenti.</p></aside></div></div>`;
 }
@@ -365,7 +383,7 @@ function wizard() {
 
 function helpDrawer() {
   if (!state.help) return '';
-  return `<div class="drawer-backdrop" onclick="closeHelp()"><aside class="help-drawer" onclick="event.stopPropagation()"><header><div><span class="eyebrow">Assistenza Carevia</span><h2>Fai controllare la pratica</h2></div><button class="icon-button" onclick="closeHelp()">${icon('close',21)}</button></header><p class="drawer-intro">Un operatore esamina i dati di ${esc(state.profile.assistedName)}, segnala cosa manca e prepara i prossimi passi.</p><div class="offer-options"><button class="offer active" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Revisione della pratica</strong><small>Controllo requisiti e lista documenti</small></div><b>49 €</b></button><button class="offer" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Concierge operativo</strong><small>Revisione piu 30 giorni di supporto</small></div><b>149 €</b></button></div><ul class="included"><li>${icon('check',17)}Risposta entro un giorno lavorativo</li><li>${icon('check',17)}Riepilogo scritto e verificabile</li><li>${icon('check',17)}Nessun rinnovo automatico</li></ul><div class="contact-fields">${field('Email','<input type="email" placeholder="nome@email.it">')}${field('Telefono','<input type="tel" placeholder="+39 333 000 0000">')}</div>${button('dark-button wide','Invia la richiesta','submitHelp()','arrow')}<p class="drawer-legal">Demo commerciale: nessun pagamento viene effettuato. Prima del lancio saranno aggiunti consenso privacy, termini del servizio e pagamento sicuro.</p></aside></div>`;
+  return `<div class="drawer-backdrop" onclick="closeHelp()"><aside class="help-drawer" onclick="event.stopPropagation()"><header><div><span class="eyebrow">Assistenza Carevia</span><h2>Fai controllare la pratica</h2></div><button class="icon-button" onclick="closeHelp()">${icon('close',21)}</button></header><p class="drawer-intro">Un operatore esamina i dati di ${esc(state.profile.assistedName)}, segnala cosa manca e prepara i prossimi passi.</p><div class="offer-options"><button class="offer active" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Revisione della pratica</strong><small>Controllo requisiti e lista documenti</small></div><b>49 €</b></button><button class="offer" onclick="selectOffer(this)"><span class="radio"></span><div><strong>Concierge operativo</strong><small>Revisione piu 30 giorni di supporto</small></div><b>149 €</b></button></div><ul class="included"><li>${icon('check',17)}Risposta entro un giorno lavorativo</li><li>${icon('check',17)}Riepilogo scritto e verificabile</li><li>${icon('check',17)}Nessun rinnovo automatico</li></ul><div class="contact-fields">${field('Email','<input type="email" placeholder="nome@email.it">')}${field('Telefono','<input type="tel" placeholder="+39 333 000 0000">')}</div>${button('dark-button wide','Invia la richiesta','submitHelp()','arrow')}<p class="drawer-legal">Demo commerciale: nessun pagamento viene effettuato e i campi email/telefono non vengono trasmessi in questa versione. Consulta <a href="privacy.html">Privacy & GDPR</a>.</p></aside></div>`;
 }
 
 function render() {
