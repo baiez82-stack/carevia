@@ -220,6 +220,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .support-value { text-align: right; }.support-value > span, .support-value > strong { display: block; }.support-value > span { color: var(--muted); font-size: 10px; }.support-value > strong { margin: 7px 0 20px; font-size: 15px; }.support-value a { display: inline-flex; align-items: center; gap: 5px; color: #59645e; font-size: 10px; font-weight: 700; text-decoration: none; }.support-value a:hover { color: var(--accent); }
 .source-note { display: flex; align-items: flex-start; gap: 14px; max-width: 800px; margin-top: 26px; padding: 18px 0; color: #59605b; }.source-note svg { flex: 0 0 auto; color: var(--accent); }.source-note strong { font-size: 12px; }.source-note p { margin: 4px 0 0; font-size: 11px; line-height: 1.55; }
 
+.coverage-banner { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:24px; padding:18px 20px; border:1px solid #d8ddd7; border-radius:8px; background:#fff; }
+.coverage-banner strong,.coverage-banner span { display:block; }
+.coverage-banner strong { margin-bottom:4px; font-size:12px; }
+.coverage-banner span { color:var(--muted); font-size:10px; line-height:1.5; }
+.coverage-grade { flex:0 0 auto; padding:6px 9px; border-radius:5px; background:#e8f2ec; color:#3d6c54; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.coverage-grade.partial { background:#fff2d7; color:#76531c; }
+.verified-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.verified-node { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:4px; background:#eef1ed; color:#56625b; font-size:9px; font-weight:720; }
+.access-detail { margin-top:9px; color:#49534c !important; font-size:10px !important; }
+.access-detail b { color:#2f3832; }
 .territory-summary { display: grid; grid-template-columns: repeat(3,1fr); margin-bottom: 28px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .territory-summary > div { min-height: 82px; display: flex; align-items: center; gap: 13px; padding: 17px 22px; border-right: 1px solid var(--line); }
 .territory-summary > div:first-child { padding-left: 0; }.territory-summary > div:last-child { border-right: 0; }
@@ -297,7 +307,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   </head>
   <body>
     <div id="root"></div>
-    <script>const STORAGE_KEY = 'carevia-static-v6';
+    <script>const STORAGE_KEY = 'carevia-static-v7';
 const DRAFT_KEY = 'carevia-draft-v1';
 
 const defaultState = {
@@ -403,6 +413,129 @@ function isReformProvince(profile) {
   return reformProvinces.has(province) || profile.region === 'Valle d’Aosta';
 }
 
+
+const TERRITORY_CHECKED = '22 ott 2026';
+
+const territorialRegistry = [
+  {
+    id:'veneto-icd', scope:'Regione', region:'Veneto', city:null, type:'Contributo domiciliarita',
+    title:'Impegnative di Cura Domiciliare (ICD)', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Patologia cronica complessa','Altro'],
+    minAge:0,
+    purpose:'Contributi regionali per sostenere la permanenza a domicilio. Le tipologie cambiano in base a bisogno assistenziale, eta, condizione e ISEE.',
+    access:'Domanda tramite Servizi Sociali del Comune/ATS o Distretto Socio-Sanitario; segue valutazione sociale/sanitaria e, per diverse tipologie, UVMD.',
+    url:'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---impegnative-di-cura-domiciliari'
+  },
+  {
+    id:'veneto-caregiver', scope:'Regione', region:'Veneto', city:null, type:'Sostegno caregiver',
+    title:'Interventi a favore del caregiver familiare', status:'Attivo con valutazione UVMD', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Interventi economici e di sollievo dedicati ai caregiver familiari; alcune misure sono cumulabili con ICD previa valutazione specifica del bisogno.',
+    access:'Rivolgersi a Distretto Socio-Sanitario o Servizi Sociali del Comune di residenza della persona assistita.',
+    url:'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---interventi-a-favore-del-caregiver-familiare'
+  },
+  {
+    id:'verona-sportello', scope:'Comune', region:'Veneto', city:'Verona', type:'Accesso sociale',
+    title:'Sportello Sì e Centri Sociali Territoriali', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Primo accesso ai Servizi Sociali comunali e agli assistenti sociali territoriali per bisogni individuali e familiari.',
+    access:'Sportello Sì: 800 085 570. I cinque CST ricevono per zona di residenza; orari pubblicati dal Comune.',
+    url:'https://www.comune.verona.it/Amministrazione/Uffici/Centri-Sociali-Territoriali'
+  },
+  {
+    id:'verona-icd', scope:'Comune', region:'Veneto', city:'Verona', type:'Contributo',
+    title:'ICD e sostegno caregiver - Comune di Verona', status:'Servizio attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Accesso locale alle ICD per persone non autosufficienti residenti a Verona e agli interventi a sostegno dei caregiver familiari.',
+    access:'Domanda durante tutto l’anno. Contatto: Sportello Sì 800 085 570; email sportelloinfosociale@comune.verona.it.',
+    url:'https://www.comune.verona.it/Servizi/Impegnativa-di-Cura-Domiciliare-ex-Assegno-di-Cura-e-interventi-a-sostegno-dei-caregivers-familiari'
+  },
+  {
+    id:'verona-sad', scope:'Comune', region:'Veneto', city:'Verona', type:'Assistenza domiciliare sociale',
+    title:'Servizio di Assistenza Domiciliare (SAD)', status:'Servizio attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:['Anziano non autosufficiente','Demenza o declino cognitivo','Patologia cronica complessa','Altro'], minAge:65,
+    purpose:'Aiuto alla cura della persona, della casa e della vita quotidiana per residenti non autonomi.',
+    access:'Rivolgersi al Centro Sociale Territoriale della propria zona; valutazione dell’assistente sociale. ISEE usato per eventuale compartecipazione.',
+    url:'https://www.comune.verona.it/Servizi/Assistenza-domiciliare'
+  },
+  {
+    id:'verona-pasti', scope:'Comune', region:'Veneto', city:'Verona', type:'Supporto domiciliare',
+    title:'Consegna pasti a domicilio', status:'Servizio attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:['Anziano non autosufficiente','Demenza o declino cognitivo','Patologia cronica complessa','Altro'], minAge:65,
+    purpose:'Consegna giornaliera di un pasto completo per over 65 o adulti in comprovato disagio residenti nel Comune.',
+    access:'Richiesta tramite Servizi Sociali/CST. Sportello Sì 800 085 570.',
+    url:'https://www.comune.verona.it/Servizi/Consegna-pasti-a-domicilio'
+  },
+  {
+    id:'verona-telesoccorso', scope:'Comune', region:'Veneto', city:'Verona', type:'Sicurezza a domicilio',
+    title:'Telesoccorso / telecontrollo Veneto', status:'Servizio attivo e gratuito', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:60,
+    purpose:'Pronto intervento telefonico 24/7 per aumentare la sicurezza della persona anziana a domicilio.',
+    access:'Può essere richiesto dall’anziano, da un familiare o persona di riferimento; il Comune pubblica il servizio come gratuito per over 60.',
+    url:'https://www.comune.verona.it/Servizi/Telesoccorso-telecontrollo-della-Regione-Veneto'
+  },
+  {
+    id:'ulss9-d1', scope:'ULSS', region:'Veneto', city:'Verona', type:'Distretto sanitario',
+    title:'ULSS 9 Scaligera - Distretto 1 Verona Citta', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Distretto sanitario di riferimento per Verona città; coordina cure primarie, assistenza territoriale e percorsi sociosanitari.',
+    access:'La pagina ULSS 9 raccoglie i servizi del Distretto 1 e i riferimenti territoriali.',
+    url:'https://www.aulss9.veneto.it/index.cfm?action=distretti.default&distretto=1'
+  },
+  {
+    id:'ulss9-adi', scope:'ULSS', region:'Veneto', city:'Verona', type:'ADI / COT',
+    title:'ADI e Centrale Operativa Territoriale - Verona Citta', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Malattia neurologica','Malattia oncologica','Cure palliative','Patologia cronica complessa','Altro'], minAge:0,
+    purpose:'Coordinamento della presa in carico domiciliare sanitaria e raccordo tra professionisti e servizi territoriali.',
+    access:'COT Spoke Via del Capitel: 045 8787760. Co-ADI Via del Capitel: 045 8787703. L’ADI viene normalmente attivata attraverso i professionisti sanitari/territoriali competenti.',
+    url:'https://www.aulss9.veneto.it/index.cfm?action=mys.apridoc&iddoc=4188'
+  },
+  {
+    id:'ulss9-uvmd', scope:'ULSS', region:'Veneto', city:'Verona', type:'Valutazione multidimensionale',
+    title:'UVMD - accesso alla rete dei servizi', status:'Procedura ULSS 9', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Valutazione multidimensionale per situazioni sociosanitarie complesse e accesso a diversi servizi/interventi.',
+    access:'La domanda può essere presentata tramite Distretto, PUA/sportello integrato, servizio sociale sanitario o Comune e viene indirizzata al Distretto di residenza.',
+    url:'https://trasparenza.aulss9.veneto.it/index.cfm?action=mys.apridoc&iddoc=9338'
+  },
+  {
+    id:'ulss9-palliative', scope:'ULSS', region:'Veneto', city:'Verona', type:'Cure palliative',
+    title:'Rete Cure Palliative ULSS 9', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:['Malattia oncologica','Cure palliative'], minAge:0,
+    purpose:'Presa in carico domiciliare, hospice, ambulatori e consulenza per patologie inguaribili in fase avanzata.',
+    access:'Attivazione attraverso medico di medicina generale, reparto/struttura, servizi territoriali o percorso di dimissione protetta; segue valutazione e PAI.',
+    url:'https://www.aulss9.veneto.it/cure-palliative-distretto-2'
+  },
+  {
+    id:'veneto-fse', scope:'Regione', region:'Veneto', city:null, type:'Documenti sanitari',
+    title:'Sanita km zero Fascicolo', status:'Attivo', verifiedAt:TERRITORY_CHECKED,
+    conditions:null, minAge:0,
+    purpose:'Accesso a referti, prescrizioni e documenti sanitari regionali; possibilità di gestione del consenso e delega.',
+    access:'Accesso ai servizi digitali regionali con identità digitale; la delega può essere gestita secondo le modalità regionali pubblicate.',
+    url:'https://www.aulss9.veneto.it/fascicolo-sanitario-elettronico'
+  }
+];
+
+function territoryNodeMatches(node, profile) {
+  if(node.region && node.region !== profile.region) return false;
+  if(node.city && normalizePlace(node.city) !== normalizePlace(profile.city)) return false;
+  if(node.minAge && (Number(profile.age)||0) < node.minAge) return false;
+  if(node.conditions && !node.conditions.includes(profile.condition)) return false;
+  return true;
+}
+
+function verifiedTerritoryNodes(profile) {
+  return territorialRegistry.filter(node=>territoryNodeMatches(node,profile));
+}
+
+function coverageFor(profile) {
+  const local = territorialRegistry.filter(n=>n.city && normalizePlace(n.city)===normalizePlace(profile.city) && n.region===profile.region);
+  const regional = territorialRegistry.filter(n=>!n.city && n.region===profile.region);
+  if(local.length) return {grade:'Verificata locale',tone:'full',text:`${local.length} nodi locali + ${regional.length} regionali verificati da Carevia il ${TERRITORY_CHECKED}.`};
+  if(regional.length) return {grade:'Verificata regionale',tone:'partial',text:`${regional.length} nodi regionali verificati; Comune/ASL specifici sono ancora da completare per questo territorio.`};
+  return {grade:'Copertura base',tone:'partial',text:'Carevia conosce i percorsi nazionali, ma non ha ancora completato il registro territoriale verificato per questa area.'};
+}
+
 function regionSource(profile) {
   if (profile.region === 'Trentino-Alto Adige') {
     const p = normalizePlace(profile.province);
@@ -428,7 +561,10 @@ function supportDetails(id, profile) {
     auu: {sourceLabel:'INPS', legalState:'Misura vigente', missing:'Verificare posizione del figlio a carico e dati della domanda AUU.'},
     afterus: {sourceLabel:'Ministero Lavoro', legalState:'Misura vigente con attuazione territoriale', missing:'Disabilita grave e requisiti/programma dell’Ambito territoriale.'},
     adi: {sourceLabel:'SSN', legalState:'Servizio territoriale', missing:'Valutazione multidimensionale e presa in carico da parte del servizio competente.'},
-    regional: {sourceLabel:profile.region, legalState:(regionSource(profile)?.status||'Misura regionale'), missing:'Requisiti del bando o servizio, Ambito/Distretto competente e disponibilita attuale.'}
+    regional: {sourceLabel:profile.region, legalState:(regionSource(profile)?.status||'Misura regionale'), missing:'Requisiti del bando o servizio, Ambito/Distretto competente e disponibilita attuale.'},
+    veneto_icd: {sourceLabel:'Regione Veneto',legalState:'Misura regionale attiva',missing:'Tipologia ICD corretta, valutazione del bisogno, eventuale UVMD, ISEE e posizione in graduatoria.'},
+    veneto_caregiver: {sourceLabel:'Regione Veneto',legalState:'Sostegno caregiver con valutazione',missing:'Carico assistenziale, tipologia di intervento applicabile e valutazione UVMD.'},
+    verona_sad: {sourceLabel:'Comune di Verona',legalState:'Servizio comunale attivo',missing:'Valutazione dell’assistente sociale e ISEE per l’eventuale compartecipazione.'}
   };
   return details[id] || {sourceLabel:'Fonte ufficiale',legalState:'Da verificare',missing:'Verificare i requisiti completi sulla fonte ufficiale.'};
 }
@@ -512,7 +648,33 @@ function evaluateSupport(profile) {
     results.push({id:'adi',title:'Assistenza Domiciliare Integrata',status:'Accesso territoriale',tone:'neutral',value:'Prestazioni domiciliari',reason:`Il percorso dipende dalla valutazione multidimensionale e dall’organizzazione sanitaria di ${profile.region}.`,next:'Chiedi al medico di base, al Distretto o al PUA come avviare la valutazione.',source:'https://www.salute.gov.it/new/it/altro/assistenza-domiciliare-integrata-adi/'});
   }
 
-  if (regional) {
+  if (profile.region === 'Veneto' && profile.living !== 'In struttura') {
+    results.push({
+      id:'veneto_icd', title:'Impegnative di Cura Domiciliare (ICD)', status:'Da verificare in Veneto', tone:'positive', value:'Contributo domiciliare regionale',
+      reason:'Hai indicato una persona assistita in Veneto con bisogno gestito a domicilio: le ICD sono uno dei principali strumenti regionali da verificare, con tipologie diverse per intensita e condizione.',
+      next:'Contatta Servizi Sociali/Distretto per individuare la tipologia ICD e avviare la valutazione.',
+      source:'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---impegnative-di-cura-domiciliari'
+    });
+    if (profile.needs.includes('Sostegno al caregiver')) {
+      results.push({
+        id:'veneto_caregiver', title:'Sostegno al caregiver familiare - Veneto', status:'Da valutare con UVMD', tone:'positive', value:'Sollievo / sostegno economico',
+        reason:'Hai indicato esplicitamente bisogno di sostegno al caregiver. Il Veneto prevede interventi dedicati, cumulabili in alcuni casi con ICD previa valutazione del bisogno.',
+        next:'Chiedi a Distretto o Servizi Sociali la valutazione per gli interventi caregiver applicabili.',
+        source:'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---interventi-a-favore-del-caregiver-familiare'
+      });
+    }
+  }
+
+  if (normalizePlace(profile.city)==='verona' && (Number(profile.age)||0)>=65 && profile.living!=='In struttura') {
+    results.push({
+      id:'verona_sad', title:'Assistenza Domiciliare del Comune di Verona', status:'Servizio locale attivo', tone:'positive', value:'SAD comunale',
+      reason:'La persona assistita risulta residente a Verona, ha almeno 65 anni e vive a domicilio: il SAD comunale e un canale concreto da verificare.',
+      next:'Chiama lo Sportello Si 800 085 570 o contatta il Centro Sociale Territoriale competente per fissare la valutazione con l’assistente sociale.',
+      source:'https://www.comune.verona.it/Servizi/Assistenza-domiciliare'
+    });
+  }
+
+  if (regional && profile.region !== 'Veneto') {
     results.push({id:'regional',title:regional.title,status:regional.status,tone:'positive',value:profile.region,reason:regional.text,next:'Apri la fonte regionale e verifica requisiti, Ambito/Distretto competente e disponibilita attuale.',source:regional.url});
   }
 
@@ -562,6 +724,7 @@ function overview() {
             <span>${icon('shield',14)} dati sul dispositivo</span>
             <span>${icon('check',14)} fonti ufficiali</span>
             <span>${icon('info',14)} nessun esito automatico</span>
+            <span>${icon('search',14)} copertura locale verificata in espansione</span>
           </div>
         </div>
         <div class="service-steps">
@@ -653,27 +816,35 @@ function documentsView() {
 function territoryView() {
   if (!state.profileConfigured) return profileGate('Il territorio cambia tutto.','Comune, Provincia, Regione e situazione assistenziale servono per capire quali porte bussare per prime.');
   const p = state.profile;
-  const regional = regionSource(p);
-  const special = [];
-  if (p.condition === 'Demenza o declino cognitivo') special.push({type:'Demenze',name:'CDCD e servizi per le demenze',purpose:'Centri per disturbi cognitivi e demenze, centri diurni e strutture mappate dall’ISS.',action:'Cerca il servizio piu vicino nella mappa nazionale.',link:'https://www.epicentro.iss.it/demenza/mappa-cdcd'});
-  if (p.condition === 'Malattia oncologica' || p.condition === 'Cure palliative') special.push({type:'Cure palliative',name:'Rete locale di cure palliative',purpose:'Presa in carico domiciliare, ambulatoriale, ospedaliera e hospice.',action:'Chiedi al medico curante o alla struttura di riferimento come attivare la rete.',link:'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/'});
-  const officialSearch = encodeURIComponent(`"${p.city}" "${p.province}" servizi sociali disabilita non autosufficienza Comune`);
-  const healthSearch = encodeURIComponent(`"${p.province}" ASL ADI PUA Casa della Comunita sito ufficiale`);
-  const services = [
-    ...(regional ? [{ type:'Regione', name:regional.title, purpose:regional.text, action:'Verifica misura, requisiti e soggetto territoriale che gestisce l’accesso.', link:regional.url }] : []),
-    { type:'Comune / Ambito', name:`Servizi sociali per ${p.city}`, purpose:'SAD, pasti, trasporto, sollievo, contributi e presa in carico sociale dipendono spesso da Comune/Ambito.', action:'Cerca il portale istituzionale e chiedi Segretariato sociale o Punto Unico di Accesso.', link:`https://www.google.com/search?q=${officialSearch}` },
-    { type:'Distretto / ASL', name:`Assistenza territoriale in provincia di ${p.province || 'residenza'}`, purpose:'ADI, UVM, PUA, Case della Comunita, ausili e continuita assistenziale.', action:'Chiedi al medico di base o al Distretto quale e il punto di accesso corretto.', link:`https://www.google.com/search?q=${healthSearch}` },
-    { type:'INPS', name:'Prestazioni nazionali e accertamento', purpose:'Invalidita, accompagnamento, permessi, congedi e altre misure previdenziali/assistenziali.', action:'Usa la fonte ufficiale e, se necessario, patronato o associazione abilitata.', link:'https://www.inps.it/it/it/sostegni-sussidi-indennita/per-disabili-invalidi-inabili.html' },
-    ...special
+  const nodes = verifiedTerritoryNodes(p);
+  const coverage = coverageFor(p);
+  const localVerified = nodes.length > 0;
+  const fallback = [
+    {scope:'Comune / Ambito',type:'Accesso sociale',title:`Servizi sociali per ${p.city}`,status:'Da verificare',verifiedAt:'non ancora verificato',purpose:'SAD, pasti, trasporto, sollievo e contributi possono dipendere da Comune/Ambito.',access:'Cerca il portale istituzionale e chiedi Segretariato sociale o Punto Unico di Accesso.',url:`https://www.google.com/search?q=${encodeURIComponent('"' + p.city + '" "' + p.province + '" servizi sociali sito istituzionale')}`},
+    {scope:'ASL / Distretto',type:'Assistenza sanitaria territoriale',title:`Distretto/ASL per ${p.province}`,status:'Da verificare',verifiedAt:'non ancora verificato',purpose:'ADI, UVM/UVMD, PUA, Case della Comunita, ausili e continuita assistenziale.',access:'Chiedi al medico di base o cerca il sito ufficiale dell’azienda sanitaria territoriale.',url:`https://www.google.com/search?q=${encodeURIComponent('"' + p.province + '" ASL ADI PUA sito ufficiale')}`}
   ];
-  return `<div class="page enter">${heading('Mappa territoriale',`Da dove partire a ${esc(p.city)}`,`Percorso costruito per ${esc(p.province)}, ${esc(p.region)}. Carevia ordina i canali da verificare, ma il servizio competente conferma accesso e disponibilita.`)}
+  const services = localVerified ? nodes : [...nodes,...fallback];
+
+  return `<div class="page enter">
+    ${heading('Registro territoriale Carevia',`Percorso locale per ${esc(p.city)}`,`Carevia distingue fonti territoriali verificate da indicazioni ancora generiche. L’obiettivo e arrivare dal bisogno al servizio competente senza rimbalzi tra enti.`)}
+    <div class="coverage-banner"><div><strong>Livello di copertura: ${esc(coverage.grade)}</strong><span>${esc(coverage.text)}</span><div class="verified-meta"><span class="verified-node">${icon('check',12)} fonti istituzionali</span><span class="verified-node">${icon('shield',12)} data di verifica esposta</span><span class="verified-node">${icon('search',12)} territorio risolto</span></div></div><span class="coverage-grade ${coverage.tone==='full'?'':'partial'}">${esc(coverage.grade)}</span></div>
     <div class="territory-summary">
-      <div>${icon('search',22)}<span><b>${esc(p.city)}</b><small>Comune indicato</small></span></div>
-      <div>${icon('tasks',22)}<span><b>${services.length} canali</b><small>ordinati per il caso</small></span></div>
+      <div>${icon('search',22)}<span><b>${esc(p.city)}</b><small>${esc(p.province)}, ${esc(p.region)}</small></span></div>
+      <div>${icon('tasks',22)}<span><b>${services.length} nodi</b><small>${localVerified?'verificati/pertinenti':'misti verificati + fallback'}</small></span></div>
       <div>${icon('shield',22)}<span><b>${isReformProvince(p)?'Provincia sperimentale 2026':'Iter da verificare'}</b><small>riforma disabilita</small></span></div>
     </div>
-    <div class="service-directory">${services.map((service,index)=>`<article class="service-row"><span class="service-number">${String(index+1).padStart(2,'0')}</span><div><span class="eyebrow">${esc(service.type)}</span><h3>${esc(service.name)}</h3><p>${esc(service.purpose)}</p><div class="service-action"><b>Prossimo passo</b><span>${esc(service.action)}</span></div></div><a class="secondary-button" href="${service.link}" target="_blank" rel="noreferrer">Apri ${icon('arrow',15)}</a></article>`).join('')}</div>
-    <div class="source-note">${icon('info',20)}<div><strong>Territorio: regola di sicurezza</strong><p>Carevia propone solo il canale e la fonte da verificare. Numeri, sportelli, bandi e disponibilita locali possono cambiare e vanno confermati sulla fonte istituzionale prima di agire.</p></div></div>
+    <div class="service-directory">${services.map((service,index)=>`<article class="service-row">
+      <span class="service-number">${String(index+1).padStart(2,'0')}</span>
+      <div>
+        <span class="eyebrow">${esc(service.scope)} · ${esc(service.type)}</span>
+        <h3>${esc(service.title)}</h3>
+        <p>${esc(service.purpose)}</p>
+        <p class="access-detail"><b>Come si accede:</b> ${esc(service.access)}</p>
+        <div class="verified-meta"><span class="verified-node">${esc(service.status)}</span><span class="verified-node">verificato ${esc(service.verifiedAt)}</span></div>
+      </div>
+      <a class="secondary-button" href="${service.url}" target="_blank" rel="noreferrer">${service.verifiedAt==='non ancora verificato'?'Cerca':'Fonte ufficiale'} ${icon('arrow',15)}</a>
+    </article>`).join('')}</div>
+    <div class="source-note">${icon('info',20)}<div><strong>Perche il livello di copertura e visibile?</strong><p>Carevia non deve fingere precisione. Dove abbiamo fonti locali verificate mostriamo il servizio concreto; dove il registro non e ancora completo dichiariamo il fallback e continuiamo l’espansione territoriale.</p></div></div>
   </div>`;
 }
 
