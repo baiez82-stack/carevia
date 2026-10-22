@@ -1030,6 +1030,7 @@ function excludedChecks(profile) {
   if(profile.publicEmployee==='No') out.push({title:'Home Care Premium',reason:'Non compare perche non hai indicato un dipendente/pensionato pubblico potenzialmente collegato alla Gestione Unitaria INPS.'});
   if(profile.caregiverWork!=='Dipendente') out.push({title:'Permessi 104 / congedo',reason:'Le tutele lavorative considerate da Carevia riguardano principalmente il lavoro dipendente; per altre situazioni servono percorsi diversi.'});
   if(profile.law104!=='Si') out.push({title:'Tutele collegate alla 104',reason:'Non vengono proposte come attive perche il riconoscimento Legge 104 non risulta indicato come gia ottenuto.'});
+  else if(profile.law104Level==='Art. 3 comma 1') out.push({title:'Permessi 104 e congedo straordinario',reason:'Il verbale indicato e art. 3 comma 1. Per le tutele di assistenza considerate qui serve la situazione di gravita ex art. 3 comma 3.'});
   return out.slice(0,4);
 }
 
@@ -1065,9 +1066,10 @@ function evaluateSupport(profile) {
     });
   }
 
-  if (profile.law104 === 'Si' && profile.caregiverWork === 'Dipendente') {
-    results.push({id:'law104work',title:'Permessi Legge 104',status:'Potenzialmente rilevanti',tone:'positive',value:'Permessi retribuiti',reason:'Hai indicato un caregiver lavoratore dipendente e un riconoscimento Legge 104. Vanno verificati gravita, relazione e condizioni previste.',next:'Controlla requisiti e domanda INPS per i permessi.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'});
-    results.push({id:'leave',title:'Congedo straordinario',status:'Da verificare',tone:'neutral',value:'Assenza retribuita',reason:'Per lavoratori dipendenti che assistono familiari con disabilita grave esiste un congedo specifico, soggetto a priorita e requisiti.',next:'Verifica convivenza, ordine di priorita e requisiti INPS.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'});
+  if (profile.law104 === 'Si' && profile.caregiverWork === 'Dipendente' && profile.law104Level !== 'Art. 3 comma 1') {
+    const severityKnown=profile.law104Level==='Art. 3 comma 3 (gravita)';
+    results.push({id:'law104work',title:'Permessi Legge 104',status:severityKnown?'Requisito di gravita indicato':'Serve verificare il comma 3',tone:severityKnown?'positive':'warning',value:'Permessi retribuiti',reason:severityKnown?'Hai indicato un caregiver dipendente e un verbale 104 art. 3 comma 3. Restano da verificare relazione, ricovero e condizioni lavorative.':'Hai indicato la 104 ma non sappiamo se il verbale riconosce la gravita art. 3 comma 3, necessaria per i permessi di assistenza.',next:severityKnown?'Prepara i dati e usa il canale corretto in base a pubblico/privato.':'Controlla il verbale prima di avviare la domanda.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'});
+    results.push({id:'leave',title:'Congedo straordinario',status:severityKnown?'Da verificare':'Serve verificare il comma 3',tone:'neutral',value:'Assenza retribuita',reason:severityKnown?'Per lavoratori dipendenti che assistono familiari con disabilita grave esiste un congedo specifico, soggetto a priorita e requisiti.':'Prima di valutare il congedo serve confermare che il verbale sia art. 3 comma 3.',next:severityKnown?'Verifica convivenza, ordine di priorita e canale di domanda corretto.':'Controlla il verbale 104.',source:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'});
   }
 
   if (profile.publicEmployee === 'Si') {
@@ -1181,9 +1183,11 @@ const practiceTemplates = {
     ],
     steps:p=>[
       {id:'verify-severity',title:'Controlla il verbale 104',text:'Verifica che sia riconosciuta la situazione di gravita ex art. 3 comma 3.',phase:'prepare'},
-      {id:'conditions',title:'Verifica le condizioni personali e lavorative',text:'Controlla relazione con la persona assistita e condizioni previste da INPS.',phase:'prepare',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
-      {id:'submission',title:'Presenta la domanda INPS',text:'Completa la domanda sul canale ufficiale o tramite intermediario abilitato.',phase:'submit',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
-      {id:'employer',title:'Gestisci la fruizione con il datore di lavoro',text:'Dopo l’accoglimento, coordina modalità e calendario con il datore secondo le regole applicabili.',phase:'wait'},
+      {id:'conditions',title:'Verifica le condizioni personali e lavorative',text:p.caregiverSector==='Pubblico'?'Controlla relazione con la persona assistita e la procedura prevista dalla tua amministrazione.':'Controlla relazione con la persona assistita e condizioni previste da INPS.',phase:'prepare',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
+      p.caregiverSector==='Pubblico'
+        ? {id:'submission',title:'Presenta la richiesta alla tua amministrazione',text:'Segui la procedura interna del datore di lavoro pubblico. La concessione non viene gestita da INPS.',phase:'submit'}
+        : {id:'submission',title:'Presenta la domanda INPS',text:'Completa la domanda sul canale ufficiale, Contact Center o tramite patronato.',phase:'submit',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
+      {id:'employer',title:'Gestisci la fruizione con il datore di lavoro',text:'Dopo il riconoscimento/autorizzazione, coordina modalità e calendario con il datore secondo le regole applicabili.',phase:'wait'},
       {id:'outcome',title:'Registra l’esito',text:'Segna la pratica conclusa solo dopo la comunicazione ufficiale.',phase:'outcome'}
     ]
   },
@@ -1200,7 +1204,9 @@ const practiceTemplates = {
     steps:p=>[
       {id:'priority',title:'Verifica ordine di priorita',text:'Controlla chi, nel nucleo familiare, puo presentare la domanda secondo l’ordine previsto.',phase:'prepare'},
       {id:'cohabitation',title:'Verifica il requisito di convivenza',text:'Controlla se e richiesto nel caso specifico.',phase:'prepare',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
-      {id:'submission',title:'Presenta la domanda INPS',text:'Utilizza il servizio ufficiale o un intermediario abilitato.',phase:'submit',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
+      p.caregiverSector==='Pubblico'
+        ? {id:'submission',title:'Presenta la richiesta alla tua amministrazione',text:'Per il pubblico impiego la gestione è presso il datore di lavoro pubblico.',phase:'submit'}
+        : {id:'submission',title:'Presenta la domanda INPS',text:'Utilizza il servizio ufficiale, il Contact Center o un patronato.',phase:'submit',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
       {id:'wait',title:'Attendi e registra la comunicazione',text:'Annota eventuali richieste o il provvedimento ricevuto.',phase:'wait'},
       {id:'outcome',title:'Registra l’esito',text:'Concludi la pratica in base alla comunicazione reale.',phase:'outcome'}
     ]
@@ -1530,7 +1536,8 @@ function applicationGuide(id,p){
 }
 
 function hydrateApplicationGuide(id,p,saved={}){
-  const g=applicationGuide(id,p);
+  const effectiveProfile=(['law104work','leave'].includes(id) && saved.sector) ? {...p,caregiverSector:saved.sector} : p;
+  const g=applicationGuide(id,effectiveProfile);
   return {...g,fields:g.fields.map(f=>({...f,value:saved[f.id]!==undefined?saved[f.id]:f.value}))};
 }
 
@@ -1543,7 +1550,12 @@ function applicationCompletion(ca){
 
 function updateCaseApplicationField(caseId,fieldId,value){
   const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
-  ca.applicationData=ca.applicationData||{}; ca.applicationData[fieldId]=value; ca.updatedAt=new Date().toISOString();
+  ca.applicationData=ca.applicationData||{}; ca.applicationData[fieldId]=value;
+  if(fieldId==='sector' && ['law104work','leave'].includes(ca.supportId)){
+    const t=practiceTemplates[ca.supportId];
+    ca.steps=t.steps({...state.profile,caregiverSector:value}).map((s,i)=>({...s,done:ca.steps?.[i]?.done||false}));
+  }
+  ca.updatedAt=new Date().toISOString();
   saveState(); render();
 }
 
