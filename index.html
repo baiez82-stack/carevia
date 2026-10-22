@@ -211,6 +211,30 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .excluded-item strong { font-size:11px; }.excluded-item span { color:var(--muted); font-size:10px; line-height:1.5; }
 .watch-card { margin-top:30px; padding:20px 22px; border:1px solid #e8dcc5; border-radius:8px; background:#fffaf0; }
 .watch-card h3 { margin:5px 0 8px; font-size:17px; }.watch-card p { margin:0; color:#6f6044; font-size:11px; line-height:1.55; }
+.application-assistant { margin-bottom:18px; padding:24px; border:1px solid #cfd8d1; border-radius:10px; background:#f8faf7; }
+.application-assistant-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:18px; }
+.application-assistant-head h3 { margin:6px 0 6px; font-family:Georgia,serif; font-size:23px; font-weight:500; }
+.application-assistant-head p { margin:0; color:var(--muted); font-size:11px; line-height:1.55; max-width:720px; }
+.application-mode { flex:0 0 auto; padding:6px 9px; border-radius:5px; background:#e6eee8; color:#3d6651; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.application-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.application-field { display:block; }
+.application-field > span { display:block; margin-bottom:6px; color:#4a554e; font-size:9px; font-weight:760; text-transform:uppercase; letter-spacing:.04em; }
+.application-field input,.application-field select,.application-field textarea { width:100%; min-height:42px; padding:10px 11px; border:1px solid #cfd4cf; border-radius:6px; background:#fff; color:#28312c; font:inherit; font-size:11px; }
+.application-field textarea { min-height:80px; resize:vertical; }
+.application-field small { display:block; margin-top:5px; color:var(--muted); font-size:9px; line-height:1.4; }
+.application-send { margin-top:18px; padding-top:18px; border-top:1px solid #dde2dc; }
+.application-send h4 { margin:0 0 10px; font-size:13px; }
+.application-channels { display:grid; gap:8px; }
+.application-channel { display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:start; padding:11px 12px; border-radius:7px; background:#fff; border:1px solid #dde2dc; }
+.application-channel > span:first-child { width:27px; height:27px; display:grid; place-items:center; border-radius:50%; background:#edf1ed; font-size:10px; font-weight:800; }
+.application-channel strong,.application-channel small { display:block; }
+.application-channel strong { font-size:11px; }
+.application-channel small { margin-top:3px; color:var(--muted); font-size:9px; line-height:1.45; }
+.application-channel a { font-size:9px; font-weight:760; color:#4f6057; text-decoration:none; }
+.application-script { margin-top:12px; padding:12px 14px; border-left:3px solid #718478; background:#fff; color:#435048; font-size:10px; line-height:1.55; }
+.application-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.application-progress { margin-top:8px; color:var(--muted); font-size:9px; }
+@media (max-width: 760px) { .application-grid { grid-template-columns:1fr; }.application-assistant-head { flex-direction:column; }.application-channel { grid-template-columns:28px 1fr; }.application-channel a { grid-column:2; } }
 .case-open-button { margin-top:12px; width:100%; }
 .case-dashboard { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(250px,.6fr); gap:18px; margin-bottom:30px; }
 .case-today { padding:26px; border-radius:10px; color:#f6f7f4; background:#2d3933; }
@@ -402,7 +426,7 @@ const defaultState = {
     caregiverName: '', assistedName: '', relationship: 'Altro familiare', age: '',
     region: 'Seleziona', province: '', city: '', condition: 'Anziano non autosufficiente',
     living: 'Con familiari', invalidity: 'No', law104: 'No', law104Level: 'Non so', allowance: 'No',
-    caregiverWork: 'Non lavoro', isee: 'Non disponibile', publicEmployee: 'Non so',
+    caregiverWork: 'Non lavoro', caregiverSector: 'Non so', isee: 'Non disponibile', publicEmployee: 'Non so',
     healthAuthority: null, socialArea: null, needs: [],
   },
   tasks: [],
@@ -1375,6 +1399,179 @@ function socialAuthorityForPractice(profile,fallback){
 
 function hasPracticeTemplate(id){ return !!practiceTemplates[id]; }
 
+
+function applicationGuide(id,p){
+  const commonPerson=[
+    {id:'assistedName',label:'Persona assistita',type:'text',value:p.assistedName||'',required:true,help:'Controlla che corrisponda ai dati anagrafici usati nella pratica.'},
+    {id:'relationship',label:'Rapporto con la persona assistita',type:'text',value:p.relationship||'',required:false,help:'Serve soprattutto per tutele lavorative e deleghe.'},
+    {id:'city',label:'Comune di residenza',type:'text',value:p.city||'',required:true,help:'Determina ente e territorio competente.'}
+  ];
+  const guides={
+    law104work:{
+      mode:p.caregiverSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
+      intro:'Prepariamo i dati prima di entrare nel canale ufficiale. Per il settore privato la domanda è INPS; per il settore pubblico la gestione è presso l’amministrazione datrice di lavoro.',
+      fields:[...commonPerson,
+        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:p.caregiverSector||'Non so',required:true,help:'Cambia il canale di presentazione.'},
+        {id:'severity',label:'Verbale 104 grave',type:'select',options:['Non so','No','Si - art. 3 comma 3'],value:p.law104Level==='Art. 3 comma 3 (gravita)'?'Si - art. 3 comma 3':'Non so',required:true,help:'I permessi di assistenza richiedono la situazione di gravità.'},
+        {id:'hospitalization',label:'Ricovero a tempo pieno',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Può incidere sul diritto, salvo eccezioni previste.'}
+      ],
+      channels:p.caregiverSector==='Pubblico'
+        ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Presenta la richiesta secondo la procedura interna dell’ente. INPS non concede questi permessi ai dipendenti pubblici.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'}]
+        : [{name:'Servizio online INPS',text:'Accedi al servizio dedicato per la domanda di permessi 104.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
+           {name:'Patronato',text:'Può presentare telematicamente la domanda per tuo conto.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
+           {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile.',url:null}],
+      script:'Ho un familiare con riconoscimento di disabilità grave ex art. 3 comma 3 e vorrei verificare/presentare la richiesta dei permessi Legge 104. Vorrei sapere quali dati o allegati mancano nel mio caso.'
+    },
+    leave:{
+      mode:p.caregiverSector==='Pubblico'?'Datore di lavoro / amministrazione':'INPS online / patronato',
+      intro:'Il congedo straordinario ha requisiti più stringenti: gravità, ordine di priorità e spesso convivenza. Carevia ti fa arrivare al canale ufficiale con questi punti già controllati.',
+      fields:[...commonPerson,
+        {id:'sector',label:'Settore lavorativo',type:'select',options:['Non so','Privato','Pubblico'],value:p.caregiverSector||'Non so',required:true,help:'Cambia il canale di domanda.'},
+        {id:'cohabitation',label:'Convivenza con la persona assistita',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Può essere richiesta in base al rapporto familiare.'},
+        {id:'priority',label:'Hai verificato l’ordine di priorità?',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Coniuge/partner, genitori, figli, fratelli/sorelle e altri parenti seguono regole di priorità.'},
+        {id:'requestedPeriod',label:'Periodo che vorresti richiedere',type:'text',value:'',required:false,help:'Preparalo prima dell’accesso al servizio.'}
+      ],
+      channels:p.caregiverSector==='Pubblico'
+        ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Per i dipendenti pubblici la domanda è gestita dal datore di lavoro pubblico.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'}]
+        : [{name:'Servizio online INPS',text:'Presenta la domanda di congedo straordinario dal servizio dedicato.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
+           {name:'Patronato',text:'Alternativa assistita per la presentazione telematica.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
+           {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile.',url:null}],
+      script:'Vorrei verificare il congedo straordinario per assistere un familiare con disabilità grave. Ho bisogno di controllare ordine di priorità, convivenza e periodo richiedibile.'
+    },
+    universal:{
+      mode:'INPS online / patronato',
+      intro:'La domanda è INPS. Prima dell’accesso conviene avere chiari ISEE sociosanitario, accompagnamento e informazioni sul bisogno assistenziale, perché la domanda include anche una valutazione sociale.',
+      fields:[...commonPerson,
+        {id:'age',label:'Età',type:'text',value:String(p.age||''),required:true,help:'La misura richiede almeno 80 anni.'},
+        {id:'allowance',label:'Accompagnamento già riconosciuto',type:'select',options:['No','In corso','Si'],value:p.allowance||'No',required:true,help:'È uno dei requisiti principali.'},
+        {id:'isee',label:'Fascia ISEE sociosanitario',type:'text',value:p.isee||'',required:true,help:'La soglia va verificata sul servizio INPS.'},
+        {id:'graveNeed',label:'Bisogno assistenziale gravissimo già verificato',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Carevia non può dedurlo automaticamente.'},
+        {id:'careArrangement',label:'Come viene prestata oggi l’assistenza?',type:'textarea',value:'',required:false,help:'La domanda INPS considera anche la situazione familiare e assistenziale.'}
+      ],
+      channels:[
+        {name:'Servizio online INPS',text:'Accedi al servizio Prestazione Universale e compila la domanda guidata.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html'},
+        {name:'Patronato',text:'Può assisterti nella presentazione della domanda.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html'}],
+      script:'Vorrei presentare la domanda di Prestazione Universale. Ho già verificato età, accompagnamento e ISEE; vorrei controllare il requisito di bisogno assistenziale gravissimo e la documentazione da allegare.'
+    },
+    hcp:{
+      mode:'Portale prestazioni welfare INPS / patronato',
+      intro:'HCP si presenta tramite i canali INPS dedicati al welfare. Prima prepara posizione nella Gestione Unitaria, DSU/ISEE e dati del verbale di invalidità/non autosufficienza.',
+      fields:[...commonPerson,
+        {id:'unitary',label:'Iscrizione alla Gestione Unitaria verificata',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'È il punto che determina la platea HCP.'},
+        {id:'dsu',label:'Protocollo DSU / ISEE disponibile',type:'select',options:['Non so','No','Si'],value:p.isee!=='Non disponibile'?'Si':'Non so',required:true,help:'INPS usa l’ISEE per graduatoria e prestazioni.'},
+        {id:'invalidityRecord',label:'Estremi del verbale di invalidità disponibili',type:'select',options:['Non so','No','Si'],value:p.invalidity==='Si'?'Si':'Non so',required:true,help:'Il patronato può richiedere gli estremi del verbale.'}
+      ],
+      channels:[
+        {name:'Portale prestazioni welfare INPS',text:'Canale online ufficiale per la domanda HCP.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html'},
+        {name:'Patronato',text:'Può presentare la domanda inserendo DSU e verbale.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html'},
+        {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile, usando le proprie credenziali.',url:null}],
+      script:'Vorrei verificare la domanda Home Care Premium 2025-2028. Ho bisogno di confermare la platea della Gestione Unitaria, DSU/ISEE e verbale di non autosufficienza.'
+    },
+    adi:{
+      mode:'Medico / Distretto / PUA',
+      intro:'Per l’ADI non devi compilare una domanda INPS. Carevia prepara una scheda chiara da usare con medico di base, Distretto o punto di accesso territoriale per chiedere la valutazione e l’attivazione delle cure domiciliari.',
+      fields:[...commonPerson,
+        {id:'doctor',label:'Medico di base',type:'text',value:'',required:false,help:'Nome utile per il primo contatto.'},
+        {id:'phone',label:'Recapito del caregiver',type:'text',value:'',required:false,help:'Da comunicare al servizio se richiesto.'},
+        {id:'needSummary',label:'Di che aiuto c’è bisogno a casa?',type:'textarea',value:'',required:true,help:'Descrivi in modo semplice: medicazioni, infermiere, fisioterapia, gestione terapia, difficoltà negli spostamenti, ecc.'},
+        {id:'currentServices',label:'Servizi già attivi',type:'textarea',value:'',required:false,help:'Indica ciò che è già presente per evitare duplicazioni.'}
+      ],
+      channels:[
+        {name:'Medico di medicina generale',text:'Chiedi come avviare la valutazione per cure domiciliari/ADI nel Distretto competente.',url:'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/assistenza-domiciliare/'},
+        {name:'Azienda sanitaria / Distretto',text:'Carevia usa l’azienda sanitaria risolta dal Comune; verifica il punto di accesso locale.',url:p.healthAuthority?.authorities?.[0]?.website||'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/assistenza-domiciliare/'}
+      ],
+      script:'Buongiorno, assisto '+(p.assistedName||'un familiare')+' residente a '+(p.city||'questo Comune')+'. Vorrei sapere come avviare una valutazione per assistenza domiciliare integrata. Posso indicare i bisogni attuali e la documentazione clinica disponibile.'
+    },
+    veneto_icd:{
+      mode:'Servizi Sociali / Distretto',
+      intro:'Per l’ICD Veneto il primo obiettivo non è compilare a caso un modulo: bisogna identificare la tipologia ICD corretta e il punto territoriale che apre la valutazione.',
+      fields:[...commonPerson,
+        {id:'isee',label:'ISEE sociosanitario',type:'text',value:p.isee||'',required:true,help:'Può incidere su tipologia e graduatoria.'},
+        {id:'careNeed',label:'Bisogno assistenziale principale',type:'textarea',value:'',required:true,help:'Descrivi cosa rende difficile la permanenza a domicilio.'},
+        {id:'existingBenefits',label:'Contributi/servizi già attivi',type:'textarea',value:'',required:false,help:'Serve al servizio per inquadrare correttamente il caso.'}
+      ],
+      channels:[
+        {name:'Servizi Sociali / Ambito',text:'Chiedi accesso alla valutazione per Impegnativa di Cura Domiciliare.',url:p.socialArea?.areas?.[0]?.url||MLPS_ATS_REGISTRY},
+        {name:'Distretto / Azienda ULSS',text:'Può essere coinvolto nella valutazione sociosanitaria/UVMD.',url:p.healthAuthority?.authorities?.[0]?.website||'https://salute.regione.veneto.it/'}
+      ],
+      script:'Vorrei verificare quale Impegnativa di Cura Domiciliare può essere adatta alla situazione della persona che assisto e come avviare la valutazione territoriale.'
+    },
+    verona_sad:{
+      mode:'Comune / assistente sociale',
+      intro:'Il SAD di Verona si attiva tramite i servizi sociali territoriali: Carevia ti prepara cosa dire e cosa portare alla valutazione.',
+      fields:[...commonPerson,
+        {id:'isee',label:'ISEE disponibile',type:'text',value:p.isee||'',required:false,help:'Può essere usato per la compartecipazione.'},
+        {id:'dailyNeeds',label:'Quali attività quotidiane richiedono aiuto?',type:'textarea',value:'',required:true,help:'Igiene, pasti, cura della casa, accompagnamento, ecc.'},
+        {id:'contacts',label:'Recapito del caregiver',type:'text',value:'',required:false,help:'Da lasciare allo sportello se richiesto.'}
+      ],
+      channels:[{name:'Sportello Sì / Centro Sociale Territoriale',text:'Contatta il servizio e chiedi una valutazione con l’assistente sociale.',url:'https://www.comune.verona.it/Servizi/Assistenza-domiciliare'}],
+      script:'Vorrei richiedere una valutazione per il Servizio di Assistenza Domiciliare per una persona residente a Verona. Posso fornire ISEE e descrivere le difficoltà nelle attività quotidiane.'
+    },
+    civil:{
+      mode:'Medico certificatore / INPS',
+      intro:'Il primo atto è il certificato medico introduttivo. Carevia prepara le informazioni da portare al medico e poi ti guida nel seguito della procedura applicabile nella provincia.',
+      fields:[...commonPerson,
+        {id:'doctor',label:'Medico certificatore individuato',type:'select',options:['Non so','No','Si'],value:'Non so',required:true,help:'Il certificato medico introduttivo avvia il percorso.'},
+        {id:'conditions',label:'Problemi funzionali da descrivere al medico',type:'textarea',value:'',required:false,help:'Descrivi difficoltà concrete, senza sostituirti alla valutazione clinica.'}
+      ],
+      channels:[
+        {name:'Medico certificatore',text:'Predispone e trasmette il certificato medico introduttivo.',url:'https://www.inps.it/it/it/inps-comunica/dossier/riforma-della-disabilita.html'},
+        {name:'INPS',text:'Il seguito della procedura dipende dal territorio e dalla fase della riforma.',url:'https://www.inps.it/it/it/inps-comunica/dossier/riforma-della-disabilita.html'}],
+      script:'Vorrei avviare il percorso di accertamento della disabilità. Ho bisogno di predisporre il certificato medico introduttivo e capire quale iter vale nella mia provincia.'
+    }
+  };
+  return guides[id] || {
+    mode:'Ente competente',
+    intro:'Carevia ti aiuta a preparare le informazioni essenziali e ti porta alla fonte ufficiale. La procedura dettagliata per questa pratica è ancora in approfondimento.',
+    fields:[...commonPerson,{id:'notes',label:'Informazioni da comunicare all’ente',type:'textarea',value:'',required:false,help:'Annota qui ciò che vuoi chiedere.'}],
+    channels:[{name:'Fonte ufficiale / ente competente',text:'Apri la fonte della pratica e verifica il canale previsto.',url:null}],
+    script:'Vorrei sapere come avviare questa pratica e quali documenti o requisiti devo presentare nel mio caso.'
+  };
+}
+
+function hydrateApplicationGuide(id,p,saved={}){
+  const g=applicationGuide(id,p);
+  return {...g,fields:g.fields.map(f=>({...f,value:saved[f.id]!==undefined?saved[f.id]:f.value}))};
+}
+
+function applicationCompletion(ca){
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const req=g.fields.filter(f=>f.required);
+  if(!req.length) return 100;
+  return Math.round(req.filter(f=>String(f.value||'').trim() && !['Non so'].includes(String(f.value))).length/req.length*100);
+}
+
+function updateCaseApplicationField(caseId,fieldId,value){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  ca.applicationData=ca.applicationData||{}; ca.applicationData[fieldId]=value; ca.updatedAt=new Date().toISOString();
+  saveState(); render();
+}
+
+function applicationFieldHtml(ca,f){
+  const val=esc(f.value||'');
+  let control='';
+  if(f.type==='select') control=`<select onchange="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">${f.options.map(o=>`<option ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.type==='textarea') control=`<textarea oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">${val}</textarea>`;
+  else control=`<input type="text" value="${val}" oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">`;
+  return `<label class="application-field"><span>${esc(f.label)}${f.required?' *':''}</span>${control}<small>${esc(f.help||'')}</small></label>`;
+}
+
+function practiceSummaryText(ca){
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const lines=[ca.title,ca.adminTitle,'','DATI PREPARATI'];
+  g.fields.forEach(f=>lines.push(f.label+': '+(f.value||'—')));
+  lines.push('','COME PRESENTARLA');
+  g.channels.forEach((ch,i)=>lines.push((i+1)+'. '+ch.name+' - '+ch.text+(ch.url?' - '+ch.url:'')));
+  lines.push('','COSA DIRE / CHIEDERE',g.script,'','Fonte ufficiale: '+ca.source);
+  return lines.join('\n');
+}
+
+async function copyPracticeSummary(caseId){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  try{await navigator.clipboard.writeText(practiceSummaryText(ca)); showToast('Riepilogo pratica copiato');}
+  catch{showToast('Copia non disponibile: usa Salva PDF');}
+}
+
 function buildCaseFromSupport(support,profile){
   const t=practiceTemplates[support.id];
   if(!t) return null;
@@ -1387,6 +1584,7 @@ function buildCaseFromSupport(support,profile){
     type:t.type,
     source:support.source,
     authority,
+    applicationData:{},
     documents:t.documents(profile).map(d=>({...d})),
     steps:t.steps(profile).map(s=>({...s,done:false})),
     outcome:null,
@@ -1500,6 +1698,7 @@ function caseDetailView(ca){
     <button class="text-button" onclick="closeCaseDetail()">${icon('back',15)} Tutte le pratiche</button>
     <div class="case-detail-head"><div><span class="eyebrow">${esc(ca.type)}</span><h2>${esc(ca.title)}</h2><p>${esc(ca.adminTitle)}</p></div><div><span class="case-status-pill ${caseStatusClass(status)}">${esc(status)}</span><div class="case-progress" style="width:180px"><i style="width:${progress}%"></i></div></div></div>
     ${next?`<section class="case-next"><span class="eyebrow">Prossimo passo</span><h3>${esc(next.title)}</h3><p>${esc(next.text)}</p><button class="secondary-button" onclick="toggleCaseStep('${ca.id}','${next.id}')">${icon('check',15)} Segna come fatto</button>${next.url?` <a class="secondary-button" href="${next.url}" target="_blank" rel="noreferrer">Apri fonte ${icon('arrow',14)}</a>`:''}</section>`:`<section class="case-next"><span class="eyebrow">Passaggi completati</span><h3>Registra l’esito ricevuto</h3><p>Carevia non decide l’esito della pratica. Segna il risultato solo dopo una comunicazione dell’ente competente.</p></section>`}
+    ${(()=>{const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{}),pct=applicationCompletion(ca);return `<section class="application-assistant"><div class="application-assistant-head"><div><span class="eyebrow">Assistente pratica</span><h3>Prepariamo insieme la richiesta</h3><p>${esc(g.intro)}</p><div class="application-progress">Dati essenziali completati: <b>${pct}%</b></div></div><span class="application-mode">${esc(g.mode)}</span></div><div class="application-grid">${g.fields.map(f=>applicationFieldHtml(ca,f)).join('')}</div><div class="application-send"><h4>Come presentare la pratica</h4><div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Apri canale →</a>`:''}</div>`).join('')}</div><div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div><div class="application-actions"><button class="secondary-button" onclick="copyPracticeSummary('${ca.id}')">${icon('file',14)} Copia riepilogo</button><button class="secondary-button" onclick="printSummary()">${icon('file',14)} Salva PDF</button></div><p class="case-panel-intro" style="margin-top:10px">Carevia prepara e guida la compilazione, ma non invia dichiarazioni o domande al posto tuo. L’invio avviene sul canale ufficiale indicato.</p></div></section>`;})()}
     <div class="case-detail-grid">
       <div>
         <section class="case-panel"><h3>Documenti e requisiti da preparare</h3><p class="case-panel-intro">${missingDocs.length?missingDocs.length+' elementi ancora da confermare.':'Hai confermato tutti gli elementi della checklist.'}</p><div class="case-checklist">${(ca.documents||[]).map(d=>`<div class="case-check ${d.ready?'done':''}"><button onclick="toggleCaseDocument('${ca.id}','${d.id}')">${d.ready?icon('check',14):''}</button><div><strong>${esc(d.title)}</strong><span>${esc(d.reason)}</span></div><small>${d.ready?'Disponibile':'Da recuperare'}</small></div>`).join('')}</div></section>
@@ -1801,7 +2000,7 @@ function wizard() {
   if (step === 0) body = `<div class="form-step"><h3>Chi stai assistendo?</h3><p>Poche informazioni per distinguere il tipo di percorso, senza chiedere dettagli clinici non necessari.</p><div class="field-grid">${field('Il tuo nome',input('caregiverName',f.caregiverName))}${field('Nome della persona assistita',input('assistedName',f.assistedName))}${field('Tu sei',select('relationship',f.relationship,['Figlio/a','Coniuge o partner','Genitore','Fratello o sorella','Altro familiare']))}${field('Eta della persona assistita',input('age',f.age,'number'))}</div></div>`;
   if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Possiamo compilare automaticamente Regione, Provincia e Comune usando la posizione del dispositivo, oppure puoi inserire il Comune e completare gli altri campi.</p><div class="field-grid"><div class="location-tools">${button('secondary-button','Usa la posizione','detectLocation()','search')}<span id="location-status" class="location-status">La posizione viene usata solo per compilare questi campi e non viene salvata come coordinate.</span></div>${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',`<input type="text" value="${esc(f.city)}" oninput="updateDraft('city',this.value)" onblur="if(this.value.trim()) completeFromMunicipality()"><span class="field-help">Scrivi il Comune: Carevia prova a completare Provincia e Regione automaticamente.</span>`)}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
   if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Se 104 gia riconosciuta: quale verbale?',select('law104Level',f.law104Level,['Non so','Art. 3 comma 1','Art. 3 comma 3 (gravita)']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
-  if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${field('Nel nucleo c’è un dipendente o pensionato pubblico?',`${select('publicEmployee',f.publicEmployee,['No','Si','Non so'])}<span class="field-help"><b>Perché lo chiediamo:</b> potrebbe aprire l’accesso a Home Care Premium (HCP), programma INPS per assistenza domiciliare rivolto agli iscritti alla Gestione Unitaria delle prestazioni creditizie e sociali e ai loro familiari non autosufficienti.</span>`)}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
+  if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${f.caregiverWork==='Dipendente'?field('Sei dipendente pubblico o privato?',select('caregiverSector',f.caregiverSector,['Non so','Privato','Pubblico'])):''}${field('Nel nucleo c’è un dipendente o pensionato pubblico?',`${select('publicEmployee',f.publicEmployee,['No','Si','Non so'])}<span class="field-help"><b>Perché lo chiediamo:</b> potrebbe aprire l’accesso a Home Care Premium (HCP), programma INPS per assistenza domiciliare rivolto agli iscritti alla Gestione Unitaria delle prestazioni creditizie e sociali e ai loro familiari non autosufficienti.</span>`)}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
   if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
   return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<div class="wizard-save"><button class="text-button" onclick="persistDraft(true)">Salva e continua dopo</button><span>Passaggio ${step+1} di 5</span></div>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
 }
@@ -1902,7 +2101,7 @@ async function completeWizard(){
 }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter;
+window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
 
 render();
 loadTerritorialStats();
