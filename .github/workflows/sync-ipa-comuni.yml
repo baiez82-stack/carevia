@@ -76,7 +76,7 @@ jobs:
               w.writeheader(); w.writerows(rows)
           Path('data/ipa_comuni_source.json').write_text(json.dumps({
               'source':'Indice PA / AgID - Amministrazioni',
-              'source_url':URL,
+              'source_url':'https://indicepa.gov.it/ipa-dati/dataset/502ff370-1b2c-4310-94c7-f39ceb7500e3/resource/3ed63523-ff9c-41f6-a6fe-980f3d9e501f/download/amministrazioni.txt',
               'rows':len(rows),
               'generated_by':'sync-ipa-comuni.yml'
           },ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
