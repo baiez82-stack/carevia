@@ -544,6 +544,15 @@ body{background:var(--canvas);color:var(--ink)}
 .compact-guided .guided-field-row{grid-template-columns:1fr}.compact-guided .guided-field-tip{margin-top:0}
 @media(max-width:850px){.action-first-card,.simple-practice-grid{grid-template-columns:1fr}.action-first-buttons{width:100%}}
 
+
+.dependency-section{margin:26px 0 30px;padding:24px;border:1px solid #cfe1da;border-radius:14px;background:#f8fcfa}
+.dependency-section .home-section-head{margin-bottom:18px}.dependency-section .home-section-head h3{margin:5px 0 6px;font-family:Georgia,serif;font-size:23px}.dependency-section .home-section-head p{margin:0;color:#68766f;font-size:11px;line-height:1.5}
+.dependency-graph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.dependency-node{position:relative;padding:16px;border:1px solid #dce5e0;border-radius:11px;background:#fff}.dependency-node.ready{border-color:#83b9a8;box-shadow:0 0 0 2px rgba(29,122,107,.06)}.dependency-node.blocked{background:#f7f7f5;opacity:.82}.dependency-node.done{background:#eef8f3}
+.dependency-node-top{display:flex;align-items:center;gap:8px}.dependency-state{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#e9efec;color:#55645e;font-size:9px;font-weight:850}.dependency-node.ready .dependency-state{background:#176858;color:#fff}.dependency-node.done .dependency-state{background:#d8eee5;color:#176858}
+.dependency-node h4{margin:10px 0 6px;font-size:13px}.dependency-node p{min-height:42px;margin:0 0 10px;color:#69766f;font-size:10px;line-height:1.45}.dependency-blocker{margin:8px 0;padding:7px 8px;border-radius:7px;background:#fff2d7;color:#6f511b;font-size:9px;font-weight:720}.graph-action{width:100%;min-height:34px;margin-top:7px}
+@media(max-width:900px){.dependency-graph{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.dependency-graph{grid-template-columns:1fr}.dependency-node p{min-height:0}}
+
 </style>
   </head>
   <body>
@@ -1230,9 +1239,13 @@ function excludedChecks(profile) {
 
 function priorityAction(profile, supports) {
   if(!supports.length) return {title:'Completa le verifiche di base',text:'Non emergono ancora percorsi prioritari: aggiorna i dati o verifica il territorio.'};
-  const urgentOrder=['palliative','dementia','civil','universal','law104work','leave','adi','regional','hcp','aids','afterus','auu'];
-  const top=[...supports].sort((a,b)=>urgentOrder.indexOf(a.id)-urgentOrder.indexOf(b.id))[0] || supports[0];
-  return {title:top.next || top.title,text:`Prima priorita: ${top.title}. Carevia la mette davanti alle altre in base alle informazioni inserite.`,support:top};
+  const graphNext=nextCareGraphNode(profile,supports);
+  if(graphNext){
+    const blockers=graphNext.blockers?.length ? ' Prima va completato: '+graphNext.blockers.map(graphNodeLabel).join(', ')+'.' : '';
+    return {title:graphNext.label,text:graphNext.why+blockers,support:supports.find(s=>s.id===graphNext.supportId)||null,graphNode:graphNext};
+  }
+  const top=supports[0];
+  return {title:top.next || top.title,text:`Prossimo passo: ${top.title}.`,support:top};
 }
 
 function evaluateSupport(profile) {
@@ -2627,15 +2640,6 @@ function overview() {
     </section>
     ${state.profileConfigured && state.cases.length ? `<section class="home-section"><div class="home-section-head"><span class="eyebrow">Continua da qui</span><h3>Una cosa alla volta.</h3><p>Carevia tiene aperte le pratiche e ti mostra il prossimo passaggio da completare.</p></div>${(()=>{const oc=state.cases.filter(c=>!c.outcome), item=oc.map(c=>({c,step:nextCaseStep(c)})).find(x=>x.step); return item?`<div class="home-resume"><div><strong>${esc(item.step.title)}</strong><span>${esc(item.c.title)} · ${esc(deriveCaseStatus(item.c))}</span></div><button class="primary-button" onclick="openCase('${item.c.id}')">Continua pratica ${icon('arrow',15)}</button></div>`:`<div class="home-resume"><div><strong>Controlla gli esiti</strong><span>Le pratiche aperte non hanno altri passaggi operativi registrati.</span></div><button class="primary-button" onclick="navigateTo('cases')">Apri pratiche ${icon('arrow',15)}</button></div>`;})()}</section>` : ''}
     <section class="home-section">
-      <div class="home-section-head"><span class="eyebrow">Copertura nazionale</span><h3>Il territorio non è più un buco nero.</h3><p>Carevia usa registri ministeriali incorporati nel progetto per risolvere Comune→ASL e Comune→Ambito Territoriale Sociale, poi aggiunge il livello locale verificato quando disponibile.</p></div>
-      <div class="home-grid">
-        <article class="home-card">${icon('search',23)}<h4>${Number(territorialStats.unique_comuni_asl).toLocaleString('it-IT')} Comuni</h4><p>corrispondenze Comune→ASL dal dataset ufficiale del Ministero della Salute.</p></article>
-        <article class="home-card">${icon('shield',23)}<h4>${Number(territorialStats.health_authorities).toLocaleString('it-IT')} aziende sanitarie</h4><p>anagrafica nazionale con recapiti e fonte ministeriale.</p></article>
-        <article class="home-card">${icon('tasks',23)}<h4>${Number(territorialStats.social_areas).toLocaleString('it-IT')} Ambiti sociali</h4><p>Registro nazionale degli Ambiti Territoriali Sociali del Ministero del Lavoro.</p></article>
-      </div>
-      <div class="source-note">${icon('info',18)}<div><strong>Dati aggiornabili, non hard-coded</strong><p>La sincronizzazione dei dataset territoriali viene eseguita automaticamente ogni settimana. Carevia mostra sempre quando il dato nazionale è risolto e quando serve una verifica locale più profonda.</p></div></div>
-    </section>
-    <section class="home-section">
       <div class="home-section-head"><span class="eyebrow">Cosa ti aiuta a fare</span><h3>Una sola mappa per problemi che oggi sono sparsi.</h3><p>Carevia non promette un bonus: collega la situazione familiare ai percorsi che vale la pena controllare.</p></div>
       <div class="home-grid">
         <article class="home-card">${icon('wallet',23)}<h4>Prestazioni e tutele</h4><p>Invalidità, accompagnamento, Legge 104, congedi, Prestazione Universale, Home Care Premium, Disability Card e altre misure da verificare.</p></article>
@@ -2648,6 +2652,95 @@ function overview() {
 
 function profileGate(title, text) {
   return `<div class="page enter profile-gate"><div>${icon('heart',34)}<h2>${title}</h2><p>${text}</p>${button('primary-button','Inizia il percorso','openWizard()','spark')}</div></div>`;
+}
+
+
+function careDependencyGraph(profile,supports){
+  const ids=new Set((supports||[]).map(s=>s.id));
+  const socialNeeded=['social_home','regional','afterus'].some(id=>ids.has(id));
+  const iseeNeeded=['universal','hcp','regional','social_home'].some(id=>ids.has(id));
+  const law104Needed=['law104work','leave','afterus'].some(id=>ids.has(id)) || profile.law104==='In corso';
+  const territorySocialDone=profile.socialArea?.status==='resolved' || profile.municipalityAuthority?.status==='resolved';
+  const done={
+    disability_assessment:profile.invalidity==='Si',
+    law104_gravity:profile.law104==='Si' && profile.law104Level==='Art. 3 comma 3 (gravita)',
+    isee_sociosanitario:profile.isee!=='Non disponibile',
+    territory_social:territorySocialDone
+  };
+  const nodes=[
+    {id:'disability_assessment',label:'Accertamento disabilità',kind:'Riconoscimento',relevant:ids.has('civil')||profile.invalidity==='In corso',done:done.disability_assessment,depends:[],supportId:'civil',why:'Può abilitare verbali e tutele successive.'},
+    {id:'law104_gravity',label:'Verbale 104 art. 3 comma 3',kind:'Riconoscimento',relevant:law104Needed,done:done.law104_gravity,depends:profile.invalidity==='No'?['disability_assessment']:[],supportId:null,why:'È un prerequisito pratico per permessi 104 e congedo straordinario.'},
+    {id:'isee_sociosanitario',label:'ISEE sociosanitario',kind:'Documento',relevant:iseeNeeded,done:done.isee_sociosanitario,depends:[],supportId:null,why:'Sblocca o completa la verifica di più misure economiche e territoriali.'},
+    {id:'territory_social',label:'Ambito / Comune competente',kind:'Territorio',relevant:socialNeeded,done:territorySocialDone,depends:[],supportId:null,why:'Serve per misure sociali e regionali che non hanno un unico sportello nazionale.'},
+    {id:'adi',label:'Assistenza Domiciliare Integrata',kind:'Servizio sanitario',relevant:ids.has('adi'),done:state.cases.some(c=>c.supportId==='adi'&&c.outcome==='approved'),depends:[],supportId:'adi',why:'Può essere attivata in parallelo ai riconoscimenti economici.'},
+    {id:'permits104',label:'Permessi Legge 104',kind:'Tutela lavoro',relevant:ids.has('law104work'),done:state.cases.some(c=>c.supportId==='law104work'&&c.outcome==='approved'),depends:['law104_gravity'],supportId:'law104work',why:'Diventa azionabile quando il requisito di gravità è verificato.'},
+    {id:'leave',label:'Congedo straordinario',kind:'Tutela lavoro',relevant:ids.has('leave'),done:state.cases.some(c=>c.supportId==='leave'&&c.outcome==='approved'),depends:['law104_gravity'],supportId:'leave',why:'Richiede ulteriori verifiche su priorità familiare e convivenza.'},
+    {id:'universal',label:'Prestazione Universale',kind:'Prestazione',relevant:ids.has('universal'),done:state.cases.some(c=>c.supportId==='universal'&&c.outcome==='approved'),depends:['isee_sociosanitario'],supportId:'universal',why:'L’ISEE è uno dei prerequisiti da avere pronto prima della domanda.'},
+    {id:'hcp',label:'Home Care Premium',kind:'Prestazione / servizio',relevant:ids.has('hcp'),done:state.cases.some(c=>c.supportId==='hcp'&&c.outcome==='approved'),depends:['isee_sociosanitario'],supportId:'hcp',why:'La verifica economica e della platea precede la domanda.'},
+    {id:'regional_support',label:'Misura regionale di non autosufficienza',kind:'Misura territoriale',relevant:ids.has('regional'),done:state.cases.some(c=>c.supportId==='regional'&&c.outcome==='approved'),depends:['territory_social','isee_sociosanitario'],supportId:'regional',why:'Dipende dal territorio e spesso dall’ISEE sociosanitario.'},
+    {id:'sad',label:'Assistenza domiciliare sociale',kind:'Servizio sociale',relevant:ids.has('social_home'),done:state.cases.some(c=>c.supportId==='social_home'&&c.outcome==='approved'),depends:['territory_social'],supportId:'social_home',why:'L’accesso viene gestito dal Comune/Ambito competente.'},
+    {id:'afterus',label:'Dopo di Noi',kind:'Percorso sociale',relevant:ids.has('afterus'),done:state.cases.some(c=>c.supportId==='afterus'&&c.outcome==='approved'),depends:['territory_social','law104_gravity'],supportId:'afterus',why:'Richiede disabilità grave e attuazione territoriale.'}
+  ].filter(n=>n.relevant);
+
+  const byId=Object.fromEntries(nodes.map(n=>[n.id,n]));
+  for(const n of nodes){
+    const blockers=n.depends.filter(id=>{
+      if(id==='disability_assessment') return !done.disability_assessment;
+      if(id==='law104_gravity') return !done.law104_gravity;
+      if(id==='isee_sociosanitario') return !done.isee_sociosanitario;
+      if(id==='territory_social') return !done.territory_social;
+      return byId[id] ? !byId[id].done : false;
+    });
+    n.blockers=blockers;
+    n.status=n.done?'done':blockers.length?'blocked':'ready';
+  }
+  return nodes;
+}
+
+function graphNodeLabel(id){
+  const map={
+    disability_assessment:'accertamento disabilità',
+    law104_gravity:'verbale 104 grave',
+    isee_sociosanitario:'ISEE sociosanitario',
+    territory_social:'Ambito/Comune competente'
+  };
+  return map[id]||id;
+}
+
+function nextCareGraphNode(profile,supports){
+  const nodes=careDependencyGraph(profile,supports);
+  const ready=nodes.find(n=>n.status==='ready'&&!n.done);
+  if(ready) return ready;
+  const blocked=nodes.find(n=>n.status==='blocked');
+  if(blocked){
+    const prerequisite=nodes.find(n=>n.id===blocked.blockers[0]);
+    if(prerequisite && !prerequisite.done) return prerequisite;
+    return blocked;
+  }
+  return null;
+}
+
+function graphNodeAction(n){
+  if(n.supportId && hasPracticeTemplate(n.supportId)) return `<button class="secondary-button graph-action" onclick="openCaseFromSupport('${n.supportId}')">${n.status==='ready'?'Vai all’azione':'Apri percorso'} ${icon('arrow',13)}</button>`;
+  if(n.id==='isee_sociosanitario') return `<a class="secondary-button graph-action" href="https://servizi2.inps.it/servizi/ISEEPrecompilato/WfPortaleUnicoIsee.aspx" target="_blank" rel="noreferrer">Apri ISEE INPS ${icon('arrow',13)}</a>`;
+  if(n.id==='territory_social') return `<button class="secondary-button graph-action" onclick="navigateTo('territory')">Vedi territorio ${icon('arrow',13)}</button>`;
+  if(n.id==='law104_gravity') return `<button class="secondary-button graph-action" onclick="navigateTo('documents')">Controlla verbale ${icon('arrow',13)}</button>`;
+  return '';
+}
+
+function dependencyGraphHtml(profile,supports){
+  const nodes=careDependencyGraph(profile,supports);
+  if(!nodes.length) return '';
+  return `<section class="dependency-section">
+    <div class="home-section-head"><span class="eyebrow">Grafo delle dipendenze</span><h3>Prima questo. Poi si sblocca il resto.</h3><p>Carevia ordina prerequisiti, riconoscimenti e servizi. Le frecce indicano una sequenza pratica da verificare, non un diritto automatico.</p></div>
+    <div class="dependency-graph">${nodes.map((n,i)=>`<article class="dependency-node ${n.status}">
+      <div class="dependency-node-top"><span class="dependency-state">${n.status==='done'?icon('check',13):n.status==='blocked'?icon('lock',13):i+1}</span><span class="eyebrow">${esc(n.kind)}</span></div>
+      <h4>${esc(n.label)}</h4>
+      <p>${esc(n.why)}</p>
+      ${n.blockers.length?`<div class="dependency-blocker">Prima: ${esc(n.blockers.map(graphNodeLabel).join(' + '))}</div>`:''}
+      ${graphNodeAction(n)}
+    </article>`).join('')}</div>
+  </section>`;
 }
 
 function supportView() {
@@ -2670,10 +2763,11 @@ function supportView() {
         </div>
       </div>
       <div class="decision-side">
-        <div><strong>Logica Carevia</strong><span>Prima salute e riconoscimenti abilitanti, poi prestazioni economiche e servizi successivi.</span></div>
+        <div><strong>Logica Carevia</strong><span>Carevia mostra quali prerequisiti sbloccano più pratiche e quali servizi possono partire in parallelo.</span></div>
         <div><strong>Esito</strong><span>Carevia non certifica il diritto: esplicita cosa sappiamo e cosa manca ancora.</span></div>
       </div>
     </section>
+    ${dependencyGraphHtml(state.profile,supports)}
     <div class="support-list">${supports.map((s,i) => `<article class="support-row" style="--delay:${i*60}ms">
       <div class="support-symbol">${icon('wallet',21)}</div>
       <div class="support-main">
