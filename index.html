@@ -2462,13 +2462,21 @@ function practiceActionModel(ca,op,g){
     add('Trova il CDCD più vicino','https://www.epicentro.iss.it/demenza/mappa-cdcd','primary','Mappa nazionale ISS');
   }
 
+  if(ca.supportId==='civil' && op.kind!=='online' && op.url){
+    add('Apri le istruzioni sul certificato medico',op.url,'primary','Pagina INPS specifica per il certificato medico introduttivo');
+  }
+
+  if(ca.supportId==='verona_sad'){
+    add('Chiama Sportello Sì','tel:800085570','primary','800 085 570');
+  }
+
   if(['law104work','leave'].includes(ca.supportId) && (ca.applicationData?.sector||p.caregiverSector)==='Pubblico'){
     actions.length=0;
     add('Copia il testo per l’ufficio personale','carevia:copy-message','primary','Poi incollalo nella mail o nel portale della tua amministrazione');
   }
 
   if(!actions.length){
-    const direct=plan.resources.find(r=>['CONTATTO','PRATICA','ENTE'].includes(r.type));
+    const direct=plan.resources.find(r=>['CONTATTO','PRATICA'].includes(r.type));
     if(direct) add(direct.label,direct.url,'primary',direct.text);
   }
 
