@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-23",
+  "purpose": "Model caregiver bureaucracy as causal dependencies, not isolated benefits.",
+  "principles": [
+    "A node is shown only when relevant to the user's situation.",
+    "Dependencies indicate practical sequencing, not automatic legal entitlement.",
+    "A completed prerequisite can unlock multiple downstream paths.",
+    "Every actionable downstream node must resolve to a verified official action."
+  ],
+  "nodes": {
+    "disability_assessment": {
+      "label": "Accertamento disabilita",
+      "kind": "recognition",
+      "support_id": "civil",
+      "depends_on": []
+    },
+    "law104_gravity": {
+      "label": "Verbale Legge 104 art. 3 comma 3",
+      "kind": "recognition",
+      "depends_on": [
+        "disability_assessment"
+      ]
+    },
+    "isee_sociosanitario": {
+      "label": "ISEE sociosanitario",
+      "kind": "document",
+      "depends_on": []
+    },
+    "adi": {
+      "label": "Assistenza Domiciliare Integrata",
+      "kind": "health_service",
+      "support_id": "adi",
+      "depends_on": []
+    },
+    "sad": {
+      "label": "Assistenza domiciliare sociale",
+      "kind": "social_service",
+      "support_id": "social_home",
+      "depends_on": [
+        "territory_social"
+      ]
+    },
+    "territory_social": {
+      "label": "Ambito / Comune competente",
+      "kind": "territory",
+      "depends_on": []
+    },
+    "permits104": {
+      "label": "Permessi Legge 104",
+      "kind": "work_right",
+      "support_id": "law104work",
+      "depends_on": [
+        "law104_gravity"
+      ]
+    },
+    "leave": {
+      "label": "Congedo straordinario",
+      "kind": "work_right",
+      "support_id": "leave",
+      "depends_on": [
+        "law104_gravity"
+      ]
+    },
+    "universal": {
+      "label": "Prestazione Universale",
+      "kind": "benefit",
+      "support_id": "universal",
+      "depends_on": [
+        "isee_sociosanitario"
+      ]
+    },
+    "hcp": {
+      "label": "Home Care Premium",
+      "kind": "benefit_service",
+      "support_id": "hcp",
+      "depends_on": [
+        "isee_sociosanitario"
+      ]
+    },
+    "regional_support": {
+      "label": "Misura regionale non autosufficienza / caregiver",
+      "kind": "regional",
+      "support_id": "regional",
+      "depends_on": [
+        "territory_social",
+        "isee_sociosanitario"
+      ]
+    },
+    "afterus": {
+      "label": "Dopo di Noi",
+      "kind": "social_program",
+      "support_id": "afterus",
+      "depends_on": [
+        "territory_social",
+        "law104_gravity"
+      ]
+    }
+  }
+}
