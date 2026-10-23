@@ -2,6 +2,10 @@ name: Verify practice routes
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'data/practice_routes.json'
+      - '.github/workflows/verify-practice-routes.yml'
   schedule:
     - cron: '17 5 * * 1'
 
