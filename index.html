@@ -2595,12 +2595,12 @@ function overview() {
     <section class="service-intro">
       <div class="service-intro-grid">
         <div>
-          <span class="eyebrow">Carevia</span>
-          <h2>Prendersi cura di qualcuno è già abbastanza difficile.</h2>
-          <p class="lead">Carevia non ti mostra un catalogo di bonus. Incrocia situazione familiare, territorio e riconoscimenti, elimina ciò che non è pertinente e costruisce il prossimo passo con motivazione, ostacoli da verificare e fonte ufficiale.</p>
+          <span class="eyebrow">Carevia · navigatore operativo del caregiving</span>
+          <h2>Non devi capire la burocrazia. Devi sapere cosa fare adesso.</h2>
+          <p class="lead">Carevia incrocia persona assistita, caregiver e territorio, elimina ciò che non serve e ti porta all’azione concreta: il modulo ufficiale da scaricare, la domanda online da aprire o il contatto esatto da usare.</p>
           <div class="service-intro-actions">
             ${button('primary-button',state.profileConfigured?'Aggiorna il percorso':'Inizia il percorso','openWizard()','spark')}
-            <button class="secondary-button" onclick="navigateTo('sources')">Esplora le fonti ${icon('arrow',15)}</button>
+            <button class="secondary-button" onclick="navigateTo('sources')">Come verifichiamo ${icon('arrow',15)}</button>
           </div>
           <div class="home-trust">
             <span>${icon('shield',14)} dati sul dispositivo</span>
@@ -2610,12 +2610,20 @@ function overview() {
           </div>
         </div>
         <div class="service-steps">
-          <div class="service-step"><strong>1. Racconta la situazione</strong><span>Età, territorio, riconoscimenti e bisogni essenziali.</span></div>
-          <div class="service-step"><strong>2. Ricevi un piano</strong><span>Misure da verificare, documenti e attività ordinate per priorità.</span></div>
-          <div class="service-step"><strong>3. Vai alla fonte giusta</strong><span>INPS, SSN, Comune, servizi territoriali e riferimenti ufficiali.</span></div>
+          <div class="service-step"><strong>1. Carevia capisce il caso</strong><span>Persona, caregiver, riconoscimenti, lavoro e Comune.</span></div>
+          <div class="service-step"><strong>2. Prepara ciò che serve</strong><span>Documenti, dati e requisiti che sbloccano la pratica.</span></div>
+          <div class="service-step"><strong>3. Ti porta all’azione</strong><span>Modulo ufficiale, domanda online o contatto esatto. Niente ricerca da rifare.</span></div>
         </div>
       </div>
       ${resume}
+    </section>
+    <section class="home-section">
+      <div class="home-section-head"><span class="eyebrow">La differenza Carevia</span><h3>Non ti mandiamo a cercare.</h3><p>Ogni percorso deve terminare con un’azione verificata. Se Carevia non ha un passaggio sufficientemente preciso, lo dichiara invece di aprire una homepage generica.</p></div>
+      <div class="home-grid">
+        <article class="home-card">${icon('file',23)}<h4>Modulo ufficiale</h4><p>Quando esiste ed è aggiornato, Carevia ti porta al PDF corretto e ti aiuta a capire come compilarlo e dove inviarlo.</p></article>
+        <article class="home-card">${icon('arrow',23)}<h4>Domanda diretta</h4><p>Quando la pratica è online, apri direttamente il servizio compilabile ufficiale con i dati e documenti già preparati.</p></article>
+        <article class="home-card">${icon('home',23)}<h4>Contatto esatto</h4><p>Quando non esiste un modulo, Carevia risolve il punto competente e mostra telefono, email, PEC o sportello con un testo pronto.</p></article>
+      </div>
     </section>
     ${state.profileConfigured && state.cases.length ? `<section class="home-section"><div class="home-section-head"><span class="eyebrow">Continua da qui</span><h3>Una cosa alla volta.</h3><p>Carevia tiene aperte le pratiche e ti mostra il prossimo passaggio da completare.</p></div>${(()=>{const oc=state.cases.filter(c=>!c.outcome), item=oc.map(c=>({c,step:nextCaseStep(c)})).find(x=>x.step); return item?`<div class="home-resume"><div><strong>${esc(item.step.title)}</strong><span>${esc(item.c.title)} · ${esc(deriveCaseStatus(item.c))}</span></div><button class="primary-button" onclick="openCase('${item.c.id}')">Continua pratica ${icon('arrow',15)}</button></div>`:`<div class="home-resume"><div><strong>Controlla gli esiti</strong><span>Le pratiche aperte non hanno altri passaggi operativi registrati.</span></div><button class="primary-button" onclick="navigateTo('cases')">Apri pratiche ${icon('arrow',15)}</button></div>`;})()}</section>` : ''}
     <section class="home-section">
@@ -2648,7 +2656,7 @@ function supportView() {
   const priority = priorityAction(state.profile,supports);
   const excluded = excludedChecks(state.profile);
   return `<div class="page enter">
-    ${heading('Motore decisionale Carevia','Il tuo percorso, in ordine',`Non un elenco di bonus: priorita, motivazioni, ostacoli e fonti per ${esc(state.profile.assistedName)}.`)}
+    ${heading('Orchestratore Carevia','Il tuo percorso operativo',`Non un elenco di bonus: una sequenza di azioni che sblocca pratiche e servizi per ${esc(state.profile.assistedName)}.`)}
     <div class="result-actions">${button('secondary-button','Salva / Stampa PDF','printSummary()','file')}${button('primary-button','Aggiorna dati','openWizard()','search')}</div>
     <section class="decision-summary">
       <div class="next-action-card">
@@ -2681,7 +2689,7 @@ function supportView() {
       <div class="support-value">
         <span>Valore / tipo</span><strong>${esc(s.value)}</strong>
         <a href="${s.source}" target="_blank" rel="noreferrer">Fonte ufficiale ${icon('arrow',14)}</a>
-        ${hasPracticeTemplate(s.id)?`<button class="${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'primary-button':'secondary-button'} case-open-button" onclick="openCaseFromSupport('${s.id}')">${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'Continua pratica':'Inizia pratica'} ${icon('arrow',14)}</button>`:''}
+        ${hasPracticeTemplate(s.id)?`<button class="${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'primary-button':'secondary-button'} case-open-button" onclick="openCaseFromSupport('${s.id}')">${state.cases.some(c=>c.supportId===s.id && c.outcome!=='rejected')?'Continua':'Vai all’azione'} ${icon('arrow',14)}</button>`:''}
         <div class="support-evidence">
           <span class="evidence-chip">${esc(s.sourceLabel)}</span>
           <span class="evidence-chip">${esc(s.legalState)}</span>
