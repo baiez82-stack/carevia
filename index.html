@@ -507,6 +507,11 @@ body{background:var(--canvas);color:var(--ink)}
 .official-doc-list svg{flex:0 0 auto;color:#1d7a6b;margin-top:1px}
 @media(max-width:800px){.practice-simple-summary{grid-template-columns:1fr}.official-doc-list{grid-template-columns:1fr}}
 
+
+.reset-data-button{border:0;background:transparent;color:#66756f;font-size:10px;font-weight:750;cursor:pointer;padding:8px 9px;border-radius:8px}
+.reset-data-button:hover{background:#f3f6f4;color:#7c2d12}
+@media(max-width:720px){.reset-data-button{font-size:0;padding:8px}.reset-data-button:after{content:'Reset';font-size:9px}}
+
 </style>
   </head>
   <body>
@@ -2393,7 +2398,7 @@ function topbar() {
     <button class="top-brand" onclick="navigateTo('overview')" aria-label="Vai alla home"><img src="assets/carevia-logo.svg" alt="Carevia"></button>
     <nav class="top-main-nav">${nav.map(([id,label,ico])=>`<button class="${state.active===id?'active':''}" onclick="navigateTo('${id}')">${icon(ico,17)}<span>${label}</span></button>`).join('')}</nav>
     <div class="top-profile">
-      ${state.profileConfigured?`<button class="profile-round" onclick="openWizard()" title="Aggiorna profilo">${icon('user',19)}</button>`:`<button class="primary-button" onclick="openWizard()">Inizia</button>`}
+      ${state.profileConfigured?`<button class="reset-data-button" onclick="resetCareviaData()" title="Azzera dati di prova">Azzera dati</button><button class="profile-round" onclick="openWizard()" title="Aggiorna profilo">${icon('user',19)}</button>`:`<button class="primary-button" onclick="openWizard()">Inizia</button>`}
     </div>
   </header>`;
 }
@@ -2748,6 +2753,18 @@ function persistDraft(showMessage=false){
   if(showMessage) showToast('Compilazione salvata su questo dispositivo');
 }
 function clearDraft(){ localStorage.removeItem(DRAFT_KEY); }
+
+function resetCareviaData(){
+  const ok=window.confirm('Vuoi azzerare tutti i dati Carevia salvati su questo dispositivo? Verranno cancellati profilo, pratiche, documenti, avanzamenti e bozze di prova. Le fonti e i dati territoriali del progetto non vengono modificati.');
+  if(!ok) return;
+  for(let i=localStorage.length-1;i>=0;i--){
+    const key=localStorage.key(i);
+    if(key && key.startsWith('carevia-')) localStorage.removeItem(key);
+  }
+  state=structuredClone(defaultState);
+  render();
+  showToast('Dati Carevia azzerati. Puoi iniziare un nuovo test.');
+}
 async function wizardNext(){
   const f=state.draft;
   if(state.wizardStep===0 && (!String(f.assistedName||'').trim() || !Number(f.age))){ showToast('Inserisci nome della persona assistita ed eta.'); return; }
@@ -2772,7 +2789,7 @@ async function completeWizard(){
 }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
+window.navigateTo=navigateTo; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
 
 render();
 loadTerritorialStats();
