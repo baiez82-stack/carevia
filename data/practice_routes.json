@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-23",
+  "principles": [
+    "Never invent a form or PDF.",
+    "Prefer direct official service over informational landing page when the official source exposes a direct service.",
+    "If no national form exists, route by municipality to health authority or social territorial area.",
+    "Show verification date and source authority."
+  ],
+  "routes": {
+    "law104work_private": {
+      "scope": "national",
+      "mode": "online",
+      "authority": "INPS",
+      "title": "Permessi Legge 104 - lavoratore privato",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html",
+      "direct_url": "https://serviziweb2.inps.it/PSRSVSCweb/initSportello.do?S=S"
+    },
+    "law104work_public": {
+      "scope": "national",
+      "mode": "employer",
+      "authority": "Datore di lavoro pubblico",
+      "title": "Permessi Legge 104 - lavoratore pubblico",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html"
+    },
+    "leave_private": {
+      "scope": "national",
+      "mode": "online",
+      "authority": "INPS",
+      "title": "Congedo straordinario - lavoratore privato",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html",
+      "direct_url": "https://serviziweb2.inps.it/AS0207/PsrConStrJ/initSportello.do?S=S"
+    },
+    "leave_public": {
+      "scope": "national",
+      "mode": "employer",
+      "authority": "Datore di lavoro pubblico",
+      "title": "Congedo straordinario - lavoratore pubblico",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html"
+    },
+    "universal": {
+      "scope": "national",
+      "mode": "online",
+      "authority": "INPS",
+      "title": "Prestazione Universale",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html",
+      "direct_url": "https://servizi2.inps.it/servizi/HUBPNPInternet/prestazione/45"
+    },
+    "hcp": {
+      "scope": "national",
+      "mode": "online",
+      "authority": "INPS",
+      "title": "Home Care Premium 2025-2028",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html",
+      "direct_url": "https://servizi2.inps.it/servizi/welfarecloudweb/"
+    },
+    "civil_reform_2026": {
+      "scope": "national-selected-provinces",
+      "mode": "doctor",
+      "authority": "INPS / medico certificatore",
+      "title": "Accertamento disabilita - province sperimentali 2026",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.certificato-medico-introduttivo---invalidit--civile.html"
+    },
+    "civil_legacy_2026": {
+      "scope": "national-other-provinces",
+      "mode": "online-after-medical-certificate",
+      "authority": "INPS",
+      "title": "Invalidita civile - procedura previgente 2026",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.domanda-invalidita-civile-e-accertamento-sanitario-50004.accertamento-sanitario.html",
+      "direct_url": "https://serviziweb2.inps.it/AS0207/InvCivCittJBWEB/servlet/LoginServlet"
+    },
+    "auu": {
+      "scope": "national",
+      "mode": "online",
+      "authority": "INPS",
+      "title": "Assegno Unico e Universale",
+      "info_url": "https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.assegno-unico-e-universale-per-i-figli-a-carico-55984.assegno-unico-e-universale-per-i-figli-a-carico.html",
+      "direct_url": "https://servizi2.inps.it/servizi/AssegnoUnicoFigli"
+    },
+    "adi": {
+      "scope": "territorial-health",
+      "mode": "assisted",
+      "authority_resolution": "Comune -> ASL/Azienda sanitaria",
+      "title": "Assistenza Domiciliare Integrata",
+      "info_url": "https://www.salute.gov.it/new/it/altro/assistenza-domiciliare-integrata-adi/"
+    },
+    "sad_social": {
+      "scope": "territorial-social",
+      "mode": "assisted",
+      "authority_resolution": "Comune -> Ambito Territoriale Sociale / Comune",
+      "title": "Assistenza domiciliare sociale",
+      "info_url": "https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/fondo-per-non-autosufficienza/pagine/default"
+    },
+    "dementia": {
+      "scope": "national-territorial-health",
+      "mode": "assisted",
+      "authority": "ISS / CDCD territoriale",
+      "title": "Percorso demenze / CDCD",
+      "direct_url": "https://www.epicentro.iss.it/demenza/mappa-cdcd"
+    },
+    "palliative": {
+      "scope": "territorial-health",
+      "mode": "assisted",
+      "authority_resolution": "Comune -> Azienda sanitaria / rete cure palliative",
+      "title": "Cure palliative",
+      "info_url": "https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/"
+    },
+    "aids": {
+      "scope": "territorial-health",
+      "mode": "assisted",
+      "authority_resolution": "Comune -> Azienda sanitaria / assistenza protesica",
+      "title": "Assistenza protesica SSN",
+      "info_url": "https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/"
+    },
+    "afterus": {
+      "scope": "regional-social",
+      "mode": "assisted",
+      "authority_resolution": "Regione -> Ambito Territoriale Sociale",
+      "title": "Dopo di Noi",
+      "info_url": "https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/Dopo-di-noi/Pagine/default"
+    },
+    "regional_support": {
+      "scope": "regional-social",
+      "mode": "assisted",
+      "authority_resolution": "Regione -> Ambito/Distretto",
+      "title": "Misure regionali non autosufficienza / caregiver"
+    }
+  }
+}
