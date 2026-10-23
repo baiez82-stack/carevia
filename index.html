@@ -553,6 +553,11 @@ body{background:var(--canvas);color:var(--ink)}
 .dependency-node h4{margin:10px 0 6px;font-size:13px}.dependency-node p{min-height:42px;margin:0 0 10px;color:#69766f;font-size:10px;line-height:1.45}.dependency-blocker{margin:8px 0;padding:7px 8px;border-radius:7px;background:#fff2d7;color:#6f511b;font-size:9px;font-weight:720}.graph-action{width:100%;min-height:34px;margin-top:7px}
 @media(max-width:900px){.dependency-graph{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.dependency-graph{grid-template-columns:1fr}.dependency-node p{min-height:0}}
 
+
+.portal-field-help{display:grid!important;grid-template-columns:1fr auto;align-items:center;gap:10px}.portal-field-help em{display:block;margin-top:7px;padding:6px 8px;border-radius:6px;background:#edf6f2;color:#174f45;font-size:9px;font-style:normal;font-weight:760}.portal-field-help .text-button{align-self:center}
+.manual-tracking{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;padding:14px;border:1px solid #dce4e0;border-radius:10px;background:#fafbf9}.manual-tracking .wide{grid-column:1/-1}.manual-tracking label{display:block;margin-bottom:5px;color:#64716c;font-size:9px;font-weight:760}.manual-tracking input{width:100%;height:38px;padding:0 10px;border:1px solid #d5dbd7;border-radius:7px;background:#fff;font-size:10px}
+@media(max-width:620px){.manual-tracking{grid-template-columns:1fr}.manual-tracking .wide{grid-column:auto}}
+
 </style>
   </head>
   <body>
@@ -2496,6 +2501,24 @@ function practiceActionModel(ca,op,g){
   return {actions,plan};
 }
 
+async function copyPreparedField(caseId,fieldId){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const field=g.fields.find(f=>f.id===fieldId);
+  const value=String(field?.value||'').trim();
+  if(!value){showToast('Questo dato non è ancora disponibile');return;}
+  try{await navigator.clipboard.writeText(value);showToast('Dato copiato');}
+  catch{showToast('Copia non disponibile su questo browser');}
+}
+
+function updateCaseSubmissionMeta(caseId,key,value){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  ca.submission=ca.submission||{};
+  ca.submission[key]=value;
+  ca.updatedAt=new Date().toISOString();
+  saveState();
+}
+
 async function copyPracticeMessage(caseId){
   const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
   const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
@@ -2556,7 +2579,7 @@ function caseDetailView(ca){
       <section class="simple-card">
         <span class="eyebrow">Carevia ti evita questo lavoro</span>
         <h3>${isOnline?'Cosa ti chiederanno nel portale':isPdf?'Come compilare il modulo':'Cosa dire e cosa chiedere'}</h3>
-        ${isOnline?`<div class="what-they-ask">${g.fields.map(f=>`<div><strong>${esc(f.label)}</strong><span>${esc(compilationHint(f))}</span></div>`).join('')}</div>`
+        ${isOnline?`<div class="what-they-ask">${g.fields.map(f=>`<div class="portal-field-help"><div><strong>${esc(f.label)}</strong><span>${esc(compilationHint(f))}</span>${f.value?`<em>${esc(String(f.value))}</em>`:''}</div>${f.value?`<button class="text-button" onclick="copyPreparedField('${ca.id}','${f.id}')">Copia</button>`:''}</div>`).join('')}</div>`
           :isPdf?`<div class="guided-fields compact-guided">${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div>`
           :`<div class="ready-script"><p>${esc(g.script)}</p><button class="secondary-button" onclick="copyPracticeMessage('${ca.id}')">${icon('file',14)} Copia testo pronto</button></div>`}
       </section>
@@ -2568,6 +2591,11 @@ function caseDetailView(ca){
       <details class="simple-progress-details">
         <summary>Segui avanzamento ed esito</summary>
         <div class="case-steps-mock">${(ca.steps||[]).map((s,i)=>`<div class="case-step ${s.done?'done':''}"><span class="case-step-number">${s.done?icon('check',13):i+1}</span><div><strong>${esc(s.title)}</strong><span>${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('${ca.id}','${s.id}')">${s.done?'Riapri':'Segna fatto'}</button></div></div>`).join('')}</div>
+        <div class="manual-tracking">
+          <div><label>Data invio / richiesta</label><input type="date" value="${esc(ca.submission?.date||'')}" onchange="updateCaseSubmissionMeta('${ca.id}','date',this.value)"></div>
+          <div><label>Protocollo / ricevuta</label><input type="text" value="${esc(ca.submission?.protocol||'')}" placeholder="Numero o riferimento" oninput="updateCaseSubmissionMeta('${ca.id}','protocol',this.value)"></div>
+          <div class="wide"><label>Nota / integrazione richiesta</label><input type="text" value="${esc(ca.submission?.note||'')}" placeholder="Es. integrazione documenti entro il..." oninput="updateCaseSubmissionMeta('${ca.id}','note',this.value)"></div>
+        </div>
         <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','rejected')">Respinta</button></div>
       </details>
     </section>
@@ -3069,7 +3097,7 @@ async function completeWizard(){
 }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.copyPracticeMessage=copyPracticeMessage; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
+window.navigateTo=navigateTo; window.copyPreparedField=copyPreparedField; window.updateCaseSubmissionMeta=updateCaseSubmissionMeta; window.copyPracticeMessage=copyPracticeMessage; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
 
 render();
 loadTerritorialStats();
