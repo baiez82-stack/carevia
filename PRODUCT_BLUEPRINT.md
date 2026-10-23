@@ -710,3 +710,33 @@ Quando tutti sono presenti, Carevia diventa un **case manager digitale**.
 
 ## Differenza competitiva
 **Non mostra tutto ciò che esiste. Mostra ciò che riguarda te, nel tuo territorio, e ti dice cosa fare dopo.**
+
+
+## Regola non negoziabile: ACTION FIRST
+
+Carevia non deve chiedere all'utente di ricompilare dentro Carevia una pratica che verra poi compilata di nuovo altrove.
+
+Ogni pratica deve portare immediatamente a uno dei tre esiti operativi verificati:
+
+1. **SCARICA MODULO UFFICIALE** — quando esiste un PDF/modulo ufficiale pertinente e aggiornato. Carevia spiega come compilarlo, quali allegati servono, dove firmare e dove consegnarlo.
+2. **APRI DOMANDA ONLINE** — quando la pratica si compila su un portale ufficiale. Carevia apre direttamente il servizio compilabile, non la pagina informativa generica, e prima mostra solo la checklist di dati/documenti da avere pronti.
+3. **CONTATTA IL PUNTO ESATTO** — quando non esiste un modulo o una domanda online. Carevia mostra telefono, email, PEC o sportello specifico risolto dal territorio e prepara il testo da usare.
+
+### Vietato
+- CTA primarie verso homepage generiche di INPS, ASL, Comune o Regione;
+- moduli ricostruiti o inventati;
+- compilazioni duplicate senza valore;
+- sequenze lunghe di step prima dell'azione principale;
+- link esterni che costringono l'utente a ricominciare la ricerca.
+
+### UX obbligatoria della pratica
+In alto, sempre:
+**Fai questo adesso** → una CTA concreta.
+
+Subito sotto:
+- **Prepara queste cose**;
+- **Dove recuperarle**;
+- **Cosa ti chiederanno / cosa dire**;
+- solo dopo, stato e follow-up.
+
+La metrica principale non è “quante informazioni mostriamo”, ma **quanto lavoro burocratico evitiamo all'utente**.
