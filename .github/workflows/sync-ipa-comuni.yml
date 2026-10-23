@@ -1,0 +1,98 @@
+name: Sync IPA municipality contacts
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sync-ipa-comuni.yml'
+  schedule:
+    - cron: '43 4 * * 2'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download and build municipality registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://indicepa.gov.it/ipa-dati/dataset/502ff370-1b2c-4310-94c7-f39ceb7500e3/resource/3ed63523-ff9c-41f6-a6fe-980f3d9e501f/download/amministrazioni.txt'
+          curl -L --fail --retry 3 --connect-timeout 20 "$URL" -o /tmp/amministrazioni.txt
+          python3 - <<'PY'
+          import csv, json, re
+          from pathlib import Path
+
+          raw=Path('/tmp/amministrazioni.txt').read_bytes()
+          text=None
+          for enc in ('utf-8-sig','utf-8','cp1252','latin-1'):
+              try:
+                  text=raw.decode(enc)
+                  break
+              except UnicodeDecodeError:
+                  pass
+          if text is None:
+              raise SystemExit('Unable to decode IPA dataset')
+
+          reader=csv.DictReader(text.splitlines(), delimiter='\t')
+          rows=[]
+          for r in reader:
+              name=(r.get('des_amm') or '').strip()
+              if not re.match(r'^Comune\s+di\s+', name, re.I):
+                  continue
+              city=(r.get('Comune') or '').strip()
+              if not city:
+                  city=re.sub(r'^Comune\s+di\s+','',name,flags=re.I).strip()
+              mails=[]
+              for i in range(1,6):
+                  addr=(r.get(f'mail{i}') or '').strip()
+                  typ=(r.get(f'tipo_mail{i}') or '').strip().lower()
+                  if addr and addr.lower()!='null':
+                      mails.append((addr,typ))
+              pec=next((a for a,t in mails if 'pec' in t),'')
+              email=next((a for a,t in mails if 'pec' not in t),'')
+              site=(r.get('sito_istituzionale') or '').strip()
+              if site and not site.startswith(('http://','https://')):
+                  site='https://'+site.lstrip('/')
+              rows.append({
+                  'comune':city,
+                  'provincia':(r.get('Provincia') or '').strip(),
+                  'regione':(r.get('Regione') or '').strip(),
+                  'ente':name,
+                  'sito':site,
+                  'email':email,
+                  'pec':pec,
+                  'cod_ipa':(r.get('cod_amm') or '').strip()
+              })
+
+          rows.sort(key=lambda x:(x['regione'].lower(),x['provincia'].lower(),x['comune'].lower()))
+          out=Path('data/ipa_comuni.csv')
+          with out.open('w',newline='',encoding='utf-8') as fh:
+              w=csv.DictWriter(fh,fieldnames=['comune','provincia','regione','ente','sito','email','pec','cod_ipa'])
+              w.writeheader(); w.writerows(rows)
+          Path('data/ipa_comuni_source.json').write_text(json.dumps({
+              'source':'Indice PA / AgID - Amministrazioni',
+              'source_url':URL,
+              'rows':len(rows),
+              'generated_by':'sync-ipa-comuni.yml'
+          },ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(f'Generated {len(rows)} municipality records')
+          PY
+
+      - name: Commit updates
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/ipa_comuni.csv data/ipa_comuni_source.json; then
+            echo "No IPA municipality changes"
+            exit 0
+          fi
+          git config user.name "carevia-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/ipa_comuni.csv data/ipa_comuni_source.json
+          git commit -m "Sync IPA municipality contacts"
+          git push
