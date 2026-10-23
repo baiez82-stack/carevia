@@ -166,10 +166,36 @@ La tesi Carevia va ridimensionata se, dopo verifica competitiva:
 
 ## Posizionamento
 
-**Carevia e il navigatore operativo del caregiving. Capisce il caso, risolve il territorio e ti porta direttamente al modulo, alla domanda o al contatto giusto, seguendo la pratica fino all'esito.**
+**Carevia e il navigatore operativo del caregiving. Capisce il caso, risolve il territorio e ti porta direttamente al modulo, alla domanda o al contatto giusto, aiutando l'utente a preparare l'azione e registrare manualmente il seguito.**
 
 Payoff:
 **Carevia. Dal problema al prossimo passo.**
 
 Comportamento di prodotto:
 **dal prossimo passo all'azione concreta, senza ricerche da rifare.**
+
+
+## Decisione dopo il red-team (23 ottobre 2026)
+
+Carevia continua, ma con prodotto ristretto.
+
+### Core difendibile
+1. **Grafo delle dipendenze burocratiche e socio-sanitarie**: mostra cosa sblocca cosa e quale prerequisito conviene completare per primo.
+2. **Risoluzione territoriale demand-driven**: copertura nazionale base, approfondimento Distretto/modulo/contatto solo sui territori realmente usati e verificati.
+3. **Action-first handoff**: modulo ufficiale, servizio online diretto o contatto esatto.
+4. **Human-in-the-loop per i dati locali**: prevista come livello successivo per segnalare moduli e contatti cambiati.
+5. **Ultimo miglio tramite partnership/API**: non promettere invio/protocollazione automatica finché non esiste una partnership o integrazione reale.
+
+### Cosa non consideriamo moat
+- dataset IPA/AgID e altri open data;
+- semplice eligibility;
+- prefill PDF da solo;
+- template email/PEC;
+- AI generativa;
+- directory di fonti.
+
+### Regola di copertura
+Non tentare di mantenere manualmente ogni PDF di ogni Comune. Il livello nazionale serve per risolvere gli enti; la profondità locale viene costruita **dalla domanda reale degli utenti** e sottoposta a verifica.
+
+### Promessa corretta
+Carevia accompagna fino all'azione ufficiale verificata e consente di registrare manualmente protocollo, integrazioni ed esito. Non promette tracking automatico dell'ente senza integrazioni.
