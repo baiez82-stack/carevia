@@ -1892,71 +1892,71 @@ function caseDetailView(ca){
     ? {name:'Amministrazione / datore di lavoro pubblico',detail:'La richiesta segue la procedura interna dell’ente o dell’ufficio personale.',url:ca.source}
     : ca.authority;
   const stages=['Dati e requisiti','Modulo e documenti','Compilazione guidata','Come presentarla','Dopo l’invio'];
-  return \`<div class="page enter practice-page">
-    <button class="text-button practice-back" onclick="closeCaseDetail()">\${icon('back',15)} Tutte le pratiche</button>
+  return `<div class="page enter practice-page">
+    <button class="text-button practice-back" onclick="closeCaseDetail()">${icon('back',15)} Tutte le pratiche</button>
 
     <div class="practice-title-row">
-      <div><span class="eyebrow">\${esc(ca.type)}</span><h2>\${esc(ca.title)}</h2><p>\${esc(ca.adminTitle)}</p></div>
-      <div class="practice-meta"><span class="case-status-pill \${caseStatusClass(status)}">\${esc(status)}</span><small>Aggiornata \${new Date(ca.updatedAt).toLocaleDateString('it-IT')}</small></div>
+      <div><span class="eyebrow">${esc(ca.type)}</span><h2>${esc(ca.title)}</h2><p>${esc(ca.adminTitle)}</p></div>
+      <div class="practice-meta"><span class="case-status-pill ${caseStatusClass(status)}">${esc(status)}</span><small>Aggiornata ${new Date(ca.updatedAt).toLocaleDateString('it-IT')}</small></div>
     </div>
 
     <section class="practice-match-card">
-      <div class="practice-match-copy"><div class="practice-match-icon">\${icon('file',25)}</div><div><h3>Questa pratica potrebbe riguardarti</h3><p>In base alle informazioni che hai inserito, Carevia ha selezionato questo percorso e ti prepara alla procedura ufficiale corretta.</p></div></div>
+      <div class="practice-match-copy"><div class="practice-match-icon">${icon('file',25)}</div><div><h3>Questa pratica potrebbe riguardarti</h3><p>In base alle informazioni che hai inserito, Carevia ha selezionato questo percorso e ti prepara alla procedura ufficiale corretta.</p></div></div>
       <div class="practice-match-actions">
-        \${op.download?\`<a class="primary-button practice-hero-btn" href="\${op.download}" target="_blank" rel="noreferrer">\${icon('file',17)} Scarica il modulo</a>\`:op.url?\`<a class="primary-button practice-hero-btn" href="\${op.url}" target="_blank" rel="noreferrer">\${icon('arrow',17)} \${esc(op.cta)}</a>\`:''}
-        <button class="secondary-button practice-hero-btn" onclick="document.getElementById('compilation-guide')?.scrollIntoView({behavior:'smooth'})">\${icon('info',17)} Guida alla compilazione</button>
+        ${op.download?`<a class="primary-button practice-hero-btn" href="${op.download}" target="_blank" rel="noreferrer">${icon('file',17)} Scarica il modulo</a>`:op.url?`<a class="primary-button practice-hero-btn" href="${op.url}" target="_blank" rel="noreferrer">${icon('arrow',17)} ${esc(op.cta)}</a>`:''}
+        <button class="secondary-button practice-hero-btn" onclick="document.getElementById('compilation-guide')?.scrollIntoView({behavior:'smooth'})">${icon('info',17)} Guida alla compilazione</button>
       </div>
     </section>
 
-    <div class="practice-stepper">\${stages.map((label,i)=>\`<div class="\${i+1===stage?'active':''} \${i+1<stage?'done':''}"><span>\${i+1<stage?icon('check',12):i+1}</span><b>\${label}</b></div>\`).join('')}</div>
+    <div class="practice-stepper">${stages.map((label,i)=>`<div class="${i+1===stage?'active':''} ${i+1<stage?'done':''}"><span>${i+1<stage?icon('check',12):i+1}</span><b>${label}</b></div>`).join('')}</div>
 
     <div class="practice-main-grid">
       <section class="practice-stage-card">
         <div class="stage-heading"><span class="stage-number">1</span><div><h3>Dati e requisiti</h3><p>Controlliamo le informazioni principali per preparare la pratica corretta e ridurre gli errori prima dell’invio.</p></div></div>
-        <div class="practice-info-strip">\${icon('info',17)}<span>I dati inseriti servono per aiutarti a preparare correttamente la pratica. Non vengono inviati automaticamente ad alcun ente.</span></div>
-        <div class="mock-form-grid">\${g.fields.map(f=>\`<div class="mock-field">\${applicationFieldHtml(ca,f)}<div class="field-advice">\${esc(compilationHint(f))}</div></div>\`).join('')}</div>
-        <div class="stage-footer"><button class="primary-button stage-continue" onclick="document.getElementById('documents-step')?.scrollIntoView({behavior:'smooth'})">Continua \${icon('arrow',15)}</button><span class="local-data-note">\${icon('shield',14)} I dati restano su questo dispositivo</span></div>
+        <div class="practice-info-strip">${icon('info',17)}<span>I dati inseriti servono per aiutarti a preparare correttamente la pratica. Non vengono inviati automaticamente ad alcun ente.</span></div>
+        <div class="mock-form-grid">${g.fields.map(f=>`<div class="mock-field">${applicationFieldHtml(ca,f)}<div class="field-advice">${esc(compilationHint(f))}</div></div>`).join('')}</div>
+        <div class="stage-footer"><button class="primary-button stage-continue" onclick="document.getElementById('documents-step')?.scrollIntoView({behavior:'smooth'})">Continua ${icon('arrow',15)}</button><span class="local-data-note">${icon('shield',14)} I dati restano su questo dispositivo</span></div>
       </section>
 
       <aside class="practice-side">
         <section class="practice-side-card">
-          <h4>\${icon('heart',18)} A cosa serve questa pratica</h4>
-          <div class="benefit-list">\${benefits.map(x=>\`<div>\${icon('check',14)}<span>\${esc(x)}</span></div>\`).join('')}</div>
-          <div class="side-note">\${icon('info',15)}<span>L’esito dipende dalla verifica dell’ente competente e dalla situazione personale.</span></div>
+          <h4>${icon('heart',18)} A cosa serve questa pratica</h4>
+          <div class="benefit-list">${benefits.map(x=>`<div>${icon('check',14)}<span>${esc(x)}</span></div>`).join('')}</div>
+          <div class="side-note">${icon('info',15)}<span>L’esito dipende dalla verifica dell’ente competente e dalla situazione personale.</span></div>
         </section>
         <section class="practice-side-card">
-          <h4>\${icon('home',18)} Ente competente</h4>
-          <strong>\${esc(dynamicAuthority?.name||'Da verificare')}</strong>
-          <p>\${esc(dynamicAuthority?.detail||'Carevia deve ancora risolvere il punto di accesso.')}</p>
-          \${dynamicAuthority?.url?\`<a class="secondary-button side-link" href="\${dynamicAuthority.url}" target="_blank" rel="noreferrer">Apri ente \${icon('arrow',14)}</a>\`:''}
+          <h4>${icon('home',18)} Ente competente</h4>
+          <strong>${esc(dynamicAuthority?.name||'Da verificare')}</strong>
+          <p>${esc(dynamicAuthority?.detail||'Carevia deve ancora risolvere il punto di accesso.')}</p>
+          ${dynamicAuthority?.url?`<a class="secondary-button side-link" href="${dynamicAuthority.url}" target="_blank" rel="noreferrer">Apri ente ${icon('arrow',14)}</a>`:''}
         </section>
       </aside>
     </div>
 
     <section id="documents-step" class="practice-lower-section">
       <div class="lower-section-title"><span class="stage-number muted">2</span><div><span class="eyebrow">Modulo e documenti</span><h3>Prepara ciò che serve davvero</h3><p>La checklist blocca lo stato “Pronta da inviare” finché risultano elementi mancanti.</p></div></div>
-      <div class="case-checklist lower-checklist">\${(ca.documents||[]).map(d=>\`<div class="case-check \${d.ready?'done':''}"><button onclick="toggleCaseDocument('\${ca.id}','\${d.id}')">\${d.ready?icon('check',14):''}</button><div><strong>\${esc(d.title)}</strong><span>\${esc(d.reason)}</span></div><small>\${d.ready?'Disponibile':'Da recuperare'}</small></div>\`).join('')}</div>
+      <div class="case-checklist lower-checklist">${(ca.documents||[]).map(d=>`<div class="case-check ${d.ready?'done':''}"><button onclick="toggleCaseDocument('${ca.id}','${d.id}')">${d.ready?icon('check',14):''}</button><div><strong>${esc(d.title)}</strong><span>${esc(d.reason)}</span></div><small>${d.ready?'Disponibile':'Da recuperare'}</small></div>`).join('')}</div>
     </section>
 
     <section id="compilation-guide" class="practice-lower-section">
       <div class="lower-section-title"><span class="stage-number muted">3</span><div><span class="eyebrow">Compilazione guidata</span><h3>Come compilare senza andare alla cieca</h3><p>Carevia non sostituisce il modulo ufficiale: ti spiega cosa preparare e come interpretare i campi più delicati.</p></div></div>
-      <div class="guided-fields">\${g.fields.map(f=>\`<div class="guided-field-row"><div class="guided-field-control">\${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>\${esc(compilationHint(f))}</p></div></div>\`).join('')}</div>
+      <div class="guided-fields">${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div>
     </section>
 
     <section class="practice-lower-section">
-      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Usa il canale ufficiale corretto</h3><p>\${esc(op.detail)}</p></div></div>
-      <div class="application-channels">\${g.channels.map((ch,i)=>\`<div class="application-channel"><span>\${i+1}</span><div><strong>\${esc(ch.name)}</strong><small>\${esc(ch.text)}</small></div>\${ch.url?\`<a href="\${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>\`:''}</div>\`).join('')}</div>
-      <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>\${esc(g.script)}</div>
+      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Usa il canale ufficiale corretto</h3><p>${esc(op.detail)}</p></div></div>
+      <div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div>`).join('')}</div>
+      <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div>
     </section>
 
     <section class="practice-lower-section">
       <div class="lower-section-title"><span class="stage-number muted">5</span><div><span class="eyebrow">Dopo l’invio</span><h3>Segui la pratica fino all’esito</h3><p>Segna i passaggi completati e registra l’esito solo dopo una comunicazione reale dell’ente.</p></div></div>
-      <div class="case-steps-mock">\${(ca.steps||[]).map((s,i)=>\`<div class="case-step \${s.done?'done':''}"><span class="case-step-number">\${s.done?icon('check',13):i+1}</span><div><strong>\${esc(s.title)}</strong><span>\${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('\${ca.id}','\${s.id}')">\${s.done?'Riapri':'Segna fatto'}</button>\${s.url?\`<a href="\${s.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>\`:''}</div></div>\`).join('')}</div>
-      <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('\${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('\${ca.id}','rejected')">Respinta</button>\${ca.outcome?\`<button class="text-button" onclick="setCaseOutcome('\${ca.id}',null)">Rimuovi esito</button>\`:''}</div>
+      <div class="case-steps-mock">${(ca.steps||[]).map((s,i)=>`<div class="case-step ${s.done?'done':''}"><span class="case-step-number">${s.done?icon('check',13):i+1}</span><div><strong>${esc(s.title)}</strong><span>${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('${ca.id}','${s.id}')">${s.done?'Riapri':'Segna fatto'}</button>${s.url?`<a href="${s.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div></div>`).join('')}</div>
+      <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','rejected')">Respinta</button>${ca.outcome?`<button class="text-button" onclick="setCaseOutcome('${ca.id}',null)">Rimuovi esito</button>`:''}</div>
     </section>
 
     <div class="practice-global-disclaimer"><strong>Importante</strong><span>Carevia è uno strumento di supporto e può contenere errori o informazioni non aggiornate. Prima dell’invio verifica sempre dati, requisiti, modulo e istruzioni sulle fonti ufficiali dell’ente competente. Carevia non sostituisce INPS, Comune, ASL/ULSS, patronati o professionisti abilitati.</span></div>
-  </div>\`;
+  </div>`;
 }
 
 function setCaseFilter(filter){ state.caseFilter=filter; saveState(); render(); }
@@ -1968,13 +1968,13 @@ function sidebar() { return ''; }
 
 function topbar() {
   const nav=[['overview','Home','home'],['support','Il mio percorso','wallet'],['cases','Pratiche','file'],['documents','Documenti','folder'],['territory','Territorio','search'],['sources','Fonti','info']];
-  return \`<header class="topbar mock-topbar">
+  return `<header class="topbar mock-topbar">
     <button class="top-brand" onclick="navigateTo('overview')" aria-label="Vai alla home"><img src="assets/carevia-logo.svg" alt="Carevia"></button>
-    <nav class="top-main-nav">\${nav.map(([id,label,ico])=>\`<button class="\${state.active===id?'active':''}" onclick="navigateTo('\${id}')">\${icon(ico,17)}<span>\${label}</span></button>\`).join('')}</nav>
+    <nav class="top-main-nav">${nav.map(([id,label,ico])=>`<button class="${state.active===id?'active':''}" onclick="navigateTo('${id}')">${icon(ico,17)}<span>${label}</span></button>`).join('')}</nav>
     <div class="top-profile">
-      \${state.profileConfigured?\`<button class="profile-round" onclick="openWizard()" title="Aggiorna profilo">\${icon('user',19)}</button>\`:\`<button class="primary-button" onclick="openWizard()">Inizia</button>\`}
+      ${state.profileConfigured?`<button class="profile-round" onclick="openWizard()" title="Aggiorna profilo">${icon('user',19)}</button>`:`<button class="primary-button" onclick="openWizard()">Inizia</button>`}
     </div>
-  </header>\`;
+  </header>`;
 }
 
 function taskRow(task) {
