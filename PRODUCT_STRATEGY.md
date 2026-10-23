@@ -172,3 +172,29 @@ Subito sotto:
 - solo dopo, stato e follow-up.
 
 La metrica principale non è “quante informazioni mostriamo”, ma **quanto lavoro burocratico evitiamo all'utente**.
+
+
+## Decisione dopo il red-team (23 ottobre 2026)
+
+Carevia continua, ma con prodotto ristretto.
+
+### Core difendibile
+1. **Grafo delle dipendenze burocratiche e socio-sanitarie**: mostra cosa sblocca cosa e quale prerequisito conviene completare per primo.
+2. **Risoluzione territoriale demand-driven**: copertura nazionale base, approfondimento Distretto/modulo/contatto solo sui territori realmente usati e verificati.
+3. **Action-first handoff**: modulo ufficiale, servizio online diretto o contatto esatto.
+4. **Human-in-the-loop per i dati locali**: prevista come livello successivo per segnalare moduli e contatti cambiati.
+5. **Ultimo miglio tramite partnership/API**: non promettere invio/protocollazione automatica finché non esiste una partnership o integrazione reale.
+
+### Cosa non consideriamo moat
+- dataset IPA/AgID e altri open data;
+- semplice eligibility;
+- prefill PDF da solo;
+- template email/PEC;
+- AI generativa;
+- directory di fonti.
+
+### Regola di copertura
+Non tentare di mantenere manualmente ogni PDF di ogni Comune. Il livello nazionale serve per risolvere gli enti; la profondità locale viene costruita **dalla domanda reale degli utenti** e sottoposta a verifica.
+
+### Promessa corretta
+Carevia accompagna fino all'azione ufficiale verificata e consente di registrare manualmente protocollo, integrazioni ed esito. Non promette tracking automatico dell'ente senza integrazioni.
