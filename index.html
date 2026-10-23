@@ -2421,7 +2421,7 @@ function overview() {
             <span>${icon('shield',14)} dati sul dispositivo</span>
             <span>${icon('check',14)} fonti ufficiali</span>
             <span>${icon('info',14)} nessun esito automatico</span>
-            <span>${icon('search',14)} Comune→ASL + Comune→Ambito Sociale nazionale</span>
+            <span>${icon('search',14)} Comune→ASL + Ambito + contatti ufficiali nazionali</span>
           </div>
         </div>
         <div class="service-steps">
@@ -2646,9 +2646,15 @@ async function completeFromMunicipality(){
     state.draft.region=mapRegionName(a.state||a.region||state.draft.region);
     state.draft.province=(a.province||a.county||a.state_district||state.draft.province||'').replace(/^Provincia di\s+/i,'');
     state.draft.city=a.city||a.town||a.village||a.municipality||city;
-    const [health,social]=await Promise.all([resolveNationalHealthAuthority(state.draft),resolveNationalSocialArea(state.draft)]);
-    state.draft.healthAuthority=health; state.draft.socialArea=social;
-    persistDraft(false); render(); showToast('Territorio completato dal Comune');
+    const [health,social,municipality]=await Promise.all([
+      resolveNationalHealthAuthority(state.draft),
+      resolveNationalSocialArea(state.draft),
+      resolveMunicipalityAuthority(state.draft)
+    ]);
+    state.draft.healthAuthority=health;
+    state.draft.socialArea=social;
+    state.draft.municipalityAuthority=municipality;
+    persistDraft(false); render(); showToast('Territorio, ASL, Ambito e Comune ufficiale aggiornati');
   }catch{
     showToast('Comune non trovato automaticamente');
   }
@@ -2748,7 +2754,7 @@ async function wizardNext(){
   state.wizardStep=Math.min(4,state.wizardStep+1); persistDraft(false); render();
 }
 function wizardBack(){ state.wizardStep=Math.max(0,state.wizardStep-1); persistDraft(false); render(); }
-function updateDraft(key,value){ state.draft[key]=value; if(['city','region','province'].includes(key)){ state.draft.healthAuthority=null; state.draft.socialArea=null; } persistDraft(false); }
+function updateDraft(key,value){ state.draft[key]=value; if(['city','region','province'].includes(key)){ state.draft.healthAuthority=null; state.draft.socialArea=null; state.draft.municipalityAuthority=null; } persistDraft(false); }
 function toggleNeed(need){ state.draft.needs=state.draft.needs.includes(need)?state.draft.needs.filter(n=>n!==need):[...state.draft.needs,need]; persistDraft(false); render(); }
 async function completeWizard(){
   await resolveDraftTerritoryData(false);
