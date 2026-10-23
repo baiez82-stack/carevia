@@ -522,7 +522,7 @@ const defaultState = {
     region: 'Seleziona', province: '', city: '', condition: 'Anziano non autosufficiente',
     living: 'Con familiari', invalidity: 'No', law104: 'No', law104Level: 'Non so', allowance: 'No',
     caregiverWork: 'Non lavoro', caregiverSector: 'Non so', isee: 'Non disponibile', publicEmployee: 'Non so',
-    healthAuthority: null, socialArea: null, needs: [],
+    healthAuthority: null, socialArea: null, municipalityAuthority: null, needs: [],
   },
   tasks: [],
   documents: [],
@@ -788,6 +788,7 @@ const MLPS_ATS_REGISTRY = 'https://www.lavoro.gov.it/strumenti-e-servizi/Sistema
 let ministryAslRowsCache = null;
 let aslRegistryRowsCache = null;
 let atsRowsCache = null;
+let ipaMunicipalityRowsCache = null;
 
 function parseCsvRows(text) {
   const first=(text.split(/\r?\n/,1)[0]||'');
@@ -907,6 +908,62 @@ async function enrichHealthAuthorities(authorities, profile){
   });
 }
 
+async function loadIpaMunicipalityRows(){
+  if(ipaMunicipalityRowsCache) return ipaMunicipalityRowsCache;
+  try{
+    const res=await fetch('data/ipa_comuni.csv',{cache:'no-cache'});
+    if(!res.ok) return [];
+    const text=await res.text();
+    const rows=parseCsvRows(text);
+    if(rows.length<2) return [];
+    const headers=rows[0].map(normalizeHeader);
+    const ix={
+      city:headers.findIndex(h=>h==='comune'),
+      province:headers.findIndex(h=>h==='provincia'),
+      region:headers.findIndex(h=>h==='regione'),
+      entity:headers.findIndex(h=>h==='ente'),
+      site:headers.findIndex(h=>h==='sito'),
+      email:headers.findIndex(h=>h==='email'),
+      pec:headers.findIndex(h=>h==='pec'),
+      code:headers.findIndex(h=>h==='cod ipa')
+    };
+    if(ix.city<0 || ix.region<0) return [];
+    ipaMunicipalityRowsCache=rows.slice(1).map(r=>({
+      city:r[ix.city]||'',province:r[ix.province]||'',region:r[ix.region]||'',entity:r[ix.entity]||'',
+      site:r[ix.site]||'',email:r[ix.email]||'',pec:r[ix.pec]||'',code:r[ix.code]||''
+    }));
+    return ipaMunicipalityRowsCache;
+  }catch{return [];}
+}
+
+async function resolveMunicipalityAuthority(profile){
+  const city=normalizeDatasetPlace(profile.city), region=normalizeDatasetPlace(profile.region);
+  if(!city || !region) return null;
+  const rows=await loadIpaMunicipalityRows();
+  const matches=rows.filter(r=>{
+    const sameCity=normalizeDatasetPlace(r.city)===city;
+    const rr=normalizeDatasetPlace(r.region);
+    const sameRegion=rr===region || rr.includes(region) || region.includes(rr);
+    return sameCity && sameRegion;
+  });
+  if(!matches.length) return {status:'not-found',source:'Indice PA / AgID'};
+  const r=matches[0];
+  return {status:'resolved',source:'Indice PA / AgID',name:r.entity||('Comune di '+profile.city),site:r.site,email:r.email,pec:r.pec,codIpa:r.code};
+}
+
+function municipalityAuthorityNode(profile){
+  const m=profile.municipalityAuthority;
+  if(!m || m.status!=='resolved') return null;
+  const contacts=[m.email && 'email '+m.email,m.pec && 'PEC '+m.pec].filter(Boolean).join(' · ');
+  return {
+    id:'national-municipality',scope:'AgID / IPA',region:profile.region,city:profile.city,type:'Comune - contatti ufficiali',
+    title:m.name||('Comune di '+profile.city),status:'Ente comunale risolto',verifiedAt:'sync settimanale',
+    conditions:null,minAge:0,purpose:'Sito e recapiti istituzionali del Comune ricavati dall’Indice delle Pubbliche Amministrazioni (IPA).',
+    access:contacts||'Apri il sito istituzionale del Comune per servizi sociali, modulistica e contatti.',
+    url:m.site||'https://www.indicepa.gov.it/'
+  };
+}
+
 async function loadAtsRows(){
   if(atsRowsCache) return atsRowsCache;
   const res=await fetch('data/ats_registry.csv',{cache:'no-cache'});
@@ -960,9 +1017,10 @@ function nationalSocialAreaNode(profile){
 
 async function resolveDraftTerritoryData(showMessage=false){
   if(!state.draft?.city || !state.draft?.region || state.draft.region==='Seleziona') return;
-  const [health,social]=await Promise.all([resolveNationalHealthAuthority(state.draft),resolveNationalSocialArea(state.draft)]);
+  const [health,social,municipality]=await Promise.all([resolveNationalHealthAuthority(state.draft),resolveNationalSocialArea(state.draft),resolveMunicipalityAuthority(state.draft)]);
   state.draft.healthAuthority=health;
   state.draft.socialArea=social;
+  state.draft.municipalityAuthority=municipality;
   persistDraft(false);
   if(showMessage){
     if(health?.status==='resolved' && social?.status==='resolved') showToast('ASL e Ambito Sociale risolti');
@@ -973,9 +1031,10 @@ async function resolveDraftTerritoryData(showMessage=false){
 
 async function resolveProfileTerritoryData(){
   if(!state.profileConfigured || !state.profile?.city || !state.profile?.region) return;
-  const [health,social]=await Promise.all([resolveNationalHealthAuthority(state.profile),resolveNationalSocialArea(state.profile)]);
+  const [health,social,municipality]=await Promise.all([resolveNationalHealthAuthority(state.profile),resolveNationalSocialArea(state.profile),resolveMunicipalityAuthority(state.profile)]);
   state.profile.healthAuthority=health;
   state.profile.socialArea=social;
+  state.profile.municipalityAuthority=municipality;
   saveState();
 }
 
@@ -1060,6 +1119,8 @@ function verifiedTerritoryNodes(profile) {
   }
   const socialResolved=nationalSocialAreaNode(profile);
   if(socialResolved && !nodes.some(n=>n.title===socialResolved.title)) nodes.push(socialResolved);
+  const municipalityResolved=municipalityAuthorityNode(profile);
+  if(municipalityResolved && !nodes.some(n=>n.title===municipalityResolved.title)) nodes.push(municipalityResolved);
   return nodes;
 }
 
@@ -1069,9 +1130,10 @@ function coverageFor(profile) {
   const ulss=resolveVenetoUlss(profile);
   const national=profile.healthAuthority;
   const social=profile.socialArea;
+  const municipality=profile.municipalityAuthority;
   if(local.length) return {grade:'Verificata locale',tone:'full',text:`${local.length} nodi locali + ${regional.length} regionali verificati da Carevia il ${TERRITORY_CHECKED}.`};
   if(ulss && !ulss.split) return {grade:'Territorio risolto',tone:'full',text:`Misure regionali + azienda sanitaria (${ulss.name}) risolte; i servizi comunali specifici sono in espansione.`};
-  if(national?.status==='resolved' && social?.status==='resolved') return {grade:'Territorio nazionale risolto',tone:'full',text:`Comune→ASL e Comune→Ambito Sociale risolti tramite i registri nazionali ufficiali; i singoli sportelli e servizi di dettaglio continuano ad essere verificati localmente.`};
+  if(national?.status==='resolved' && social?.status==='resolved' && municipality?.status==='resolved') return {grade:'Territorio nazionale risolto',tone:'full',text:`Comune→ASL, Comune→Ambito Sociale e sito/recapiti ufficiali del Comune risolti tramite registri nazionali; i singoli moduli locali vengono mostrati solo quando verificati.`};
   if(national?.status==='resolved') return {grade:'Sanita territoriale risolta',tone:'full',text:`Comune→ASL risolto tramite open data del Ministero della Salute; l’Ambito Sociale non è disponibile nel registro nazionale per questo territorio.`};
   if(national?.status==='multiple' && social?.status==='resolved') return {grade:'Risoluzione territoriale parziale',tone:'partial',text:'Ambito Sociale risolto; il Comune è servito da più ASL e richiede municipio/circoscrizione o verifica sub-comunale.'};
   if(national?.status==='multiple') return {grade:'Risoluzione sanitaria parziale',tone:'partial',text:'Il dataset ministeriale associa il Comune a più aziende sanitarie: serve municipio/circoscrizione o una verifica locale.'};
@@ -1538,10 +1600,19 @@ function healthAuthorityForPractice(profile,fallback){
 }
 
 function socialAuthorityForPractice(profile,fallback){
-  const a=profile.socialArea;
+  const a=profile.socialArea, m=profile.municipalityAuthority;
   if(a?.status==='resolved' && a.areas?.length){
     const x=a.areas[0];
-    return {name:x.name||fallback,detail:x.lead ? 'Ente capofila: '+x.lead : 'Ambito Territoriale Sociale',url:MLPS_ATS_REGISTRY};
+    const contacts=[m?.email&&'email '+m.email,m?.pec&&'PEC '+m.pec].filter(Boolean).join(' · ');
+    return {
+      name:x.name||fallback,
+      detail:[x.lead?'Ente capofila: '+x.lead:'Ambito Territoriale Sociale',m?.name?('Comune: '+m.name):'',contacts].filter(Boolean).join(' · '),
+      url:m?.site||MLPS_ATS_REGISTRY
+    };
+  }
+  if(m?.status==='resolved'){
+    const contacts=[m.email&&'email '+m.email,m.pec&&'PEC '+m.pec].filter(Boolean).join(' · ');
+    return {name:m.name||fallback,detail:contacts||'Comune risolto tramite Indice PA / AgID.',url:m.site||'https://www.indicepa.gov.it/'};
   }
   return {name:fallback,detail:'Verifica l’Ambito competente nel Registro nazionale.',url:MLPS_ATS_REGISTRY};
 }
@@ -2549,8 +2620,8 @@ async function detectLocation(){
       if(region) state.draft.region=region;
       if(province) state.draft.province=province;
       if(city) state.draft.city=city;
-      const [health,social]=await Promise.all([resolveNationalHealthAuthority(state.draft),resolveNationalSocialArea(state.draft)]);
-      state.draft.healthAuthority=health; state.draft.socialArea=social;
+      const [health,social,municipality]=await Promise.all([resolveNationalHealthAuthority(state.draft),resolveNationalSocialArea(state.draft),resolveMunicipalityAuthority(state.draft)]);
+      state.draft.healthAuthority=health; state.draft.socialArea=social; state.draft.municipalityAuthority=municipality;
       persistDraft(false); render(); showToast('Localita, ASL e Ambito Sociale aggiornati');
     }catch(e){
       if(status) status.textContent='Non riesco a completare automaticamente la localita. Inseriscila manualmente.';
