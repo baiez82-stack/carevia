@@ -512,6 +512,24 @@ body{background:var(--canvas);color:var(--ink)}
 .reset-data-button:hover{background:#f3f6f4;color:#7c2d12}
 @media(max-width:720px){.reset-data-button{font-size:0;padding:8px}.reset-data-button:after{content:'Reset';font-size:9px}}
 
+
+.operational-section{scroll-margin-top:110px}
+.operational-guide{display:grid;gap:18px}
+.operational-guide-head{padding:18px;border:1px solid #cfe1da;border-radius:12px;background:linear-gradient(135deg,#f3faf7,#fbfdfc)}
+.operational-guide-head h3{margin:6px 0 6px;font-family:Georgia,serif;font-size:23px}.operational-guide-head p{margin:0;color:#66756f;font-size:11px;line-height:1.55}
+.operational-steps{display:grid;gap:9px}.operational-step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px;border:1px solid #e0e6e2;border-radius:10px;background:#fff}
+.operational-step>span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#e6f3ee;color:#126355;font-weight:800;font-size:11px}
+.operational-step strong{font-size:12px}.operational-step p{margin:4px 0 0;color:#65736e;font-size:10px;line-height:1.55}
+.operational-resources{display:grid;gap:8px}.operational-resources h4{margin:0 0 4px;font-size:13px}
+.operational-resource{display:grid;grid-template-columns:86px 1fr 20px;gap:12px;align-items:center;padding:13px 14px;border:1px solid #dce4e0;border-radius:10px;background:#fafbf9;color:inherit;text-decoration:none}
+.operational-resource:hover{border-color:#9fc9bc;background:#f4faf7}.operational-resource>span{font-size:8px;font-weight:850;letter-spacing:.08em;color:#176858}
+.operational-resource strong,.operational-resource small{display:block}.operational-resource strong{font-size:11px}.operational-resource small{margin-top:3px;color:#6a7772;font-size:9px;line-height:1.45}
+.operational-final{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px;border-radius:11px;background:#123f3a;color:#fff}
+.operational-final strong,.operational-final span{display:block}.operational-final strong{font-size:12px}.operational-final span{margin-top:4px;color:#d8e6e1;font-size:10px}
+.official-sources-details{margin-top:14px;border-top:1px solid #e2e7e4;padding-top:12px}.official-sources-details summary{cursor:pointer;color:#557069;font-size:10px;font-weight:750}
+.official-sources-details .application-channels{margin-top:12px}
+@media(max-width:700px){.operational-resource{grid-template-columns:70px 1fr 18px}.operational-final{align-items:flex-start;flex-direction:column}.operational-final .primary-button{width:100%}}
+
 </style>
   </head>
   <body>
@@ -2133,19 +2151,113 @@ function continueToOfficialPractice(caseId){
     showToast('Completa prima i campi obbligatori: '+missing.map(x=>x.label).join(', '));
     return;
   }
-  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
-  const op=officialPracticeGuide(ca,g);
-  const target=op.download||op.url;
-  if(!target){
-    showToast('Il canale ufficiale non è ancora stato collegato per questa pratica');
-    return;
-  }
-  const submit=(ca.steps||[]).find(s=>s.phase==='submit');
-  if(submit) submit.done=true;
+  ca.handoffReady=true;
   ca.updatedAt=new Date().toISOString();
   saveState();
-  window.open(target,'_blank','noopener,noreferrer');
   render();
+  setTimeout(()=>document.getElementById('operational-guide')?.scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+
+function practiceOperationalGuide(ca,op){
+  const p=state.profile;
+  const docs=(op.docs||[]).join(' ').toLowerCase();
+  const resources=[];
+  const steps=[];
+  const addResource=(type,label,text,url)=>{ if(url && !resources.some(r=>r.url===url)) resources.push({type,label,text,url}); };
+  const addStep=(title,text)=>steps.push({title,text});
+
+  const inpsDisability='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-aree-tematiche.portale-della-disabilit-.html';
+  const inpsIsee='https://servizi2.inps.it/servizi/ISEEPrecompilato/WfPortaleUnicoIsee.aspx';
+  const venetoFse='https://salute.regione.veneto.it/fse-e-servizi-online/fascicolo-sanitario-elettronico-regionale/fse-documenti-e-referti';
+
+  if(/isee|dsu/.test(docs)) addResource('DOCUMENTO','Recupera o prepara l’ISEE','Portale Unico ISEE INPS: puoi consultare DSU, attestazioni e avviare la precompilata.',inpsIsee);
+  if(/verbale|104|invalidit|disabilit/.test(docs)) addResource('DOCUMENTO','Recupera verbali e pratiche di disabilità','Nel Portale INPS della disabilità puoi consultare verbali, certificato medico introduttivo e stato delle pratiche.',inpsDisability);
+  if(/documentazione clinica|refert|terapie|sanitaria|clinica/.test(docs) && p.region==='Veneto') addResource('DOCUMENTO','Recupera referti e documenti sanitari','Nel Fascicolo Sanitario Elettronico del Veneto puoi visualizzare e scaricare referti, lettere di dimissione e prescrizioni.',venetoFse);
+
+  if(ca.supportId==='adi'){
+    if(normalizePlace(p.city)==='pescantina'){
+      addStep('1. Non cercare un modulo ADI','Per Pescantina non c’è un PDF nazionale da compilare: l’attivazione delle cure domiciliari parte normalmente dal medico di base, pediatra o medico ospedaliero.');
+      addStep('2. Prepara ciò che il medico deve vedere','Tessera sanitaria, referti recenti, lettere di dimissione se presenti, terapie in corso e una descrizione concreta di cosa serve a casa.');
+      addStep('3. Chiedi esplicitamente l’attivazione ADI','Al medico puoi dire: “Vorrei avviare una valutazione per Assistenza Domiciliare Integrata per una persona residente a Pescantina”.');
+      addStep('4. Se serve, contatta direttamente la COADI','Per Pescantina il riferimento è il Distretto 4 Ovest Veronese e la presa in carico territoriale è gestita dalla COADI di Bussolengo.');
+      addResource('CONTATTO','Chiama COADI Bussolengo','Tel. 045 6712395. Orari pubblicati ULSS 9: lunedì, mercoledì, giovedì e sabato 9:00–11:00.','tel:0456712395');
+      addResource('CONTATTO','Scrivi a COADI Bussolengo','Email ufficiale pubblicata da ULSS 9.','mailto:coadi.bussolengo@aulss9.veneto.it');
+      addResource('FONTE','Istruzioni ADI — Distretto 4 Ovest Veronese','Pagina ULSS 9 con modalità di accesso, contatti COADI e organizzazione delle cure domiciliari.','https://www.aulss9.veneto.it/index.cfm?action=mys.apridoc&iddoc=5154');
+      return {title:'Per Pescantina: fai questi passaggi, non cercare nel sito ULSS',steps,resources,final:null};
+    }
+    addStep('1. Parti dal medico di base o dalla dimissione ospedaliera','L’ADI viene normalmente attivata dal medico o dall’ospedale; non è una pratica nazionale da compilare autonomamente.');
+    addStep('2. Prepara la documentazione sanitaria','Porta referti, terapie, eventuali dimissioni e una descrizione del bisogno assistenziale a domicilio.');
+    addStep('3. Usa l’azienda sanitaria risolta da Carevia','Se il medico ti indirizza al territorio, usa il Distretto/servizio cure domiciliari dell’azienda sanitaria competente.');
+    if(op.url) addResource('ENTE','Azienda sanitaria competente','Pagina ufficiale dell’ente territoriale risolto da Carevia.',op.url);
+    return {title:'ADI: Carevia ti dice cosa fare prima di aprire un sito esterno',steps,resources,final:null};
+  }
+
+  if(ca.supportId==='law104work'){
+    addStep('1. Recupera il verbale corretto','Verifica che il verbale riporti la condizione richiesta per la tutela che stai chiedendo.');
+    addStep('2. Tieni pronti i dati del familiare assistito','Rapporto familiare, eventuale ricovero a tempo pieno e dati richiesti dalla domanda.');
+    if((ca.applicationData?.sector||p.caregiverSector)==='Pubblico'){
+      addStep('3. Presenta la richiesta alla tua amministrazione','Per il pubblico impiego la richiesta segue la procedura del datore di lavoro/amministrazione, non la domanda INPS dei dipendenti privati.');
+      if(op.sourceUrl) addResource('FONTE','Istruzioni INPS sui permessi 104','Scheda ufficiale che distingue i canali e i requisiti.',op.sourceUrl);
+      return {title:'Prima prepara il verbale, poi usa la procedura della tua amministrazione',steps,resources,final:null};
+    }
+    addStep('3. Solo adesso apri la domanda INPS','Carevia ti porta direttamente al servizio autenticato, evitando la pagina informativa generica.');
+  }
+
+  if(ca.supportId==='leave'){
+    addStep('1. Verifica verbale, rapporto familiare e priorità','Sono elementi che possono cambiare il diritto al congedo e vanno controllati prima di entrare nel servizio.');
+    addStep('2. Prepara convivenza e periodo richiesto','Tieni pronti i dati che troverai nella domanda.');
+    if((ca.applicationData?.sector||p.caregiverSector)==='Pubblico'){
+      addStep('3. Usa la procedura della tua amministrazione','Per il settore pubblico la richiesta è gestita dal datore di lavoro pubblico.');
+      return {title:'Congedo: prepara i requisiti prima della richiesta',steps,resources,final:null};
+    }
+    addStep('3. Apri la domanda INPS solo quando sei pronto','Il pulsante finale porta direttamente al servizio telematico.');
+  }
+
+  if(ca.supportId==='civil'){
+    addStep('1. Prepara la documentazione sanitaria','Referti e documenti clinici utili devono essere ordinati prima dell’appuntamento con il medico certificatore.');
+    addStep('2. Vai dal medico certificatore','Nelle province coinvolte dalla sperimentazione 2026 il procedimento parte dal certificato medico introduttivo trasmesso dal medico.');
+    addStep('3. Controlla poi il Portale INPS della disabilità','Da lì puoi seguire pratica, comunicazioni e verbali quando disponibili.');
+  }
+
+  if(ca.supportId==='hcp' || ca.supportId==='universal'){
+    addStep('1. Recupera ISEE/DSU e verbali necessari','Usa i collegamenti qui sotto per arrivare ai documenti prima di entrare nella domanda.');
+    addStep('2. Controlla che i requisiti essenziali siano già verificabili','Evita di entrare nel portale senza avere protocollo DSU, verbali o dati richiesti.');
+    addStep('3. Apri il servizio ufficiale solo alla fine','Carevia ti porta direttamente alla procedura autenticata.');
+  }
+
+  if(ca.supportId==='auu'){
+    addStep('1. Verifica dati del figlio e riconoscimento di disabilità','Tieni pronti i dati anagrafici e il riconoscimento utile per la domanda/aggiornamento.');
+    addStep('2. Verifica l’ISEE se vuoi l’importo commisurato','Senza ISEE valgono le regole previste per l’importo minimo.');
+    addStep('3. Apri il servizio AUU INPS','Il collegamento finale porta alla procedura ufficiale.');
+  }
+
+  if(['social_home','regional','afterus','veneto_icd','veneto_caregiver','verona_sad'].includes(ca.supportId)){
+    addStep('1. Prepara i documenti prima di contattare il territorio','ISEE, documento di identità, verbali e descrizione del bisogno se richiesti dalla misura.');
+    addStep('2. Carevia usa Comune/Ambito/Distretto per evitare rimbalzi','Il punto di accesso dipende dal territorio; il link esterno deve servire solo per il servizio competente, non per una ricerca generica.');
+    addStep('3. Chiedi esattamente la misura indicata','Usa la frase pronta di Carevia e registra risposta, appuntamento o protocollo.');
+  }
+
+  if(['dementia','palliative','aids'].includes(ca.supportId)){
+    addStep('1. Prepara i documenti sanitari','Referti, terapie e informazioni concrete sul bisogno.');
+    addStep('2. Usa il punto sanitario corretto','Carevia indica il servizio specialistico/territoriale pertinente invece di una home page generica.');
+    addStep('3. Registra il contatto o l’appuntamento','La pratica continua dentro Carevia anche quando l’attivazione avviene tramite medico o servizio territoriale.');
+  }
+
+  if(op.sourceUrl && op.sourceUrl!==op.url) addResource('FONTE','Leggi le istruzioni ufficiali','Fonte ufficiale usata da Carevia per verificare requisiti e procedura.',op.sourceUrl);
+  if(op.url) addResource(op.kind==='online'?'PRATICA':'ENTE',officialActionLabel(op),op.kind==='online'?'Apre il servizio ufficiale dove la pratica viene realmente compilata.':'Apre il canale ufficiale verificato per questa pratica.',op.url);
+
+  return {title:'Cosa fai adesso, senza cercare da solo',steps,resources,final:op.url?{label:officialActionLabel(op),url:op.url}:null};
+}
+
+function practiceOperationalGuideHtml(ca,op){
+  const plan=practiceOperationalGuide(ca,op);
+  return `<div class="operational-guide">
+    <div class="operational-guide-head"><span class="eyebrow">Istruzioni operative Carevia</span><h3>${esc(plan.title)}</h3><p>Carevia resta qui con te fino al punto in cui serve davvero uscire sul servizio ufficiale.</p></div>
+    <div class="operational-steps">${plan.steps.map((s,i)=>`<div class="operational-step"><span>${i+1}</span><div><strong>${esc(s.title)}</strong><p>${esc(s.text)}</p></div></div>`).join('')}</div>
+    ${plan.resources.length?`<div class="operational-resources"><h4>Dove recuperare documenti e contatti</h4>${plan.resources.map(r=>`<a class="operational-resource" href="${r.url}" target="${r.url.startsWith('http')?'_blank':'_self'}" rel="noreferrer"><span>${esc(r.type)}</span><div><strong>${esc(r.label)}</strong><small>${esc(r.text)}</small></div>${icon('arrow',15)}</a>`).join('')}</div>`:''}
+    ${plan.final?`<div class="operational-final"><div><strong>Solo quando sei pronto</strong><span>Apri la pratica ufficiale. Carevia non considera “inviata” la pratica finché non lo registri tu.</span></div><a class="primary-button" href="${plan.final.url}" target="_blank" rel="noreferrer">${icon('arrow',15)} ${esc(plan.final.label)}</a></div>`:''}
+  </div>`;
 }
 
 function buildCaseFromSupport(support,profile){
@@ -2316,7 +2428,7 @@ function caseDetailView(ca){
     <section class="practice-match-card">
       <div class="practice-match-copy"><div class="practice-match-icon">${icon('file',25)}</div><div><span class="practice-action-type">${officialActionType(op)} · verificato ${esc(op.verifiedAt)}</span><h3>Questa pratica potrebbe riguardarti</h3><p>Carevia ha verificato il canale ufficiale: prima ti prepara, poi ti porta al modulo, alla domanda online o allo sportello corretto senza passaggi generici inutili.</p></div></div>
       <div class="practice-match-actions">
-        ${op.download?`<a class="primary-button practice-hero-btn" href="${op.download}" target="_blank" rel="noreferrer">${icon('file',17)} Scarica il modulo</a>`:op.url?`<a class="primary-button practice-hero-btn" href="${op.url}" target="_blank" rel="noreferrer">${icon('arrow',17)} ${esc(op.cta)}</a>`:''}
+        <button class="primary-button practice-hero-btn" onclick="document.getElementById('operational-guide')?.scrollIntoView({behavior:'smooth'})">${icon('arrow',17)} Vedi cosa fare davvero</button>
         <button class="secondary-button practice-hero-btn" onclick="document.getElementById('compilation-guide')?.scrollIntoView({behavior:'smooth'})">${icon('info',17)} Guida alla compilazione</button>
       </div>
     </section>
@@ -2361,18 +2473,15 @@ function caseDetailView(ca){
       <div class="guided-fields">${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div>
       <div class="practice-fill-status">
         <div><strong>${pct===100?'Preparazione completata':'Completa i dati essenziali'}</strong><span>${pct}% completato · ${missingApplicationFields(ca).length?missingApplicationFields(ca).length+' campi obbligatori mancanti':'pronto per il passaggio ufficiale'}</span></div>
-        <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} ${officialActionLabel(op)}</button>
+        <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} Vai alle istruzioni operative</button>
       </div>
     </section>
 
-    <section class="practice-lower-section">
-      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Usa il canale ufficiale corretto</h3><p>${esc(op.detail)}</p></div></div>
-      <div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div>`).join('')}</div>
+    <section id="operational-guide" class="practice-lower-section operational-section">
+      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Carevia ti porta fino al punto giusto</h3><p>Non apriamo più home page generiche: prima trovi documenti, contatti e istruzioni; poi, solo se serve, esci sul servizio ufficiale preciso.</p></div></div>
+      ${practiceOperationalGuideHtml(ca,op)}
       <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div>
-      <div class="official-handoff">
-        <div><span class="eyebrow">Passaggio alla pratica vera</span><h4>${pct===100?'Hai preparato i dati essenziali':'Mancano ancora alcuni dati obbligatori'}</h4><p>${op.kind==='pdf'?'Carevia apre il PDF ufficiale da compilare, stampare e firmare secondo le istruzioni dell’ente.':op.kind==='online'?'Carevia apre direttamente il servizio autenticato dove la domanda viene realmente compilata e inviata.':'Non esiste un modulo online unico verificato: Carevia apre il contatto o la procedura territoriale corretta, con ciò che devi avere già pronto.'}</p></div>
-        <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} ${officialActionLabel(op)}</button>
-      </div>
+      <details class="official-sources-details"><summary>Vedi anche i canali ufficiali verificati</summary><div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte →</a>`:''}</div>`).join('')}</div></details>
     </section>
 
     <section class="practice-lower-section">
