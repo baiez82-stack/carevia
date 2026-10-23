@@ -486,6 +486,14 @@ body{background:var(--canvas);color:var(--ink)}
 @media(max-width:1000px){.mock-topbar{grid-template-columns:220px 1fr 52px}.top-brand img{width:205px}.top-main-nav button span{display:none}.practice-main-grid{grid-template-columns:1fr}.practice-side{grid-template-columns:1fr 1fr}.mock-form-grid{grid-template-columns:1fr}.practice-stepper{grid-template-columns:1fr 1fr 1fr}.practice-stepper>div b{font-size:10px}}
 @media(max-width:700px){.mock-topbar{height:72px;grid-template-columns:180px 1fr}.top-brand img{width:170px}.top-main-nav{display:none}.top-profile{grid-column:2;grid-row:1}.workspace{padding:22px 16px 42px}.practice-title-row,.practice-match-card{flex-direction:column;align-items:flex-start}.practice-meta{align-items:flex-start}.practice-match-actions{justify-content:flex-start}.practice-stepper{grid-template-columns:1fr}.practice-side{grid-template-columns:1fr}.stage-footer{align-items:flex-start;flex-direction:column}.stage-continue{width:100%;min-width:0}}
 
+
+.practice-fill-status{margin-top:16px;padding:15px 16px;border:1px solid #cfe1da;border-radius:10px;background:#f3faf7;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.practice-fill-status strong,.practice-fill-status span{display:block}.practice-fill-status strong{font-size:12px}.practice-fill-status span{margin-top:4px;color:#63736d;font-size:10px}
+.primary-button:disabled{cursor:not-allowed;opacity:.45;transform:none!important;box-shadow:none}
+.official-handoff{margin-top:16px;padding:18px;border:1px solid #cfe1da;border-radius:11px;background:#f5fbf8;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.official-handoff h4{margin:5px 0 5px;font-size:15px}.official-handoff p{margin:0;color:#66756f;font-size:10px;line-height:1.5;max-width:720px}
+@media(max-width:700px){.practice-fill-status,.official-handoff{align-items:flex-start;flex-direction:column}.practice-fill-status .primary-button,.official-handoff .primary-button{width:100%}}
+
 </style>
   </head>
   <body>
@@ -1702,22 +1710,24 @@ function adaptCaseStepsToApplication(ca){
   }
 }
 
-function updateCaseApplicationField(caseId,fieldId,value){
+function updateCaseApplicationField(caseId,fieldId,value,rerender=false){
   const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
   ca.applicationData=ca.applicationData||{}; ca.applicationData[fieldId]=value;
   if(fieldId==='sector' && ['law104work','leave'].includes(ca.supportId)){
     adaptCaseStepsToApplication(ca);
+    rerender=true;
   }
   ca.updatedAt=new Date().toISOString();
-  saveState(); render();
+  saveState();
+  if(rerender) render();
 }
 
 function applicationFieldHtml(ca,f){
   const val=esc(f.value||'');
   let control='';
-  if(f.type==='select') control=`<select onchange="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">${f.options.map(o=>`<option ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
-  else if(f.type==='textarea') control=`<textarea oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">${val}</textarea>`;
-  else control=`<input type="text" value="${val}" oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value)">`;
+  if(f.type==='select') control=`<select onchange="updateCaseApplicationField('${ca.id}','${f.id}',this.value,true)">${f.options.map(o=>`<option ${o===f.value?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.type==='textarea') control=`<textarea oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value,false)" onblur="updateCaseApplicationField('${ca.id}','${f.id}',this.value,true)">${val}</textarea>`;
+  else control=`<input type="text" value="${val}" oninput="updateCaseApplicationField('${ca.id}','${f.id}',this.value,false)" onblur="updateCaseApplicationField('${ca.id}','${f.id}',this.value,true)">`;
   return `<label class="application-field"><span>${esc(f.label)}${f.required?' *':''}</span>${control}<small>${esc(f.help||'')}</small></label>`;
 }
 
@@ -1735,6 +1745,46 @@ async function copyPracticeSummary(caseId){
   const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
   try{await navigator.clipboard.writeText(practiceSummaryText(ca)); showToast('Riepilogo pratica copiato');}
   catch{showToast('Copia non disponibile: usa Salva PDF');}
+}
+
+function requiredApplicationFields(ca){
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  return g.fields.filter(f=>f.required);
+}
+
+function missingApplicationFields(ca){
+  return requiredApplicationFields(ca).filter(f=>{
+    const v=String(f.value||'').trim();
+    return !v || v==='Non so';
+  });
+}
+
+function officialActionLabel(op){
+  if(op.download) return 'Scarica il modulo ufficiale';
+  if(op.kind==='online') return 'Apri la pratica ufficiale';
+  return 'Apri il canale ufficiale';
+}
+
+function continueToOfficialPractice(caseId){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  const missing=missingApplicationFields(ca);
+  if(missing.length){
+    showToast('Completa prima i campi obbligatori: '+missing.map(x=>x.label).join(', '));
+    return;
+  }
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const op=officialPracticeGuide(ca,g);
+  const target=op.download||op.url;
+  if(!target){
+    showToast('Il canale ufficiale non è ancora stato collegato per questa pratica');
+    return;
+  }
+  const submit=(ca.steps||[]).find(s=>s.phase==='submit');
+  if(submit) submit.done=true;
+  ca.updatedAt=new Date().toISOString();
+  saveState();
+  window.open(target,'_blank','noopener,noreferrer');
+  render();
 }
 
 function buildCaseFromSupport(support,profile){
@@ -1916,6 +1966,10 @@ function caseDetailView(ca){
         <div class="practice-info-strip">${icon('info',17)}<span>I dati inseriti servono per aiutarti a preparare correttamente la pratica. Non vengono inviati automaticamente ad alcun ente.</span></div>
         <div class="mock-form-grid">${g.fields.map(f=>`<div class="mock-field">${applicationFieldHtml(ca,f)}<div class="field-advice">${esc(compilationHint(f))}</div></div>`).join('')}</div>
         <div class="stage-footer"><button class="primary-button stage-continue" onclick="document.getElementById('documents-step')?.scrollIntoView({behavior:'smooth'})">Continua ${icon('arrow',15)}</button><span class="local-data-note">${icon('shield',14)} I dati restano su questo dispositivo</span></div>
+        <div class="practice-fill-status">
+          <div><strong>${pct===100?'Dati essenziali pronti':'Completa prima i dati essenziali'}</strong><span>${pct}% completato · ${missingApplicationFields(ca).length?missingApplicationFields(ca).length+' campi obbligatori mancanti':'nessun campo obbligatorio mancante'}</span></div>
+          <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} ${officialActionLabel(op)}</button>
+        </div>
       </section>
 
       <aside class="practice-side">
@@ -1947,6 +2001,10 @@ function caseDetailView(ca){
       <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Usa il canale ufficiale corretto</h3><p>${esc(op.detail)}</p></div></div>
       <div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div>`).join('')}</div>
       <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div>
+      <div class="official-handoff">
+        <div><span class="eyebrow">Passaggio alla pratica vera</span><h4>${pct===100?'Hai preparato i dati essenziali':'Mancano ancora alcuni dati obbligatori'}</h4><p>${op.download?'Carevia aprirà il modulo ufficiale disponibile.':'Carevia aprirà il servizio o la pagina ufficiale dove la pratica viene realmente presentata.'}</p></div>
+        <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} ${officialActionLabel(op)}</button>
+      </div>
     </section>
 
     <section class="practice-lower-section">
