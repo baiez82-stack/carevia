@@ -1195,6 +1195,15 @@ function evaluateSupport(profile) {
     results.push({id:'adi',title:'Assistenza Domiciliare Integrata',status:'Accesso territoriale',tone:'neutral',value:'Prestazioni domiciliari',reason:`Il percorso dipende dalla valutazione multidimensionale e dall’organizzazione sanitaria di ${profile.region}.`,next:'Chiedi al medico di base, al Distretto o al PUA come avviare la valutazione.',source:'https://www.salute.gov.it/new/it/altro/assistenza-domiciliare-integrata-adi/'});
   }
 
+  if (profile.living !== 'In struttura' && profile.needs.includes('Assistenza a domicilio')) {
+    results.push({
+      id:'social_home', title:'Assistenza domiciliare sociale (SAD)', status:'Accesso tramite Comune / Ambito', tone:'neutral', value:'Aiuto alla persona e alla vita quotidiana',
+      reason:`Oltre alle cure sanitarie ADI, il territorio può offrire assistenza sociale domiciliare per igiene, pasti, cura della casa e supporto quotidiano. Carevia risolve l’Ambito Sociale associato a ${profile.city}.`,
+      next:'Contatta i Servizi Sociali del Comune o l’Ambito Territoriale Sociale risolto da Carevia per chiedere la valutazione.',
+      source:MLPS_ATS_REGISTRY
+    });
+  }
+
   if (profile.region === 'Veneto' && profile.living !== 'In struttura') {
     results.push({
       id:'veneto_icd', title:'Impegnative di Cura Domiciliare (ICD)', status:'Da verificare in Veneto', tone:'positive', value:'Contributo domiciliare regionale',
@@ -1479,6 +1488,45 @@ const practiceTemplates = {
   }
 };
 
+
+// Nationwide territorial templates: used in every Region when a local form is not yet linked.
+practiceTemplates.social_home = {
+  humanTitle:'Assistenza domiciliare sociale',
+  adminTitle:'Servizio di Assistenza Domiciliare (SAD) / assistenza sociale a domicilio',
+  type:'Servizio sociale territoriale',
+  authority:p=>socialAuthorityForPractice(p,'Comune / Ambito Territoriale Sociale'),
+  documents:p=>[
+    {id:'isee',title:'ISEE',reason:'Può essere richiesto per accesso o compartecipazione al costo.',ready:p.isee!=='Non disponibile'},
+    {id:'identity',title:'Documento di identità',reason:'Identificazione della persona assistita.',ready:false},
+    {id:'health',title:'Eventuale documentazione sanitaria / verbali',reason:'Può essere utile alla valutazione sociale del bisogno.',ready:p.invalidity==='Si'||p.law104==='Si'||p.allowance==='Si'}
+  ],
+  steps:p=>[
+    {id:'contact',title:'Contatta Comune o Ambito Sociale',text:'Chiedi come avviare la valutazione per assistenza domiciliare sociale nel Comune di residenza.',phase:'prepare',url:MLPS_ATS_REGISTRY},
+    {id:'assessment',title:'Completa la valutazione sociale',text:'Registra colloquio, visita domiciliare o altra valutazione prevista localmente.',phase:'submit'},
+    {id:'fee',title:'Verifica eventuale compartecipazione',text:'Controlla la quota collegata all’ISEE, se prevista.',phase:'wait'},
+    {id:'outcome',title:'Registra l’attivazione',text:'Concludi quando il servizio risulta effettivamente attivato.',phase:'outcome'}
+  ]
+};
+
+practiceTemplates.regional = {
+  humanTitle:'Sostegno regionale per non autosufficienza / caregiver',
+  adminTitle:'Misura regionale o territoriale di domiciliarità e non autosufficienza',
+  type:'Misura territoriale',
+  authority:p=>socialAuthorityForPractice(p,'Regione / Ambito Territoriale Sociale'),
+  documents:p=>[
+    {id:'isee',title:'ISEE / ISEE sociosanitario',reason:'Molte misure regionali lo utilizzano per soglie, graduatorie o compartecipazione.',ready:p.isee!=='Non disponibile'},
+    {id:'identity',title:'Documento di identità',reason:'Può essere richiesto nella domanda territoriale.',ready:false},
+    {id:'health',title:'Verbali e documentazione di non autosufficienza',reason:'Servono a inquadrare il bisogno e la misura applicabile.',ready:p.invalidity==='Si'||p.law104==='Si'||p.allowance==='Si'}
+  ],
+  steps:p=>[
+    {id:'source',title:'Verifica la misura regionale attiva',text:'Carevia usa la fonte ufficiale della Regione e il tuo Ambito Sociale.',phase:'prepare',url:regionSource(p)?.url||MLPS_ATS_REGISTRY},
+    {id:'local',title:'Individua il punto di accesso locale',text:'Comune, Ambito, Distretto o servizio indicato dalla Regione.',phase:'prepare'},
+    {id:'submission',title:'Presenta domanda o richiesta di valutazione',text:'Usa esclusivamente modulo, portale o sportello indicato dall’ente competente.',phase:'submit'},
+    {id:'wait',title:'Segui graduatoria o valutazione',text:'Registra integrazioni, convocazioni e comunicazioni.',phase:'wait'},
+    {id:'outcome',title:'Registra l’esito',text:'Concludi solo sulla base della comunicazione ufficiale.',phase:'outcome'}
+  ]
+};
+
 function healthAuthorityForPractice(profile,fallback){
   const a=profile.healthAuthority;
   if(a?.status==='resolved' && a.authorities?.length){
@@ -1622,7 +1670,97 @@ function applicationGuide(id,p,saved={}){
       script:'Vorrei avviare il percorso di accertamento della disabilità. Ho bisogno di predisporre il certificato medico introduttivo e capire quale iter vale nella mia provincia.'
     }
   };
-  return guides[id] || {
+  const extraGuides={
+    social_home:{
+      mode:'Comune / Ambito Sociale',
+      intro:'Il SAD è un servizio sociale territoriale: Carevia ti prepara alla valutazione e usa il tuo Comune/Ambito per evitare ricerche generiche.',
+      fields:[...commonPerson,
+        {id:'isee',label:'ISEE disponibile',type:'text',value:p.isee||'',required:false,help:'Può essere richiesto per accesso o compartecipazione.'},
+        {id:'dailyNeeds',label:'In quali attività serve aiuto?',type:'textarea',value:'',required:true,help:'Igiene, pasti, vestizione, mobilità, cura della casa, accompagnamento.'},
+        {id:'contacts',label:'Recapito del caregiver',type:'text',value:'',required:false,help:'Usa un contatto raggiungibile per l’appuntamento.'}
+      ],
+      channels:[{name:'Comune / Ambito Territoriale Sociale',text:'Chiedi la valutazione per assistenza domiciliare sociale.',url:p.socialArea?.source||MLPS_ATS_REGISTRY}],
+      script:'Vorrei chiedere una valutazione per assistenza domiciliare sociale per '+(p.assistedName||'un familiare')+' residente a '+(p.city||'questo Comune')+'. Posso descrivere le difficoltà quotidiane e fornire ISEE e documentazione disponibile.'
+    },
+    regional:{
+      mode:'Regione / Ambito / Distretto',
+      intro:'Le misure di non autosufficienza e caregiver cambiano per Regione. Carevia usa la fonte ufficiale regionale e il tuo Ambito territoriale per portarti al punto di accesso corretto.',
+      fields:[...commonPerson,
+        {id:'isee',label:'ISEE / ISEE sociosanitario',type:'text',value:p.isee||'',required:false,help:'Molte misure regionali lo richiedono.'},
+        {id:'careNeed',label:'Bisogno assistenziale principale',type:'textarea',value:'',required:true,help:'Descrivi in modo concreto il bisogno a domicilio.'},
+        {id:'existingBenefits',label:'Servizi o contributi già attivi',type:'textarea',value:'',required:false,help:'Aiuta a verificare compatibilità e cumulabilità.'}
+      ],
+      channels:[
+        {name:'Fonte ufficiale della Regione',text:regionSource(p)?.title||'Misura regionale da verificare',url:regionSource(p)?.url||null},
+        {name:'Ambito Territoriale Sociale',text:'Punto locale per avvisi, valutazioni e domande sociali.',url:p.socialArea?.source||MLPS_ATS_REGISTRY}
+      ],
+      script:'Vorrei verificare quale misura regionale per non autosufficienza o caregiver è attiva per la mia situazione e come presentare correttamente la domanda nel mio Ambito.'
+    },
+    dementia:{
+      mode:'Medico / CDCD territoriale',
+      intro:'Il percorso demenze non è una domanda INPS. Carevia ti aiuta a preparare informazioni cliniche e a trovare il CDCD corretto.',
+      fields:[...commonPerson,
+        {id:'doctor',label:'Medico di base',type:'text',value:'',required:false,help:'Può indirizzare al percorso diagnostico territoriale.'},
+        {id:'conditions',label:'Problemi osservati',type:'textarea',value:'',required:true,help:'Memoria, orientamento, comportamento, autonomia: descrivi fatti concreti.'},
+        {id:'currentServices',label:'Visite o servizi già attivi',type:'textarea',value:'',required:false,help:'Indica specialisti, terapie e servizi già presenti.'}
+      ],
+      channels:[{name:'Mappa nazionale CDCD ISS',text:'Trova il centro territoriale dedicato a disturbi cognitivi e demenze.',url:'https://www.epicentro.iss.it/demenza/mappa-cdcd'}],
+      script:'Vorrei avviare una valutazione per disturbi cognitivi/demenza. Posso indicare i problemi osservati, le terapie e la documentazione clinica disponibile.'
+    },
+    palliative:{
+      mode:'Medico / rete cure palliative',
+      intro:'Le cure palliative si attivano attraverso la rete sanitaria territoriale. Carevia prepara i dati da comunicare e l’ente sanitario corretto.',
+      fields:[...commonPerson,
+        {id:'doctor',label:'Medico / struttura che segue la persona',type:'text',value:'',required:false,help:'È spesso il primo punto di attivazione.'},
+        {id:'needSummary',label:'Bisogni e sintomi da segnalare',type:'textarea',value:'',required:true,help:'Descrivi bisogni concreti e urgenze senza sostituirti alla valutazione clinica.'},
+        {id:'currentServices',label:'Servizi e terapie già attivi',type:'textarea',value:'',required:false,help:'Serve alla continuità assistenziale.'}
+      ],
+      channels:[{name:'Azienda sanitaria / rete cure palliative',text:'Attivazione tramite medico o struttura sanitaria territoriale.',url:p.healthAuthority?.authorities?.[0]?.site||'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/'}],
+      script:'Vorrei chiedere una valutazione per l’attivazione della rete di cure palliative. Posso fornire documentazione clinica, terapie e bisogni attuali.'
+    },
+    aids:{
+      mode:'Specialista / assistenza protesica ASL',
+      intro:'Gli ausili SSN richiedono normalmente prescrizione e autorizzazione secondo il percorso territoriale. Carevia prepara ciò che serve prima di contattare il servizio.',
+      fields:[...commonPerson,
+        {id:'careNeed',label:'Quale difficoltà deve compensare l’ausilio?',type:'textarea',value:'',required:true,help:'Descrivi il bisogno funzionale concreto.'},
+        {id:'doctor',label:'Specialista / servizio che segue la persona',type:'text',value:'',required:false,help:'Può essere necessario per la prescrizione.'}
+      ],
+      channels:[{name:'Azienda sanitaria / assistenza protesica',text:'Verifica prescrizione, autorizzazione e fornitura nel territorio.',url:p.healthAuthority?.authorities?.[0]?.site||'https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/'}],
+      script:'Vorrei verificare il percorso per un ausilio o dispositivo di assistenza protesica SSN e sapere quale prescrizione/documentazione serve nel mio territorio.'
+    },
+    auu:{
+      mode:'INPS online',
+      intro:'Per un figlio con disabilità l’Assegno unico può spettare senza limite di età. Carevia prepara i dati prima dell’accesso al servizio INPS.',
+      fields:[...commonPerson,
+        {id:'isee',label:'ISEE disponibile',type:'text',value:p.isee||'',required:false,help:'Non è obbligatorio per il diritto, ma incide sull’importo.'},
+        {id:'invalidityRecord',label:'Riconoscimento di disabilità disponibile',type:'select',options:['Non so','No','Si'],value:(p.invalidity==='Si'||p.law104==='Si')?'Si':'Non so',required:true,help:'Serve per applicare le regole specifiche della disabilità.'}
+      ],
+      channels:[{name:'Assegno unico e universale — servizio INPS',text:'Presentazione e gestione della domanda.',url:'https://servizi2.inps.it/servizi/AssegnoUnicoFigli'}],
+      script:'Vorrei presentare o aggiornare la domanda di Assegno unico per un figlio con disabilità e verificare i dati necessari per applicare correttamente le regole previste.'
+    },
+    afterus:{
+      mode:'Ambito / Servizi Sociali',
+      intro:'Il Dopo di Noi è attuato territorialmente. Carevia prepara la richiesta e ti porta all’Ambito competente, senza fingere che esista una domanda nazionale unica.',
+      fields:[...commonPerson,
+        {id:'severity',label:'Disabilità grave art. 3 comma 3',type:'select',options:['Non so','No','Si'],value:p.law104Level==='Art. 3 comma 3 (gravita)'?'Si':'Non so',required:true,help:'È un requisito centrale del percorso.'},
+        {id:'isee',label:'ISEE disponibile',type:'text',value:p.isee||'',required:false,help:'Può essere richiesto dalla programmazione territoriale.'},
+        {id:'careNeed',label:'Obiettivo di autonomia / abitare',type:'textarea',value:'',required:true,help:'Descrivi il bisogno: autonomia, uscita dal nucleo, co-housing, sostegno abitativo.'}
+      ],
+      channels:[{name:'Ambito Territoriale Sociale / Servizi Sociali',text:'Verifica programmazione e accesso locale al Dopo di Noi.',url:p.socialArea?.source||'https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/Dopo-di-noi/Pagine/default'}],
+      script:'Vorrei sapere come avviare un percorso Dopo di Noi per una persona con disabilità grave residente nel territorio e quali valutazioni/documenti sono richiesti.'
+    },
+    veneto_caregiver:{
+      mode:'Distretto / Servizi Sociali',
+      intro:'Gli interventi caregiver Veneto richiedono valutazione territoriale. Carevia prepara il carico assistenziale e ti porta al Distretto/Servizi Sociali.',
+      fields:[...commonPerson,
+        {id:'careNeed',label:'Carico assistenziale del caregiver',type:'textarea',value:'',required:true,help:'Descrivi ore, attività, difficoltà e bisogno di sollievo.'},
+        {id:'existingBenefits',label:'Servizi/contributi già attivi',type:'textarea',value:'',required:false,help:'Serve per valutare interventi applicabili e cumulabilità.'}
+      ],
+      channels:[{name:'Distretto / Servizi Sociali',text:'Chiedi la valutazione per gli interventi caregiver applicabili.',url:p.healthAuthority?.authorities?.[0]?.site||'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---interventi-a-favore-del-caregiver-familiare'}],
+      script:'Vorrei chiedere una valutazione per gli interventi a sostegno del caregiver familiare e descrivere il carico assistenziale e i servizi già attivi.'
+    }
+  };
+  return guides[id] || extraGuides[id] || {
     mode:'Ente competente',
     intro:'Carevia ti aiuta a preparare le informazioni essenziali e ti porta alla fonte ufficiale. La procedura dettagliata per questa pratica è ancora in approfondimento.',
     fields:[...commonPerson,{id:'notes',label:'Informazioni da comunicare all’ente',type:'textarea',value:'',required:false,help:'Annota qui ciò che vuoi chiedere.'}],
@@ -1738,6 +1876,53 @@ function officialPracticeGuide(ca,g){
     sadVerona,'Apri contatti del servizio',sadVerona,
     ['ISEE','Documento di identità della persona assistita','Informazioni sulle difficoltà nella cura personale e della casa'],
     'Sportello Sì: 800 085 570. La domanda viene attivata dopo la valutazione dell’Assistente Sociale.');
+
+  if(ca.supportId==='auu') return make('online','Assegno unico e universale — servizio INPS',
+    'La domanda si presenta e si gestisce online. Se esiste già una domanda accolta, nel 2026 di norma prosegue senza nuova domanda: Carevia deve distinguere nuova richiesta da aggiornamento.',
+    'https://servizi2.inps.it/servizi/AssegnoUnicoFigli','Apri direttamente Assegno unico INPS',
+    'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.assegno-unico-e-universale-per-i-figli-a-carico-55984.assegno-unico-e-universale-per-i-figli-a-carico.html',
+    ['SPID/CIE/CNS','Dati del figlio e del nucleo','Riconoscimento di disabilità','ISEE se disponibile','Dati di pagamento richiesti dal servizio']);
+
+  if(ca.supportId==='dementia') return make('assisted','Valutazione disturbi cognitivi / demenza',
+    'Non esiste una domanda nazionale unica. Carevia ti porta al CDCD territoriale e prepara le informazioni da riferire al medico/centro.',
+    'https://www.epicentro.iss.it/demenza/mappa-cdcd','Apri la mappa nazionale CDCD','https://www.epicentro.iss.it/demenza/mappa-cdcd',
+    ['Tessera sanitaria','Documentazione clinica e referti','Elenco terapie','Descrizione dei problemi osservati']);
+
+  if(ca.supportId==='palliative') return make('assisted','Attivazione rete cure palliative',
+    'L’accesso avviene attraverso medico o rete sanitaria territoriale, non tramite un modulo nazionale standard.',
+    ca.authority?.url||'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/','Apri azienda sanitaria / rete territoriale',
+    'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/rete-delle-cure-palliative/',
+    ['Tessera sanitaria','Documentazione clinica','Terapie in corso','Recapito familiare/caregiver']);
+
+  if(ca.supportId==='aids') return make('assisted','Assistenza protesica SSN',
+    'Il percorso richiede valutazione/prescrizione e autorizzazione territoriale. Non esiste un PDF nazionale unico valido per tutti gli ausili.',
+    ca.authority?.url||'https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/','Apri assistenza protesica territoriale',
+    'https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/',
+    ['Documentazione clinica','Prescrizione specialistica quando prevista','Tessera sanitaria','Eventuali preventivi/documenti richiesti localmente']);
+
+  if(ca.supportId==='afterus') return make('assisted','Dopo di Noi — percorso territoriale',
+    'La Legge 112/2016 viene attuata attraverso programmazione regionale e Ambiti/Servizi Sociali: non esiste una domanda nazionale unica.',
+    ca.authority?.url||p.socialArea?.source||'https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/Dopo-di-noi/Pagine/default',
+    'Apri Ambito / istruzioni territoriali','https://www.lavoro.gov.it/temi-e-priorita/disabilita-e-non-autosufficienza/focus-on/Dopo-di-noi/Pagine/default',
+    ['Verbale di disabilità grave','ISEE se richiesto','Documentazione sociale/sanitaria utile','Informazioni sul progetto di autonomia e abitare']);
+
+  if(ca.supportId==='social_home') return make('assisted','Assistenza domiciliare sociale (SAD)',
+    'È un servizio comunale/di Ambito: modalità, modulo e compartecipazione cambiano territorialmente. Carevia usa il Comune e l’Ambito nazionale per indirizzarti.',
+    ca.authority?.url||p.socialArea?.source||MLPS_ATS_REGISTRY,'Apri Ambito / ente sociale competente',MLPS_ATS_REGISTRY,
+    ['ISEE se richiesto','Documento di identità','Documentazione sanitaria/verbali utili','Descrizione delle attività quotidiane per cui serve aiuto']);
+
+  if(ca.supportId==='regional') return make('assisted',regionSource(p)?.title||'Misura regionale per non autosufficienza / caregiver',
+    regionSource(p)?.text||'La misura è gestita a livello regionale o territoriale.',
+    regionSource(p)?.url||ca.authority?.url||MLPS_ATS_REGISTRY,'Apri la misura regionale ufficiale',regionSource(p)?.url||MLPS_ATS_REGISTRY,
+    ['ISEE / ISEE sociosanitario se richiesto','Documento di identità','Verbali di invalidità/104/accompagnamento disponibili','Documentazione del bisogno assistenziale'],
+    'Carevia usa anche l’Ambito Sociale del Comune per individuare il punto locale di presentazione.');
+
+  if(ca.supportId==='veneto_caregiver') return make('assisted','Interventi a sostegno del caregiver familiare — Veneto',
+    'Gli interventi richiedono valutazione territoriale e possono dipendere dalla tipologia di bisogno. Non esiste un unico PDF nazionale.',
+    ca.authority?.url||'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---interventi-a-favore-del-caregiver-familiare',
+    'Apri Distretto / istruzioni ufficiali Veneto',
+    'https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---interventi-a-favore-del-caregiver-familiare',
+    ['Informazioni sul carico assistenziale','Documentazione della persona assistita','ISEE se richiesto dal percorso']);
 
   const firstUrl=(g.channels||[]).find(ch=>ch.url)?.url||ca.source||null;
   return make('assisted',ca.title,
@@ -2016,7 +2201,9 @@ function practiceBenefits(ca){
     hcp:['Presentare la domanda Home Care Premium','Verificare platea, DSU/ISEE e verbale','Seguire correttamente il canale welfare INPS'],
     adi:['Chiedere una valutazione per cure domiciliari','Individuare Distretto / punto di accesso competente','Descrivere in modo chiaro i bisogni assistenziali a casa'],
     veneto_icd:['Avviare la valutazione per l’ICD pertinente','Individuare Ambito / ULSS competente','Preparare ISEE e quadro assistenziale'],
-    verona_sad:['Richiedere una valutazione per assistenza domiciliare','Preparare bisogni quotidiani e ISEE','Contattare il servizio sociale territoriale corretto']
+    verona_sad:['Richiedere una valutazione per assistenza domiciliare','Preparare bisogni quotidiani e ISEE','Contattare il servizio sociale territoriale corretto'],
+    social_home:['Chiedere aiuto domiciliare sociale','Individuare Comune/Ambito competente','Preparare ISEE e bisogni quotidiani'],
+    regional:['Verificare la misura regionale rilevante','Individuare Ambito/Distretto locale','Preparare requisiti e documenti territoriali']
   };
   return map[ca.supportId]||['Avviare correttamente la pratica','Preparare dati e documenti richiesti','Usare il canale ufficiale dell’ente competente'];
 }
