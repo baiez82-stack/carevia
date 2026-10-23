@@ -1,0 +1,32 @@
+name: Verify app JavaScript
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - '.github/workflows/verify-app-js.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract inline JavaScript
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<script>([\s\S]*)</script>',html)
+          if not m:
+              raise SystemExit('Inline script not found')
+          Path('/tmp/carevia-app.js').write_text(m.group(1),encoding='utf-8')
+          print('Extracted', len(m.group(1)), 'characters')
+          PY
+      - name: Check JavaScript syntax
+        run: node --check /tmp/carevia-app.js
