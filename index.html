@@ -530,6 +530,20 @@ body{background:var(--canvas);color:var(--ink)}
 .official-sources-details .application-channels{margin-top:12px}
 @media(max-width:700px){.operational-resource{grid-template-columns:70px 1fr 18px}.operational-final{align-items:flex-start;flex-direction:column}.operational-final .primary-button{width:100%}}
 
+
+.simple-practice-page{max-width:1250px;margin:0 auto}
+.action-first-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.7fr);gap:28px;align-items:center;padding:28px;border:1px solid #bddfd3;background:linear-gradient(135deg,#edf8f4,#ffffff);border-radius:18px;box-shadow:0 14px 36px rgba(20,75,64,.06)}
+.action-first-copy h3{margin:7px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:#1c7566}.action-first-copy h4{margin:5px 0 9px;font-family:Georgia,serif;font-size:28px;color:#123f3a}.action-first-copy p{margin:0;color:#5e6f69;line-height:1.6;font-size:12px}
+.action-first-buttons{display:grid;gap:9px}.action-main-btn{min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center}.no-action-note{font-size:11px;color:#7b4c30}
+.simple-practice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.simple-card{padding:22px;border:1px solid #dce4e0;background:#fff;border-radius:14px}.simple-card h3{margin:6px 0 16px;font-family:Georgia,serif;font-size:22px}
+.simple-doc-list{display:grid;gap:9px}.simple-doc-item{display:flex;gap:9px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eef1ef;font-size:11px;line-height:1.45}.simple-doc-item svg{color:#1e7b69;flex:0 0 auto;margin-top:1px}
+.doc-recovery{margin-top:18px}.doc-recovery h4{margin:0 0 8px;font-size:11px}.doc-recovery a{display:grid;grid-template-columns:1fr 18px;gap:4px 10px;padding:11px 12px;margin-top:7px;border:1px solid #d8e4df;border-radius:9px;text-decoration:none;color:inherit;background:#f7fbf9}.doc-recovery a span{font-size:11px;font-weight:750}.doc-recovery a small{grid-column:1;color:#6b7773;font-size:9px;line-height:1.4}.doc-recovery a svg{grid-column:2;grid-row:1/3;align-self:center}
+.what-they-ask{display:grid;gap:8px}.what-they-ask>div{padding:11px 12px;border-radius:9px;background:#f7f8f7}.what-they-ask strong,.what-they-ask span{display:block}.what-they-ask strong{font-size:10px}.what-they-ask span{margin-top:4px;color:#68756f;font-size:9px;line-height:1.45}
+.ready-script{padding:16px;border-radius:10px;background:#f5f8f6}.ready-script p{margin:0 0 12px;font-size:12px;line-height:1.6;color:#40524c}
+.simple-track-card{margin-top:16px}.simple-track-card>div:first-child p{margin:5px 0 15px;color:#6a7772;font-size:10px}.simple-progress-details{margin-top:16px;border-top:1px solid #e5eae7;padding-top:12px}.simple-progress-details summary{cursor:pointer;font-size:11px;font-weight:750;color:#365f56}.simple-progress-details .case-steps-mock{margin-top:12px}
+.compact-guided .guided-field-row{grid-template-columns:1fr}.compact-guided .guided-field-tip{margin-top:0}
+@media(max-width:850px){.action-first-card,.simple-practice-grid{grid-template-columns:1fr}.action-first-buttons{width:100%}}
+
 </style>
   </head>
   <body>
@@ -2408,89 +2422,136 @@ function practiceStage(ca){
   return 1;
 }
 
-function caseDetailView(ca){
-  const status=deriveCaseStatus(ca), progress=caseProgress(ca), missingDocs=(ca.documents||[]).filter(d=>!d.ready);
+
+function encodedMailto(address,subject,body){
+  if(!address) return null;
+  return 'mailto:'+address+'?subject='+encodeURIComponent(subject||'Richiesta informazioni')+'&body='+encodeURIComponent(body||'');
+}
+
+function practiceActionModel(ca,op,g){
+  const p=state.profile;
+  const plan=practiceOperationalGuide(ca,op);
+  const actions=[];
+  const add=(label,url,kind='primary',note='')=>{ if(url && !actions.some(a=>a.url===url)) actions.push({label,url,kind,note}); };
+
+  if(op.kind==='pdf' && op.download){
+    add('Scarica il modulo ufficiale',op.download,'primary','PDF ufficiale verificato');
+  } else if(op.kind==='online' && op.url){
+    add(op.actionLabel||'Apri direttamente la domanda',op.url,'primary','Servizio ufficiale dove compili davvero la pratica');
+  }
+
+  if(ca.supportId==='adi' && normalizePlace(p.city)==='pescantina'){
+    add('Chiama COADI Bussolengo','tel:0456712395','primary','045 6712395');
+    add('Scrivi alla COADI','mailto:coadi.bussolengo@aulss9.veneto.it','secondary','coadi.bussolengo@aulss9.veneto.it');
+  }
+
+  if(['social_home','regional','afterus','veneto_icd','veneto_caregiver','verona_sad'].includes(ca.supportId)){
+    const m=p.municipalityAuthority;
+    const address=m?.email||m?.pec;
+    const mail=encodedMailto(address,'Richiesta informazioni - '+ca.title,g.script);
+    if(mail) add('Scrivi al servizio territoriale',mail,'primary',address);
+  }
+
+  if(['adi','palliative','aids'].includes(ca.supportId) && !(ca.supportId==='adi' && normalizePlace(p.city)==='pescantina')){
+    const a=p.healthAuthority?.authorities?.[0];
+    if(a?.phone) add('Chiama '+(a.name||'azienda sanitaria'),'tel:'+a.phone.replace(/\s+/g,''),'primary',a.phone);
+    if(a?.email) add('Scrivi a '+(a.name||'azienda sanitaria'),encodedMailto(a.email,'Richiesta informazioni - '+ca.title,g.script),'secondary',a.email);
+  }
+
+  if(ca.supportId==='dementia'){
+    add('Trova il CDCD più vicino','https://www.epicentro.iss.it/demenza/mappa-cdcd','primary','Mappa nazionale ISS');
+  }
+
+  if(['law104work','leave'].includes(ca.supportId) && (ca.applicationData?.sector||p.caregiverSector)==='Pubblico'){
+    actions.length=0;
+    add('Copia il testo per l’ufficio personale','carevia:copy-message','primary','Poi incollalo nella mail o nel portale della tua amministrazione');
+  }
+
+  if(!actions.length){
+    const direct=plan.resources.find(r=>['CONTATTO','PRATICA','ENTE'].includes(r.type));
+    if(direct) add(direct.label,direct.url,'primary',direct.text);
+  }
+
+  return {actions,plan};
+}
+
+async function copyPracticeMessage(caseId){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
   const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
-  const pct=applicationCompletion(ca), op=officialPracticeGuide(ca,g), stage=practiceStage(ca), benefits=practiceBenefits(ca);
-  const sector=ca.applicationData?.sector||state.profile.caregiverSector||'Non so';
-  const dynamicAuthority=(['law104work','leave'].includes(ca.supportId)&&sector==='Pubblico')
-    ? {name:'Amministrazione / datore di lavoro pubblico',detail:'La richiesta segue la procedura interna dell’ente o dell’ufficio personale.',url:ca.source}
-    : ca.authority;
-  const stages=['Dati e requisiti','Modulo e documenti','Compilazione guidata','Come presentarla','Dopo l’invio'];
-  return `<div class="page enter practice-page">
+  try{await navigator.clipboard.writeText(g.script);showToast('Testo copiato: puoi incollarlo nella mail o nel portale');}
+  catch{showToast('Copia non disponibile su questo browser');}
+}
+
+function actionLinkHtml(ca,a){
+  if(a.url==='carevia:copy-message') return `<button class="primary-button action-main-btn" onclick="copyPracticeMessage('${ca.id}')">${icon('file',16)} ${esc(a.label)}</button>`;
+  const external=a.url.startsWith('http');
+  return `<a class="${a.kind==='primary'?'primary-button':'secondary-button'} action-main-btn" href="${a.url}" ${external?'target="_blank" rel="noreferrer"':''}>${icon('arrow',16)} ${esc(a.label)}</a>`;
+}
+
+function documentRecoveryResources(ca,op){
+  return practiceOperationalGuide(ca,op).resources.filter(r=>r.type==='DOCUMENT');
+}
+
+function caseDetailView(ca){
+  const status=deriveCaseStatus(ca);
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const op=officialPracticeGuide(ca,g);
+  const model=practiceActionModel(ca,op,g);
+  const docResources=documentRecoveryResources(ca,op);
+  const missingDocs=(ca.documents||[]).filter(d=>!d.ready);
+  const isPdf=op.kind==='pdf';
+  const isOnline=op.kind==='online';
+  const actionTitle=isPdf?'Scarica e compila il modulo ufficiale':isOnline?'Apri direttamente la domanda ufficiale':'Contatta il punto giusto, senza cercare da solo';
+  return `<div class="page enter practice-page simple-practice-page">
     <button class="text-button practice-back" onclick="closeCaseDetail()">${icon('back',15)} Tutte le pratiche</button>
 
     <div class="practice-title-row">
       <div><span class="eyebrow">${esc(ca.type)}</span><h2>${esc(ca.title)}</h2><p>${esc(ca.adminTitle)}</p></div>
-      <div class="practice-meta"><span class="case-status-pill ${caseStatusClass(status)}">${esc(status)}</span><small>Aggiornata ${new Date(ca.updatedAt).toLocaleDateString('it-IT')}</small></div>
+      <div class="practice-meta"><span class="case-status-pill ${caseStatusClass(status)}">${esc(status)}</span><small>Fonte verificata ${esc(op.verifiedAt||'')}</small></div>
     </div>
 
-    <section class="practice-match-card">
-      <div class="practice-match-copy"><div class="practice-match-icon">${icon('file',25)}</div><div><span class="practice-action-type">${officialActionType(op)} · verificato ${esc(op.verifiedAt)}</span><h3>Questa pratica potrebbe riguardarti</h3><p>Carevia ha verificato il canale ufficiale: prima ti prepara, poi ti porta al modulo, alla domanda online o allo sportello corretto senza passaggi generici inutili.</p></div></div>
-      <div class="practice-match-actions">
-        <button class="primary-button practice-hero-btn" onclick="document.getElementById('operational-guide')?.scrollIntoView({behavior:'smooth'})">${icon('arrow',17)} Vedi cosa fare davvero</button>
-        <button class="secondary-button practice-hero-btn" onclick="document.getElementById('compilation-guide')?.scrollIntoView({behavior:'smooth'})">${icon('info',17)} Guida alla compilazione</button>
+    <section class="action-first-card">
+      <div class="action-first-copy">
+        <span class="practice-action-type">${officialActionType(op)}</span>
+        <h3>Fai questo adesso</h3>
+        <h4>${esc(actionTitle)}</h4>
+        <p>${esc(op.detail)}</p>
+      </div>
+      <div class="action-first-buttons">
+        ${model.actions.map(a=>actionLinkHtml(ca,a)).join('')||'<span class="no-action-note">Carevia non ha ancora un’azione diretta verificata per questo caso.</span>'}
       </div>
     </section>
 
-    <div class="practice-stepper">${stages.map((label,i)=>`<div class="${i+1===stage?'active':''} ${i+1<stage?'done':''}"><span>${i+1<stage?icon('check',12):i+1}</span><b>${label}</b></div>`).join('')}</div>
-
-    <div class="practice-main-grid">
-      <section class="practice-stage-card">
-        <div class="stage-heading"><span class="stage-number">1</span><div><h3>Dati e requisiti</h3><p>Controlliamo le informazioni principali per preparare la pratica corretta e ridurre gli errori prima dell’invio.</p></div></div>
-        <div class="practice-info-strip">${icon('info',17)}<span>I dati inseriti servono per aiutarti a preparare correttamente la pratica. Non vengono inviati automaticamente ad alcun ente.</span></div>
-        <div class="practice-simple-summary">
-          <div><span>TIPO DI PRATICA</span><strong>${officialActionType(op)}</strong></div>
-          <div><span>COSA SUCCEDE</span><strong>${esc(op.title)}</strong><p>${esc(op.detail)}</p></div>
-          <div><span>DOVE TI PORTA CAREVIA</span><strong>${esc(officialActionLabel(op))}</strong><p>${esc(op.note||'Userai esclusivamente il canale ufficiale verificato.')}</p></div>
+    <div class="simple-practice-grid">
+      <section class="simple-card">
+        <span class="eyebrow">Prima di iniziare</span>
+        <h3>Prepara queste cose</h3>
+        <div class="simple-doc-list">
+          ${(op.docs||[]).map(d=>`<div class="simple-doc-item">${icon('check',14)}<span>${esc(d)}</span></div>`).join('')}
         </div>
-        <div class="stage-footer"><button class="primary-button stage-continue" onclick="document.getElementById('documents-step')?.scrollIntoView({behavior:'smooth'})">Vedi cosa serve ${icon('arrow',15)}</button><span class="local-data-note">${icon('shield',14)} I dati restano su questo dispositivo</span></div>
+        ${docResources.length?`<div class="doc-recovery"><h4>Dove recuperarle</h4>${docResources.map(r=>`<a href="${r.url}" target="_blank" rel="noreferrer"><span>${esc(r.label)}</span><small>${esc(r.text)}</small>${icon('arrow',14)}</a>`).join('')}</div>`:''}
       </section>
 
-      <aside class="practice-side">
-        <section class="practice-side-card">
-          <h4>${icon('heart',18)} A cosa serve questa pratica</h4>
-          <div class="benefit-list">${benefits.map(x=>`<div>${icon('check',14)}<span>${esc(x)}</span></div>`).join('')}</div>
-          <div class="side-note">${icon('info',15)}<span>L’esito dipende dalla verifica dell’ente competente e dalla situazione personale.</span></div>
-        </section>
-        <section class="practice-side-card">
-          <h4>${icon('home',18)} Ente competente</h4>
-          <strong>${esc(dynamicAuthority?.name||'Da verificare')}</strong>
-          <p>${esc(dynamicAuthority?.detail||'Carevia deve ancora risolvere il punto di accesso.')}</p>
-          ${dynamicAuthority?.url?`<a class="secondary-button side-link" href="${dynamicAuthority.url}" target="_blank" rel="noreferrer">Apri ente ${icon('arrow',14)}</a>`:''}
-        </section>
-      </aside>
+      <section class="simple-card">
+        <span class="eyebrow">Carevia ti evita questo lavoro</span>
+        <h3>${isOnline?'Cosa ti chiederanno nel portale':isPdf?'Come compilare il modulo':'Cosa dire e cosa chiedere'}</h3>
+        ${isOnline?`<div class="what-they-ask">${g.fields.map(f=>`<div><strong>${esc(f.label)}</strong><span>${esc(compilationHint(f))}</span></div>`).join('')}</div>`
+          :isPdf?`<div class="guided-fields compact-guided">${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div>`
+          :`<div class="ready-script"><p>${esc(g.script)}</p><button class="secondary-button" onclick="copyPracticeMessage('${ca.id}')">${icon('file',14)} Copia testo pronto</button></div>`}
+      </section>
     </div>
 
-    <section id="documents-step" class="practice-lower-section">
-      <div class="lower-section-title"><span class="stage-number muted">2</span><div><span class="eyebrow">Modulo e documenti</span><h3>Prepara ciò che serve davvero</h3><p>La checklist blocca lo stato “Pronta da inviare” finché risultano elementi mancanti.</p></div></div>
-      <div class="official-docs-box"><span class="eyebrow">Prima di iniziare, prepara</span><div class="official-doc-list">${(op.docs||[]).map(x=>`<div>${icon('check',13)}<span>${esc(x)}</span></div>`).join('')}</div></div>
-      <div class="case-checklist lower-checklist">${(ca.documents||[]).map(d=>`<div class="case-check ${d.ready?'done':''}"><button onclick="toggleCaseDocument('${ca.id}','${d.id}')">${d.ready?icon('check',14):''}</button><div><strong>${esc(d.title)}</strong><span>${esc(d.reason)}</span></div><small>${d.ready?'Disponibile':'Da recuperare'}</small></div>`).join('')}</div>
+    <section class="simple-card simple-track-card">
+      <div><span class="eyebrow">Documenti e stato</span><h3>Segna solo ciò che hai davvero fatto</h3><p>Carevia non considera una pratica inviata finché non lo registri tu.</p></div>
+      <div class="case-checklist lower-checklist">${(ca.documents||[]).map(d=>`<div class="case-check ${d.ready?'done':''}"><button onclick="toggleCaseDocument('${ca.id}','${d.id}')">${d.ready?icon('check',14):''}</button><div><strong>${esc(d.title)}</strong><span>${esc(d.reason)}</span></div><small>${d.ready?'Pronto':'Da recuperare'}</small></div>`).join('')}</div>
+      <details class="simple-progress-details">
+        <summary>Segui avanzamento ed esito</summary>
+        <div class="case-steps-mock">${(ca.steps||[]).map((s,i)=>`<div class="case-step ${s.done?'done':''}"><span class="case-step-number">${s.done?icon('check',13):i+1}</span><div><strong>${esc(s.title)}</strong><span>${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('${ca.id}','${s.id}')">${s.done?'Riapri':'Segna fatto'}</button></div></div>`).join('')}</div>
+        <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','rejected')">Respinta</button></div>
+      </details>
     </section>
 
-    <section id="compilation-guide" class="practice-lower-section">
-      <div class="lower-section-title"><span class="stage-number muted">3</span><div><span class="eyebrow">Compilazione guidata</span><h3>Come compilare senza andare alla cieca</h3><p>Carevia non sostituisce il modulo ufficiale: ti spiega cosa preparare e come interpretare i campi più delicati.</p></div></div>
-      <div class="guided-fields">${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div>
-      <div class="practice-fill-status">
-        <div><strong>${pct===100?'Preparazione completata':'Completa i dati essenziali'}</strong><span>${pct}% completato · ${missingApplicationFields(ca).length?missingApplicationFields(ca).length+' campi obbligatori mancanti':'pronto per il passaggio ufficiale'}</span></div>
-        <button class="primary-button" ${pct===100?'':'disabled'} onclick="continueToOfficialPractice('${ca.id}')">${icon('arrow',15)} Vai alle istruzioni operative</button>
-      </div>
-    </section>
-
-    <section id="operational-guide" class="practice-lower-section operational-section">
-      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Carevia ti porta fino al punto giusto</h3><p>Non apriamo più home page generiche: prima trovi documenti, contatti e istruzioni; poi, solo se serve, esci sul servizio ufficiale preciso.</p></div></div>
-      ${practiceOperationalGuideHtml(ca,op)}
-      <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div>
-      <details class="official-sources-details"><summary>Vedi anche i canali ufficiali verificati</summary><div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte →</a>`:''}</div>`).join('')}</div></details>
-    </section>
-
-    <section class="practice-lower-section">
-      <div class="lower-section-title"><span class="stage-number muted">5</span><div><span class="eyebrow">Dopo l’invio</span><h3>Segui la pratica fino all’esito</h3><p>Segna i passaggi completati e registra l’esito solo dopo una comunicazione reale dell’ente.</p></div></div>
-      <div class="case-steps-mock">${(ca.steps||[]).map((s,i)=>`<div class="case-step ${s.done?'done':''}"><span class="case-step-number">${s.done?icon('check',13):i+1}</span><div><strong>${esc(s.title)}</strong><span>${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('${ca.id}','${s.id}')">${s.done?'Riapri':'Segna fatto'}</button>${s.url?`<a href="${s.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div></div>`).join('')}</div>
-      <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','rejected')">Respinta</button>${ca.outcome?`<button class="text-button" onclick="setCaseOutcome('${ca.id}',null)">Rimuovi esito</button>`:''}</div>
-    </section>
-
-    <div class="practice-global-disclaimer"><strong>Importante</strong><span>Carevia è uno strumento di supporto e può contenere errori o informazioni non aggiornate. Prima dell’invio verifica sempre dati, requisiti, modulo e istruzioni sulle fonti ufficiali dell’ente competente. Carevia non sostituisce INPS, Comune, ASL/ULSS, patronati o professionisti abilitati.</span></div>
+    <div class="practice-global-disclaimer"><strong>Importante</strong><span>Carevia semplifica il percorso e usa fonti ufficiali verificate, ma può contenere errori o informazioni non aggiornate. Prima dell’invio definitivo controlla sempre quanto mostrato dal servizio ufficiale.</span></div>
   </div>`;
 }
 
@@ -2898,7 +2959,7 @@ async function completeWizard(){
 }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
+window.navigateTo=navigateTo; window.copyPracticeMessage=copyPracticeMessage; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
 
 render();
 loadTerritorialStats();
