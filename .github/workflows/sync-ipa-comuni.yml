@@ -87,7 +87,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- data/ipa_comuni.csv data/ipa_comuni_source.json; then
+          if [ -z "$(git status --porcelain -- data/ipa_comuni.csv data/ipa_comuni_source.json)" ]; then
             echo "No IPA municipality changes"
             exit 0
           fi
