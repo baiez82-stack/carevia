@@ -1,0 +1,48 @@
+name: Verify practice routes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check official practice links
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("data/practice_routes.json").read_text())
+          urls=[]
+          for key, route in data.get("routes",{}).items():
+              for field in ("info_url","direct_url"):
+                  url=route.get(field)
+                  if url:
+                      urls.append((key,field,url))
+          Path("/tmp/routes.tsv").write_text("\n".join("\t".join(x) for x in urls))
+          print(f"Checking {len(urls)} official URLs")
+          PY
+
+          failures=0
+          while IFS=$'\t' read -r route field url; do
+            code=$(curl -L -A "Carevia-Link-Checker/1.0" --connect-timeout 12 --max-time 30 -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")
+            echo "$route $field -> $code $url"
+            case "$code" in
+              2*|3*|401|403|405) ;;
+              *) failures=$((failures+1)) ;;
+            esac
+          done < /tmp/routes.tsv
+
+          if [ "$failures" -gt 0 ]; then
+            echo "::error::$failures official practice route(s) failed verification"
+            exit 1
+          fi
