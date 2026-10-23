@@ -1470,7 +1470,7 @@ function healthAuthorityForPractice(profile,fallback){
   const a=profile.healthAuthority;
   if(a?.status==='resolved' && a.authorities?.length){
     const x=a.authorities[0];
-    return {name:x.name||fallback,detail:[x.address,x.phone].filter(Boolean).join(' · '),url:x.website||MINISTRY_ASL_DATASET_PAGE};
+    return {name:x.name||fallback,detail:[x.address,x.phone].filter(Boolean).join(' · '),url:x.site||x.website||MINISTRY_ASL_DATASET_PAGE};
   }
   if(a?.status==='multiple') return {name:fallback,detail:'Il Comune e associato a piu aziende sanitarie: serve un livello territoriale piu preciso.',url:MINISTRY_ASL_DATASET_PAGE};
   return {name:fallback,detail:'Carevia non ha ancora risolto un ente sanitario univoco.',url:MINISTRY_ASL_DATASET_PAGE};
@@ -1567,7 +1567,7 @@ function applicationGuide(id,p,saved={}){
       ],
       channels:[
         {name:'Medico di medicina generale',text:'Chiedi come avviare la valutazione per cure domiciliari/ADI nel Distretto competente.',url:'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/assistenza-domiciliare/'},
-        {name:'Azienda sanitaria / Distretto',text:'Carevia usa l’azienda sanitaria risolta dal Comune; verifica il punto di accesso locale.',url:p.healthAuthority?.authorities?.[0]?.website||'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/assistenza-domiciliare/'}
+        {name:'Azienda sanitaria / Distretto',text:'Carevia usa l’azienda sanitaria risolta dal Comune; verifica il punto di accesso locale.',url:p.healthAuthority?.authorities?.[0]?.site||p.healthAuthority?.authorities?.[0]?.website||'https://www.salute.gov.it/new/it/tema/nuova-assistenza-distrettuale/assistenza-domiciliare/'}
       ],
       script:'Buongiorno, assisto '+(p.assistedName||'un familiare')+' residente a '+(p.city||'questo Comune')+'. Vorrei sapere come avviare una valutazione per assistenza domiciliare integrata. Posso indicare i bisogni attuali e la documentazione clinica disponibile.'
     },
@@ -1581,7 +1581,7 @@ function applicationGuide(id,p,saved={}){
       ],
       channels:[
         {name:'Servizi Sociali / Ambito',text:'Chiedi accesso alla valutazione per Impegnativa di Cura Domiciliare.',url:p.socialArea?.areas?.[0]?.url||MLPS_ATS_REGISTRY},
-        {name:'Distretto / Azienda ULSS',text:'Può essere coinvolto nella valutazione sociosanitaria/UVMD.',url:p.healthAuthority?.authorities?.[0]?.website||'https://salute.regione.veneto.it/'}
+        {name:'Distretto / Azienda ULSS',text:'Può essere coinvolto nella valutazione sociosanitaria/UVMD.',url:p.healthAuthority?.authorities?.[0]?.site||p.healthAuthority?.authorities?.[0]?.website||'https://salute.regione.veneto.it/'}
       ],
       script:'Vorrei verificare quale Impegnativa di Cura Domiciliare può essere adatta alla situazione della persona che assisto e come avviare la valutazione territoriale.'
     },
@@ -1645,8 +1645,8 @@ function officialPracticeGuide(ca,g){
       : online('Congedo straordinario per assistenza a familiare con disabilità grave','La domanda è telematica INPS. Carevia verifica prima i dati che possono bloccare la compilazione: rapporto familiare, priorità, convivenza e periodo richiesto.'),
     universal: online('Domanda di Prestazione Universale','La domanda si presenta sul servizio INPS. Non usare moduli PDF ricostruiti: Carevia ti porta alla domanda ufficiale e ti prepara i dati da inserire.'),
     hcp: online('Domanda Home Care Premium','La domanda è gestita attraverso i servizi welfare INPS. Carevia controlla prima platea, DSU/ISEE e dati del verbale.'),
-    adi: local('Attivazione Assistenza Domiciliare Integrata (ADI)','Non esiste un unico modulo nazionale da scaricare: l’accesso avviene tramite medico, Distretto o punto territoriale competente. Carevia deve indicarti il canale corretto per il tuo Comune.'),
-    veneto_icd: local('Richiesta / valutazione per Impegnativa di Cura Domiciliare','La modulistica e il percorso dipendono dal territorio e dalla tipologia ICD. Carevia deve mostrarti solo il modulo ufficiale pertinente quando è disponibile.'),
+    adi: local('Attivazione Assistenza Domiciliare Integrata (ADI)','Non esiste un unico modulo nazionale da scaricare: l’accesso avviene tramite medico, Distretto o punto territoriale competente. Carevia ti porta all’azienda sanitaria risolta per il tuo Comune.',ca.authority?.url||firstUrl),
+    veneto_icd: local('Richiesta / valutazione per Impegnativa di Cura Domiciliare','La Regione Veneto indica che la domanda si presenta tramite Servizi Sociali / Distretto e che il modulo è disponibile presso la propria ULSS. Carevia ti porta all’ente territoriale risolto e deve collegare il modulo specifico quando pubblicato online.',ca.authority?.url||firstUrl),
     verona_sad: local('Richiesta di Assistenza Domiciliare comunale','La procedura è comunale/territoriale. Carevia deve collegare la modulistica ufficiale del Comune quando disponibile e guidarti nella compilazione.'),
     civil: local('Avvio accertamento della disabilità','Il primo atto è il certificato medico introduttivo predisposto da un medico certificatore. Non è un modulo che il caregiver deve scaricare e compilare autonomamente.')
   };
