@@ -169,4 +169,7 @@ La tesi Carevia va ridimensionata se, dopo verifica competitiva:
 **Carevia e il navigatore operativo del caregiving. Capisce il caso, risolve il territorio e ti porta direttamente al modulo, alla domanda o al contatto giusto, seguendo la pratica fino all'esito.**
 
 Payoff:
-**Carevia. Dal problema all'azione.**
+**Carevia. Dal problema al prossimo passo.**
+
+Comportamento di prodotto:
+**dal prossimo passo all'azione concreta, senza ricerche da rifare.**
