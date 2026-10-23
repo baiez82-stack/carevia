@@ -425,6 +425,67 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .carevia-disclaimer strong{font-size:12px}.carevia-disclaimer span{font-size:12px;line-height:1.5;color:var(--muted)}
 @media(max-width:800px){.official-practice-card{align-items:flex-start;flex-direction:column}.official-practice-actions{justify-content:flex-start;min-width:0}.guided-field-row{grid-template-columns:1fr}}
 
+
+/* Carevia 2.0 — mockup direction */
+:root{--brand:#0f5148;--brand-2:#1d7a6b;--brand-soft:#e9f4f0;--warm:#f5a13a;--canvas:#f7f7f3;--ink:#17312d}
+body{background:var(--canvas);color:var(--ink)}
+.app-shell{display:block;min-height:100vh}
+.sidebar{display:none!important}
+.main-area{grid-column:auto}
+.workspace{max-width:1460px;margin:0 auto;padding:28px 4vw 56px}
+.mock-topbar{height:90px;padding:0 4vw;background:rgba(251,251,248,.96);border-bottom:1px solid #dfe7e2;display:grid;grid-template-columns:320px 1fr 80px;gap:22px}
+.top-brand{border:0;background:transparent;padding:0;display:flex;align-items:center;justify-content:flex-start}
+.top-brand img{width:255px;height:auto;display:block}
+.top-main-nav{display:flex;align-items:center;justify-content:center;gap:6px}
+.top-main-nav button{border:0;background:transparent;color:#17312d;border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:8px;font-size:13px}
+.top-main-nav button:hover,.top-main-nav button.active{background:#e9f4f0;color:#0e5d51}
+.top-main-nav button.active{font-weight:750}
+.top-profile{display:flex;justify-content:flex-end;align-items:center}
+.profile-round{width:42px;height:42px;border:0;border-radius:50%;background:#e9f4f0;color:#0e5d51;display:grid;place-items:center}
+.primary-button{background:#0f5148;border-color:#0f5148;box-shadow:none}
+.primary-button:hover{background:#0b463e}
+.practice-page{max-width:100%}
+.practice-back{margin-bottom:14px}
+.practice-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:22px}
+.practice-title-row h2{margin:6px 0 4px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(34px,4vw,52px);font-weight:600;letter-spacing:-.025em;color:#123f3a}
+.practice-title-row p{margin:0;color:#5f706b;font-size:14px}
+.practice-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.practice-meta small{color:#87928e;font-size:10px}
+.practice-match-card{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px 24px;border:1px solid #cce2da;background:linear-gradient(135deg,#eaf7f2,#f8fcfa);border-radius:15px;box-shadow:0 12px 32px rgba(25,78,67,.05)}
+.practice-match-copy{display:flex;align-items:center;gap:17px;min-width:0}
+.practice-match-icon{width:58px;height:58px;border-radius:50%;background:#d6eee6;color:#0f6457;display:grid;place-items:center;flex:0 0 auto}
+.practice-match-copy h3{margin:0 0 6px;font-family:Georgia,serif;font-size:24px;font-weight:600}
+.practice-match-copy p{margin:0;max-width:780px;color:#5a6c66;font-size:12px;line-height:1.55}
+.practice-match-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.practice-hero-btn{min-height:52px;padding:0 20px;border-radius:10px;white-space:nowrap}
+.practice-stepper{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 20px}
+.practice-stepper>div{display:flex;align-items:center;gap:9px;min-height:46px;padding:0 10px;color:#8a9591;border-bottom:2px solid #dfe6e2}
+.practice-stepper>div span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#edf0ee;font-size:11px;font-weight:800}
+.practice-stepper>div b{font-size:11px;font-weight:650}
+.practice-stepper>div.active{color:#0f5d51;border-bottom-color:#1b8a76}.practice-stepper>div.active span{background:#1b8a76;color:#fff}
+.practice-stepper>div.done{color:#417067;border-bottom-color:#9dcec0}.practice-stepper>div.done span{background:#dff1eb;color:#176858}
+.practice-main-grid{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(300px,.75fr);gap:16px;align-items:start}
+.practice-stage-card,.practice-side-card,.practice-lower-section{border:1px solid #d9e2de;background:#fff;border-radius:14px;box-shadow:0 12px 28px rgba(24,55,49,.04)}
+.practice-stage-card{padding:24px}
+.stage-heading{display:flex;gap:16px;align-items:flex-start;margin-bottom:18px}
+.stage-number{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:#1b8a76;color:#fff;font-size:18px;font-weight:800}
+.stage-number.muted{background:#e6f1ed;color:#126355}
+.stage-heading h3,.lower-section-title h3{margin:1px 0 4px;font-family:Georgia,serif;font-size:24px;font-weight:600}
+.stage-heading p,.lower-section-title p{margin:0;color:#697873;font-size:11px;line-height:1.55}
+.practice-info-strip{display:flex;align-items:flex-start;gap:10px;margin:14px 0 18px;padding:13px 14px;border-radius:9px;background:#eaf5fb;color:#24658b;font-size:11px;line-height:1.5}
+.mock-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mock-field{min-width:0}.mock-field .application-field input,.mock-field .application-field select,.mock-field .application-field textarea{min-height:48px;border-radius:8px}
+.field-advice{margin-top:6px;padding:7px 9px;border-radius:7px;background:#f6f8f6;color:#6a7672;font-size:9px;line-height:1.45}
+.stage-footer{display:flex;align-items:center;gap:14px;margin-top:18px}.stage-continue{min-width:260px;min-height:48px}.local-data-note{display:inline-flex;align-items:center;gap:7px;padding:9px 11px;border-radius:8px;background:#edf6f2;color:#317062;font-size:10px}
+.practice-side{display:grid;gap:12px}.practice-side-card{padding:20px}.practice-side-card h4{display:flex;align-items:center;gap:8px;margin:0 0 15px;font-size:13px}.practice-side-card>strong{display:block;margin-bottom:5px;font-size:14px}.practice-side-card>p{margin:0;color:#667570;font-size:10px;line-height:1.5}
+.benefit-list{display:grid;gap:11px}.benefit-list>div{display:flex;align-items:flex-start;gap:8px;color:#50605b;font-size:11px;line-height:1.45}.benefit-list svg{color:#1e865f;flex:0 0 auto;margin-top:1px}
+.side-note{display:flex;gap:8px;margin-top:18px;padding:12px;border-radius:8px;background:#eaf5fb;color:#2c6280;font-size:10px;line-height:1.45}.side-link{margin-top:14px;width:100%}
+.practice-lower-section{margin-top:16px;padding:24px}.lower-section-title{display:flex;gap:14px;align-items:flex-start;margin-bottom:17px}.lower-checklist{margin-top:4px}
+.case-steps-mock{display:grid;gap:8px}.practice-outcome-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.practice-global-disclaimer{display:flex;gap:12px;align-items:flex-start;margin-top:16px;padding:14px 16px;border:1px solid #f1d8b5;border-radius:10px;background:#fff4e5;color:#6f5738}.practice-global-disclaimer strong{font-size:11px}.practice-global-disclaimer span{font-size:10px;line-height:1.55}
+@media(max-width:1000px){.mock-topbar{grid-template-columns:220px 1fr 52px}.top-brand img{width:205px}.top-main-nav button span{display:none}.practice-main-grid{grid-template-columns:1fr}.practice-side{grid-template-columns:1fr 1fr}.mock-form-grid{grid-template-columns:1fr}.practice-stepper{grid-template-columns:1fr 1fr 1fr}.practice-stepper>div b{font-size:10px}}
+@media(max-width:700px){.mock-topbar{height:72px;grid-template-columns:180px 1fr}.top-brand img{width:170px}.top-main-nav{display:none}.top-profile{grid-column:2;grid-row:1}.workspace{padding:22px 16px 42px}.practice-title-row,.practice-match-card{flex-direction:column;align-items:flex-start}.practice-meta{align-items:flex-start}.practice-match-actions{justify-content:flex-start}.practice-stepper{grid-template-columns:1fr}.practice-side{grid-template-columns:1fr}.stage-footer{align-items:flex-start;flex-direction:column}.stage-continue{width:100%;min-width:0}}
+
 </style>
   </head>
   <body>
@@ -1797,25 +1858,105 @@ function casesView(){
   </div>`;
 }
 
+
+function practiceBenefits(ca){
+  const map={
+    civil:['Avviare l’accertamento ufficiale della disabilità','Ottenere un verbale utile per eventuali tutele e servizi','Accedere, se spettanti, a misure collegate al riconoscimento'],
+    law104work:['Richiedere i permessi lavorativi previsti dalla Legge 104','Gestire correttamente il canale pubblico o privato','Preparare i dati da comunicare al datore di lavoro'],
+    leave:['Richiedere il congedo straordinario se ne ricorrono i requisiti','Verificare priorità familiare e convivenza','Preparare periodo e documentazione per la richiesta'],
+    universal:['Presentare la domanda di Prestazione Universale','Verificare i requisiti essenziali prima dell’accesso','Arrivare alla domanda INPS con i dati già ordinati'],
+    hcp:['Presentare la domanda Home Care Premium','Verificare platea, DSU/ISEE e verbale','Seguire correttamente il canale welfare INPS'],
+    adi:['Chiedere una valutazione per cure domiciliari','Individuare Distretto / punto di accesso competente','Descrivere in modo chiaro i bisogni assistenziali a casa'],
+    veneto_icd:['Avviare la valutazione per l’ICD pertinente','Individuare Ambito / ULSS competente','Preparare ISEE e quadro assistenziale'],
+    verona_sad:['Richiedere una valutazione per assistenza domiciliare','Preparare bisogni quotidiani e ISEE','Contattare il servizio sociale territoriale corretto']
+  };
+  return map[ca.supportId]||['Avviare correttamente la pratica','Preparare dati e documenti richiesti','Usare il canale ufficiale dell’ente competente'];
+}
+
+function practiceStage(ca){
+  const missing=(ca.documents||[]).filter(d=>!d.ready).length;
+  if(ca.outcome) return 5;
+  if((ca.steps||[]).some(s=>['wait','outcome'].includes(s.phase)&&s.done)) return 5;
+  if((ca.steps||[]).some(s=>s.phase==='submit'&&s.done)) return 4;
+  if(!missing && applicationCompletion(ca)>=100) return 3;
+  if(applicationCompletion(ca)>=100) return 2;
+  return 1;
+}
+
 function caseDetailView(ca){
-  const status=deriveCaseStatus(ca), next=nextCaseStep(ca), progress=caseProgress(ca);
-  const missingDocs=(ca.documents||[]).filter(d=>!d.ready);
-  return `<div class="page enter">
-    <button class="text-button" onclick="closeCaseDetail()">${icon('back',15)} Tutte le pratiche</button>
-    <div class="case-detail-head"><div><span class="eyebrow">${esc(ca.type)}</span><h2>${esc(ca.title)}</h2><p>${esc(ca.adminTitle)}</p></div><div><span class="case-status-pill ${caseStatusClass(status)}">${esc(status)}</span><div class="case-progress" style="width:180px"><i style="width:${progress}%"></i></div></div></div>
-    ${(()=>{const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{}),pct=applicationCompletion(ca),op=officialPracticeGuide(ca,g);return `<section class="application-assistant application-assistant-v2"><div class="official-practice-card"><div><span class="eyebrow">${esc(op.badge)}</span><h3>${esc(op.title)}</h3><p>${esc(op.detail)}</p></div><div class="official-practice-actions">${op.download?`<a class="primary-button" href="${op.download}" target="_blank" rel="noreferrer">${icon('file',16)} Scarica modulo ufficiale</a>`:'' }${op.url?`<a class="primary-button" href="${op.url}" target="_blank" rel="noreferrer">${icon('arrow',16)} ${esc(op.cta)}</a>`:''}</div></div><div class="application-assistant-head"><div><span class="eyebrow">Compilazione assistita</span><h3>Ti preparo alla pratica vera</h3><p>Carevia usa i dati del tuo profilo per farti arrivare al modulo o al servizio ufficiale con le informazioni già ordinate e con indicazioni pratiche su come compilare i punti più delicati.</p><div class="application-progress">Preparazione completata: <b>${pct}%</b></div></div><span class="application-mode">${esc(g.mode)}</span></div><div class="guided-fields"><h4>Dati da preparare e come compilarli</h4>${g.fields.map(f=>`<div class="guided-field-row"><div class="guided-field-control">${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>${esc(compilationHint(f))}</p></div></div>`).join('')}</div><div class="application-send"><h4>Dove si presenta davvero</h4><div class="application-channels">${g.channels.map((ch,i)=>`<div class="application-channel"><span>${i+1}</span><div><strong>${esc(ch.name)}</strong><small>${esc(ch.text)}</small></div>${ch.url?`<a href="${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div>`).join('')}</div><div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>${esc(g.script)}</div><div class="application-actions"><button class="secondary-button" onclick="copyPracticeSummary('${ca.id}')">${icon('file',14)} Copia riepilogo</button><button class="secondary-button" onclick="printSummary()">${icon('file',14)} Salva riepilogo PDF</button></div><div class="carevia-disclaimer"><strong>Importante</strong><span>Carevia è uno strumento di supporto alla compilazione e può contenere errori o informazioni non aggiornate. Prima dell’invio verifica sempre dati, requisiti, modulo e istruzioni sulla fonte ufficiale dell’ente competente. Carevia non sostituisce INPS, Comune, ASL/ULSS, patronati o professionisti abilitati e non assume decisioni al posto dell’ente.</span></div></div></section>`;})()}
-    <div class="case-detail-grid">
-      <div>
-        <section class="case-panel"><h3>Documenti e requisiti da preparare</h3><p class="case-panel-intro">${missingDocs.length?missingDocs.length+' elementi ancora da confermare.':'Hai confermato tutti gli elementi della checklist.'}</p><div class="case-checklist">${(ca.documents||[]).map(d=>`<div class="case-check ${d.ready?'done':''}"><button onclick="toggleCaseDocument('${ca.id}','${d.id}')">${d.ready?icon('check',14):''}</button><div><strong>${esc(d.title)}</strong><span>${esc(d.reason)}</span></div><small>${d.ready?'Disponibile':'Da recuperare'}</small></div>`).join('')}</div></section>
-        <section class="case-panel"><h3>Passaggi della pratica</h3><div>${(ca.steps||[]).map((s,i)=>`<div class="case-step ${s.done?'done':''}"><span class="case-step-number">${s.done?icon('check',13):i+1}</span><div><strong>${esc(s.title)}</strong><span>${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('${ca.id}','${s.id}')">${s.done?'Riapri':'Segna fatto'}</button>${s.url?`<a href="${s.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>`:''}</div></div>`).join('')}</div></section>
+  const status=deriveCaseStatus(ca), progress=caseProgress(ca), missingDocs=(ca.documents||[]).filter(d=>!d.ready);
+  const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
+  const pct=applicationCompletion(ca), op=officialPracticeGuide(ca,g), stage=practiceStage(ca), benefits=practiceBenefits(ca);
+  const sector=ca.applicationData?.sector||state.profile.caregiverSector||'Non so';
+  const dynamicAuthority=(['law104work','leave'].includes(ca.supportId)&&sector==='Pubblico')
+    ? {name:'Amministrazione / datore di lavoro pubblico',detail:'La richiesta segue la procedura interna dell’ente o dell’ufficio personale.',url:ca.source}
+    : ca.authority;
+  const stages=['Dati e requisiti','Modulo e documenti','Compilazione guidata','Come presentarla','Dopo l’invio'];
+  return \`<div class="page enter practice-page">
+    <button class="text-button practice-back" onclick="closeCaseDetail()">\${icon('back',15)} Tutte le pratiche</button>
+
+    <div class="practice-title-row">
+      <div><span class="eyebrow">\${esc(ca.type)}</span><h2>\${esc(ca.title)}</h2><p>\${esc(ca.adminTitle)}</p></div>
+      <div class="practice-meta"><span class="case-status-pill \${caseStatusClass(status)}">\${esc(status)}</span><small>Aggiornata \${new Date(ca.updatedAt).toLocaleDateString('it-IT')}</small></div>
+    </div>
+
+    <section class="practice-match-card">
+      <div class="practice-match-copy"><div class="practice-match-icon">\${icon('file',25)}</div><div><h3>Questa pratica potrebbe riguardarti</h3><p>In base alle informazioni che hai inserito, Carevia ha selezionato questo percorso e ti prepara alla procedura ufficiale corretta.</p></div></div>
+      <div class="practice-match-actions">
+        \${op.download?\`<a class="primary-button practice-hero-btn" href="\${op.download}" target="_blank" rel="noreferrer">\${icon('file',17)} Scarica il modulo</a>\`:op.url?\`<a class="primary-button practice-hero-btn" href="\${op.url}" target="_blank" rel="noreferrer">\${icon('arrow',17)} \${esc(op.cta)}</a>\`:''}
+        <button class="secondary-button practice-hero-btn" onclick="document.getElementById('compilation-guide')?.scrollIntoView({behavior:'smooth'})">\${icon('info',17)} Guida alla compilazione</button>
       </div>
-      <aside>
-        ${(()=>{const sector=ca.applicationData?.sector||state.profile.caregiverSector||'Non so';const dynamicAuthority=(['law104work','leave'].includes(ca.supportId)&&sector==='Pubblico')?{name:'Amministrazione / datore di lavoro pubblico',detail:'La richiesta segue la procedura interna dell’ente o dell’ufficio personale.',url:ca.source}:ca.authority;return `<section class="case-panel case-authority"><span class="eyebrow">Ente / porta di accesso</span><h3 style="margin-top:8px">${esc(dynamicAuthority?.name||'Da verificare')}</h3><span>${esc(dynamicAuthority?.detail||'Carevia deve ancora risolvere il punto di accesso.')}</span>${dynamicAuthority?.url?`<a class="secondary-button" style="margin-top:14px" href="${dynamicAuthority.url}" target="_blank" rel="noreferrer">Apri ente / fonte ${icon('arrow',14)}</a>`:''}</section>`;})()}
-        <section class="case-panel"><span class="eyebrow">Esito reale</span><h3 style="margin-top:8px">Quando ricevi la risposta</h3><p class="case-panel-intro">Non usare questi pulsanti per una previsione. Registrano soltanto l’esito che ti ha comunicato l’ente.</p><div class="case-outcome"><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('${ca.id}','rejected')">Respinta</button></div>${ca.outcome?`<button class="text-button" style="margin-top:10px" onclick="setCaseOutcome('${ca.id}',null)">Rimuovi esito</button>`:''}</section>
-        <section class="case-panel"><span class="eyebrow">Fonte</span><p class="case-panel-intro">La pratica resta una guida operativa. Requisiti e decisione finale spettano all’ente competente.</p><a href="${ca.source}" target="_blank" rel="noreferrer">Apri la fonte ufficiale →</a></section>
+    </section>
+
+    <div class="practice-stepper">\${stages.map((label,i)=>\`<div class="\${i+1===stage?'active':''} \${i+1<stage?'done':''}"><span>\${i+1<stage?icon('check',12):i+1}</span><b>\${label}</b></div>\`).join('')}</div>
+
+    <div class="practice-main-grid">
+      <section class="practice-stage-card">
+        <div class="stage-heading"><span class="stage-number">1</span><div><h3>Dati e requisiti</h3><p>Controlliamo le informazioni principali per preparare la pratica corretta e ridurre gli errori prima dell’invio.</p></div></div>
+        <div class="practice-info-strip">\${icon('info',17)}<span>I dati inseriti servono per aiutarti a preparare correttamente la pratica. Non vengono inviati automaticamente ad alcun ente.</span></div>
+        <div class="mock-form-grid">\${g.fields.map(f=>\`<div class="mock-field">\${applicationFieldHtml(ca,f)}<div class="field-advice">\${esc(compilationHint(f))}</div></div>\`).join('')}</div>
+        <div class="stage-footer"><button class="primary-button stage-continue" onclick="document.getElementById('documents-step')?.scrollIntoView({behavior:'smooth'})">Continua \${icon('arrow',15)}</button><span class="local-data-note">\${icon('shield',14)} I dati restano su questo dispositivo</span></div>
+      </section>
+
+      <aside class="practice-side">
+        <section class="practice-side-card">
+          <h4>\${icon('heart',18)} A cosa serve questa pratica</h4>
+          <div class="benefit-list">\${benefits.map(x=>\`<div>\${icon('check',14)}<span>\${esc(x)}</span></div>\`).join('')}</div>
+          <div class="side-note">\${icon('info',15)}<span>L’esito dipende dalla verifica dell’ente competente e dalla situazione personale.</span></div>
+        </section>
+        <section class="practice-side-card">
+          <h4>\${icon('home',18)} Ente competente</h4>
+          <strong>\${esc(dynamicAuthority?.name||'Da verificare')}</strong>
+          <p>\${esc(dynamicAuthority?.detail||'Carevia deve ancora risolvere il punto di accesso.')}</p>
+          \${dynamicAuthority?.url?\`<a class="secondary-button side-link" href="\${dynamicAuthority.url}" target="_blank" rel="noreferrer">Apri ente \${icon('arrow',14)}</a>\`:''}
+        </section>
       </aside>
     </div>
-  </div>`;
+
+    <section id="documents-step" class="practice-lower-section">
+      <div class="lower-section-title"><span class="stage-number muted">2</span><div><span class="eyebrow">Modulo e documenti</span><h3>Prepara ciò che serve davvero</h3><p>La checklist blocca lo stato “Pronta da inviare” finché risultano elementi mancanti.</p></div></div>
+      <div class="case-checklist lower-checklist">\${(ca.documents||[]).map(d=>\`<div class="case-check \${d.ready?'done':''}"><button onclick="toggleCaseDocument('\${ca.id}','\${d.id}')">\${d.ready?icon('check',14):''}</button><div><strong>\${esc(d.title)}</strong><span>\${esc(d.reason)}</span></div><small>\${d.ready?'Disponibile':'Da recuperare'}</small></div>\`).join('')}</div>
+    </section>
+
+    <section id="compilation-guide" class="practice-lower-section">
+      <div class="lower-section-title"><span class="stage-number muted">3</span><div><span class="eyebrow">Compilazione guidata</span><h3>Come compilare senza andare alla cieca</h3><p>Carevia non sostituisce il modulo ufficiale: ti spiega cosa preparare e come interpretare i campi più delicati.</p></div></div>
+      <div class="guided-fields">\${g.fields.map(f=>\`<div class="guided-field-row"><div class="guided-field-control">\${applicationFieldHtml(ca,f)}</div><div class="guided-field-tip"><span>COME COMPILARLO</span><p>\${esc(compilationHint(f))}</p></div></div>\`).join('')}</div>
+    </section>
+
+    <section class="practice-lower-section">
+      <div class="lower-section-title"><span class="stage-number muted">4</span><div><span class="eyebrow">Come presentarla</span><h3>Usa il canale ufficiale corretto</h3><p>\${esc(op.detail)}</p></div></div>
+      <div class="application-channels">\${g.channels.map((ch,i)=>\`<div class="application-channel"><span>\${i+1}</span><div><strong>\${esc(ch.name)}</strong><small>\${esc(ch.text)}</small></div>\${ch.url?\`<a href="\${ch.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>\`:''}</div>\`).join('')}</div>
+      <div class="application-script"><b>Cosa puoi dire o chiedere:</b><br>\${esc(g.script)}</div>
+    </section>
+
+    <section class="practice-lower-section">
+      <div class="lower-section-title"><span class="stage-number muted">5</span><div><span class="eyebrow">Dopo l’invio</span><h3>Segui la pratica fino all’esito</h3><p>Segna i passaggi completati e registra l’esito solo dopo una comunicazione reale dell’ente.</p></div></div>
+      <div class="case-steps-mock">\${(ca.steps||[]).map((s,i)=>\`<div class="case-step \${s.done?'done':''}"><span class="case-step-number">\${s.done?icon('check',13):i+1}</span><div><strong>\${esc(s.title)}</strong><span>\${esc(s.text)}</span></div><div class="case-step-actions"><button class="text-button" onclick="toggleCaseStep('\${ca.id}','\${s.id}')">\${s.done?'Riapri':'Segna fatto'}</button>\${s.url?\`<a href="\${s.url}" target="_blank" rel="noreferrer">Fonte ufficiale →</a>\`:''}</div></div>\`).join('')}</div>
+      <div class="practice-outcome-row"><button class="secondary-button" onclick="setCaseOutcome('\${ca.id}','approved')">Approvata / attivata</button><button class="secondary-button" onclick="setCaseOutcome('\${ca.id}','rejected')">Respinta</button>\${ca.outcome?\`<button class="text-button" onclick="setCaseOutcome('\${ca.id}',null)">Rimuovi esito</button>\`:''}</div>
+    </section>
+
+    <div class="practice-global-disclaimer"><strong>Importante</strong><span>Carevia è uno strumento di supporto e può contenere errori o informazioni non aggiornate. Prima dell’invio verifica sempre dati, requisiti, modulo e istruzioni sulle fonti ufficiali dell’ente competente. Carevia non sostituisce INPS, Comune, ASL/ULSS, patronati o professionisti abilitati.</span></div>
+  </div>\`;
 }
 
 function setCaseFilter(filter){ state.caseFilter=filter; saveState(); render(); }
@@ -1823,19 +1964,17 @@ function setCaseFilter(filter){ state.caseFilter=filter; saveState(); render(); 
 function statusBadge(item) { return `<span class="status-badge ${item.tone}"><i></i>${esc(item.status)}</span>`; }
 function button(cls, label, action, iconName = '') { return `<button class="${cls}" onclick="${action}">${iconName ? icon(iconName, 17) : ''}${label}</button>`; }
 
-function sidebar() {
-  const nav = [['overview','Home','home'],['support','Il mio percorso','wallet'],['cases','Pratiche','file'],['documents','Documenti','folder'],['territory','Territorio','search'],['sources','Fonti ufficiali','info']];
-  const caseBlock = state.profileConfigured
-    ? `<div class="sidebar-case"><div class="avatar">${esc(state.profile.assistedName[0] || 'P')}</div><div><strong>${esc(state.profile.assistedName)}</strong><span>${esc(state.profile.city)}</span></div><span>...</span></div>`
-    : `<div class="sidebar-case"><div class="avatar">+</div><div><strong>Inizia il percorso</strong><span>Nessun profilo ancora</span></div><span>...</span></div>`;
-  return `<aside class="sidebar ${state.mobileNav ? 'mobile-open' : ''}"><div class="brand"><span class="brand-mark">${icon('heart',21)}</span><span>carevia</span></div><button class="mobile-close icon-button" onclick="closeMobileNav()" aria-label="Chiudi menu">${icon('close',20)}</button><nav><p class="nav-label">Navigatore</p>${nav.map(([id,label,ico]) => `<button class="nav-item ${state.active === id ? 'active' : ''}" onclick="navigateTo('${id}')">${icon(ico,18)}<span>${label}</span></button>`).join('')}</nav>${caseBlock}<div class="sidebar-footer"><span>${icon('shield',16)}Dati salvati su questo dispositivo</span><a href="privacy.html">Privacy & GDPR</a></div></aside>`;
-}
+function sidebar() { return ''; }
 
 function topbar() {
-  if (!state.profileConfigured) {
-    return `<header class="topbar"><button class="icon-button menu-button" onclick="openMobileNav()" aria-label="Apri menu">${icon('menu',21)}</button><div><span class="eyebrow">Carevia</span><h1>Navigatore caregiver</h1></div><div class="topbar-actions">${button('primary-button','Inizia','openWizard()','spark')}</div></header>`;
-  }
-  return `<header class="topbar"><button class="icon-button menu-button" onclick="openMobileNav()" aria-label="Apri menu">${icon('menu',21)}</button><div><span class="eyebrow">Pratica familiare</span><h1>${esc(state.profile.assistedName)}</h1></div><div class="topbar-actions">${button('secondary-button','Salva PDF','printSummary()','file')}${button('secondary-button','Aggiorna','openWizard()','search')}<div class="user-chip"><span>${esc(state.profile.caregiverName[0] || 'C')}</span><div><strong>${esc(state.profile.caregiverName || 'Caregiver')}</strong><small>Familiare</small></div></div></div></header>`;
+  const nav=[['overview','Home','home'],['support','Il mio percorso','wallet'],['cases','Pratiche','file'],['documents','Documenti','folder'],['territory','Territorio','search'],['sources','Fonti','info']];
+  return \`<header class="topbar mock-topbar">
+    <button class="top-brand" onclick="navigateTo('overview')" aria-label="Vai alla home"><img src="assets/carevia-logo.svg" alt="Carevia"></button>
+    <nav class="top-main-nav">\${nav.map(([id,label,ico])=>\`<button class="\${state.active===id?'active':''}" onclick="navigateTo('\${id}')">\${icon(ico,17)}<span>\${label}</span></button>\`).join('')}</nav>
+    <div class="top-profile">
+      \${state.profileConfigured?\`<button class="profile-round" onclick="openWizard()" title="Aggiorna profilo">\${icon('user',19)}</button>\`:\`<button class="primary-button" onclick="openWizard()">Inizia</button>\`}
+    </div>
+  </header>\`;
 }
 
 function taskRow(task) {
