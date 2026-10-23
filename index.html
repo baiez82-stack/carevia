@@ -1506,7 +1506,7 @@ function applicationGuide(id,p,saved={}){
       ],
       channels:effectiveSector==='Pubblico'
         ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Presenta la richiesta secondo la procedura interna dell’ente. INPS non concede questi permessi ai dipendenti pubblici.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'}]
-        : [{name:'Servizio online INPS',text:'Accedi al servizio dedicato per la domanda di permessi 104.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
+        : [{name:'Domanda online INPS',text:'Apre direttamente il servizio autenticato per i permessi Legge 104.',url:'https://serviziweb2.inps.it/PSRSVSCweb/initSportello.do?S=S'},
            {name:'Patronato',text:'Può presentare telematicamente la domanda per tuo conto.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html'},
            {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile.',url:null}],
       script:'Ho un familiare con riconoscimento di disabilità grave ex art. 3 comma 3 e vorrei verificare/presentare la richiesta dei permessi Legge 104. Vorrei sapere quali dati o allegati mancano nel mio caso.'
@@ -1522,7 +1522,7 @@ function applicationGuide(id,p,saved={}){
       ],
       channels:effectiveSector==='Pubblico'
         ? [{name:'Amministrazione / datore di lavoro pubblico',text:'Per i dipendenti pubblici la domanda è gestita dal datore di lavoro pubblico.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'}]
-        : [{name:'Servizio online INPS',text:'Presenta la domanda di congedo straordinario dal servizio dedicato.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
+        : [{name:'Domanda online INPS',text:'Apre direttamente il servizio autenticato per il congedo straordinario.',url:'https://serviziweb2.inps.it/AS0207/PsrConStrJ/initSportello.do?S=S'},
            {name:'Patronato',text:'Alternativa assistita per la presentazione telematica.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html'},
            {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile.',url:null}],
       script:'Vorrei verificare il congedo straordinario per assistere un familiare con disabilità grave. Ho bisogno di controllare ordine di priorità, convivenza e periodo richiedibile.'
@@ -1538,7 +1538,7 @@ function applicationGuide(id,p,saved={}){
         {id:'careArrangement',label:'Come viene prestata oggi l’assistenza?',type:'textarea',value:'',required:false,help:'La domanda INPS considera anche la situazione familiare e assistenziale.'}
       ],
       channels:[
-        {name:'Servizio online INPS',text:'Accedi al servizio Prestazione Universale e compila la domanda guidata.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html'},
+        {name:'Domanda online Prestazione Universale',text:'Apre direttamente il servizio autenticato INPS.',url:'https://servizi2.inps.it/servizi/HUBPNPInternet/prestazione/45'},
         {name:'Patronato',text:'Può assisterti nella presentazione della domanda.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html'}],
       script:'Vorrei presentare la domanda di Prestazione Universale. Ho già verificato età, accompagnamento e ISEE; vorrei controllare il requisito di bisogno assistenziale gravissimo e la documentazione da allegare.'
     },
@@ -1551,7 +1551,7 @@ function applicationGuide(id,p,saved={}){
         {id:'invalidityRecord',label:'Estremi del verbale di invalidità disponibili',type:'select',options:['Non so','No','Si'],value:p.invalidity==='Si'?'Si':'Non so',required:true,help:'Il patronato può richiedere gli estremi del verbale.'}
       ],
       channels:[
-        {name:'Portale prestazioni welfare INPS',text:'Canale online ufficiale per la domanda HCP.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html'},
+        {name:'Portale prestazioni welfare INPS',text:'Apre direttamente il portale ufficiale per la domanda HCP.',url:'https://servizi2.inps.it/servizi/welfarecloudweb/'},
         {name:'Patronato',text:'Può presentare la domanda inserendo DSU e verbale.',url:'https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html'},
         {name:'Contact Center INPS',text:'803 164 da rete fissa oppure 06 164 164 da mobile, usando le proprie credenziali.',url:null}],
       script:'Vorrei verificare la domanda Home Care Premium 2025-2028. Ho bisogno di confermare la platea della Gestione Unitaria, DSU/ISEE e verbale di non autosufficienza.'
@@ -1632,28 +1632,119 @@ function applicationCompletion(ca){
 
 
 function officialPracticeGuide(ca,g){
-  const sector=ca.applicationData?.sector||state.profile.caregiverSector||'Non so';
+  const p=state.profile;
+  const sector=ca.applicationData?.sector||p.caregiverSector||'Non so';
+  const verifiedAt='23 ott 2026';
+  const make=(kind,title,detail,url,actionLabel,sourceUrl,docs=[],note='')=>({
+    kind,title,detail,url:url||null,download:kind==='pdf'?url:null,
+    actionLabel,cta:actionLabel,sourceUrl:sourceUrl||ca.source||url||null,
+    verifiedAt,docs,note
+  });
+
+  const inps104Info='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50098.indennit-per-permessi-fruiti-dai-lavoratori-per-assistere-familiari-disabili-in-situazione-di-gravit-o-fruiti-dai-lavoratori-disabili.html';
+  const inps104Direct='https://serviziweb2.inps.it/PSRSVSCweb/initSportello.do?S=S';
+  const inpsLeaveInfo='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.50097.indennit-per-congedi-straordinari-assistenza-familiari-disabili-.html';
+  const inpsLeaveDirect='https://serviziweb2.inps.it/AS0207/PsrConStrJ/initSportello.do?S=S';
+  const universalInfo='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.decreto-anziani-prestazione-universale.html';
+  const universalDirect='https://servizi2.inps.it/servizi/HUBPNPInternet/prestazione/45';
+  const hcpInfo='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium--50014.hcp-assistenza-domiciliare-per-persone-non-autosufficienti-home-care-premium-domanda-e-gestione-benefici.html';
+  const hcpDirect='https://servizi2.inps.it/servizi/welfarecloudweb/';
+  const invalidityInfo='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.domanda-invalidita-civile-e-accertamento-sanitario-50004.accertamento-sanitario.html';
+  const invalidityDirect='https://serviziweb2.inps.it/AS0207/InvCivCittJBWEB/servlet/LoginServlet';
+  const medicalCertInfo='https://www.inps.it/it/it/dettaglio-scheda.it.schede-servizio-strumento.schede-servizi.certificato-medico-introduttivo---invalidit--civile.html';
+  const ulss9D4='https://www.aulss9.veneto.it/index.cfm?action=mys.apridoc&iddoc=5154';
+  const icdVeneto='https://salute.regione.veneto.it/organizzazione-sssr/il-servizio-socio-sanitario-regionale/assistenza-distrettuale/assistenza-sociosanitaria/anziani-non-autosufficienti/domiciliarit%C3%A0-%28icd%29---impegnative-di-cura-domiciliari';
+  const sadVerona='https://www.comune.verona.it/Servizi/Assistenza-domiciliare';
+
+  if(ca.supportId==='law104work'){
+    if(sector==='Pubblico') return make('assisted','Permessi Legge 104 — dipendente pubblico',
+      'Non esiste una domanda INPS per il dipendente pubblico: la richiesta va presentata alla propria amministrazione secondo la procedura interna.',
+      inps104Info,'Apri istruzioni ufficiali INPS',inps104Info,
+      ['Verbale Legge 104 con art. 3 comma 3','Dati del familiare assistito e rapporto di parentela','Informazioni su eventuale ricovero a tempo pieno'],
+      'Carevia non può conoscere la modulistica interna del tuo datore pubblico senza identificarlo.');
+    return make('online','Permessi Legge 104 — domanda online INPS',
+      'La domanda è telematica. Carevia ti prepara i dati, poi apre direttamente il servizio INPS autenticato.',
+      inps104Direct,'Apri direttamente la domanda INPS',inps104Info,
+      ['SPID/CIE/CNS per accedere','Verbale Legge 104 art. 3 comma 3','Dati della persona assistita e rapporto familiare','Informazioni su ricovero a tempo pieno e condizioni dichiarate']);
+  }
+
+  if(ca.supportId==='leave'){
+    if(sector==='Pubblico') return make('assisted','Congedo straordinario — dipendente pubblico',
+      'La domanda non è gestita da INPS: va presentata esclusivamente al datore di lavoro pubblico secondo la procedura interna.',
+      inpsLeaveInfo,'Apri istruzioni ufficiali INPS',inpsLeaveInfo,
+      ['Verbale Legge 104 art. 3 comma 3','Rapporto familiare','Verifica dell’ordine di priorità','Convivenza quando richiesta','Periodo di congedo']);
+    return make('online','Congedo straordinario — domanda online INPS',
+      'La domanda è telematica per i dipendenti privati. Carevia verifica prima priorità, convivenza e periodo richiesto.',
+      inpsLeaveDirect,'Apri direttamente la domanda INPS',inpsLeaveInfo,
+      ['SPID/CIE/CNS per accedere','Verbale Legge 104 art. 3 comma 3','Rapporto familiare e ordine di priorità','Dati sulla convivenza','Periodo richiesto']);
+  }
+
+  if(ca.supportId==='universal') return make('online','Prestazione Universale — domanda online INPS',
+    'La domanda si presenta nel servizio dedicato INPS. Carevia deve preparare prima i requisiti e le informazioni che troverai nel questionario.',
+    universalDirect,'Apri direttamente Prestazione Universale',universalInfo,
+    ['SPID/CIE/CNS per accedere','Indennità di accompagnamento già riconosciuta','ISEE sociosanitario valido','Informazioni sulla situazione familiare e assistenziale','Documentazione richiesta dal servizio INPS']);
+
+  if(ca.supportId==='hcp') return make('online','Home Care Premium — Portale prestazioni welfare',
+    'La domanda HCP si presenta dal Portale prestazioni welfare INPS. Patronato e Contact Center sono canali alternativi.',
+    hcpDirect,'Apri direttamente il Portale HCP',hcpInfo,
+    ['SPID/CIE/CNS per accedere','Protocollo DSU / ISEE','Estremi del verbale che certifica invalidità/non autosufficienza','Verifica dell’iscrizione alla Gestione Unitaria']);
+
+  if(ca.supportId==='civil'){
+    if(isReformProvince(p)){
+      return make('assisted','Accertamento disabilità — avvio dal medico certificatore',
+        'Nel tuo territorio 2026 il cittadino non deve inviare una domanda amministrativa di accertamento: il procedimento parte con il certificato medico introduttivo trasmesso telematicamente dal medico certificatore.',
+        medicalCertInfo,'Apri istruzioni per il certificato medico',invalidityInfo,
+        ['Tessera sanitaria / codice fiscale','Documento di identità','Referti e documentazione sanitaria utile','Elenco delle patologie e difficoltà funzionali da riferire al medico'],
+        'Dopo l’invio del certificato possono esserci ulteriori dati socio-economici da comunicare a INPS, se richiesti.');
+    }
+    return make('online','Invalidità civile — domanda online INPS dopo il certificato medico',
+      'Fuori dai territori sperimentali 2026, dopo il certificato medico introduttivo resta prevista la domanda amministrativa del cittadino.',
+      invalidityDirect,'Apri direttamente la domanda Invalidità civile',invalidityInfo,
+      ['Certificato medico introduttivo e relativo codice','SPID/CIE/CNS','Documento di identità e tessera sanitaria','Dati socio-economici richiesti da INPS']);
+  }
+
+  if(ca.supportId==='adi'){
+    const pescantina=normalizePlace(p.city)==='pescantina';
+    return make('assisted','Assistenza Domiciliare Integrata — attivazione sanitaria',
+      pescantina
+        ? 'Per Pescantina l’ADI fa capo al Distretto 4 Ovest Veronese. L’attivazione avviene di norma tramite medico di medicina generale, pediatra o medico ospedaliero; la presa in carico è gestita dalla COADI di Bussolengo.'
+        : 'L’ADI non ha un modulo nazionale da compilare: viene attivata tramite medico/ospedale e presa in carico dal servizio territoriale competente.',
+      pescantina?ulss9D4:(ca.authority?.url||ca.source),'Apri contatti e modalità di accesso',pescantina?ulss9D4:ca.source,
+      ['Tessera sanitaria','Documentazione clinica recente disponibile','Elenco terapie e bisogni assistenziali','Recapito del caregiver'],
+      pescantina?'COADI Bussolengo: 045 6712395 — coadi.bussolengo@aulss9.veneto.it.':'Carevia usa il Comune per risolvere l’azienda sanitaria competente.');
+  }
+
+  if(ca.supportId==='veneto_icd') return make('assisted','Impegnativa di Cura Domiciliare (ICD) — domanda territoriale',
+    'La Regione Veneto prevede una domanda, ma il modulo e la valutazione dipendono dalla tipologia ICD e dall’AULSS/Servizi Sociali competenti. Carevia non deve proporti un PDF non verificato o non pertinente.',
+    ca.authority?.url||icdVeneto,'Apri ente territoriale / istruzioni ICD',icdVeneto,
+    ['ISEE sociosanitario','Documento di identità e tessera sanitaria','Documentazione sanitaria / verbali disponibili','Informazioni sul bisogno assistenziale a domicilio'],
+    'La domanda può essere presentata tramite Servizi Sociali del Comune/ATS o Distretto socio-sanitario; segue valutazione e graduatoria.');
+
+  if(ca.supportId==='verona_sad') return make('assisted','SAD Verona — accesso tramite Assistente Sociale',
+    'Il servizio online del Comune di Verona non è disponibile: bisogna fissare un appuntamento con il Centro Sociale Territoriale competente. L’ISEE è necessario per determinare l’eventuale compartecipazione.',
+    sadVerona,'Apri contatti del servizio',sadVerona,
+    ['ISEE','Documento di identità della persona assistita','Informazioni sulle difficoltà nella cura personale e della casa'],
+    'Sportello Sì: 800 085 570. La domanda viene attivata dopo la valutazione dell’Assistente Sociale.');
+
   const firstUrl=(g.channels||[]).find(ch=>ch.url)?.url||ca.source||null;
-  const online=(title,detail,url=firstUrl)=>({kind:'online',badge:'PRATICA UFFICIALE ONLINE',title,detail,url,cta:'Apri la pratica ufficiale',download:null});
-  const local=(title,detail,url=firstUrl)=>({kind:'local',badge:'PROCEDURA TERRITORIALE',title,detail,url,cta:'Apri ente / istruzioni ufficiali',download:null});
-  const registry={
-    law104work: sector==='Pubblico'
-      ? local('Richiesta permessi Legge 104 alla tua amministrazione','Per un dipendente pubblico non esiste una domanda INPS da inviare come per il settore privato: la richiesta segue la procedura dell’amministrazione o dell’ufficio personale.')
-      : online('Permessi Legge 104 per assistenza a familiare con disabilità grave','La domanda viene presentata tramite il servizio INPS dedicato, direttamente oppure con Patronato/Contact Center. Carevia ti prepara prima dell’accesso.'),
-    leave: sector==='Pubblico'
-      ? local('Richiesta di congedo straordinario alla tua amministrazione','Per il settore pubblico la richiesta segue le regole e la modulistica dell’amministrazione datrice di lavoro.')
-      : online('Congedo straordinario per assistenza a familiare con disabilità grave','La domanda è telematica INPS. Carevia verifica prima i dati che possono bloccare la compilazione: rapporto familiare, priorità, convivenza e periodo richiesto.'),
-    universal: online('Domanda di Prestazione Universale','La domanda si presenta sul servizio INPS. Non usare moduli PDF ricostruiti: Carevia ti porta alla domanda ufficiale e ti prepara i dati da inserire.'),
-    hcp: online('Domanda Home Care Premium','La domanda è gestita attraverso i servizi welfare INPS. Carevia controlla prima platea, DSU/ISEE e dati del verbale.'),
-    adi: local('Attivazione Assistenza Domiciliare Integrata (ADI)','Non esiste un unico modulo nazionale da scaricare: l’accesso avviene tramite medico, Distretto o punto territoriale competente. Carevia ti porta all’azienda sanitaria risolta per il tuo Comune.',ca.authority?.url||firstUrl),
-    veneto_icd: local('Richiesta / valutazione per Impegnativa di Cura Domiciliare','La Regione Veneto indica che la domanda si presenta tramite Servizi Sociali / Distretto e che il modulo è disponibile presso la propria ULSS. Carevia ti porta all’ente territoriale risolto e deve collegare il modulo specifico quando pubblicato online.',ca.authority?.url||firstUrl),
-    verona_sad: local('Richiesta di Assistenza Domiciliare comunale','La procedura è comunale/territoriale. Carevia deve collegare la modulistica ufficiale del Comune quando disponibile e guidarti nella compilazione.'),
-    civil: local('Avvio accertamento della disabilità','Il primo atto è il certificato medico introduttivo predisposto da un medico certificatore. Non è un modulo che il caregiver deve scaricare e compilare autonomamente.')
-  };
-  return registry[ca.supportId]||local(ca.title,'Carevia ha identificato l’ente competente, ma deve ancora collegare una modulistica ufficiale verificata per questa pratica.');
+  return make('assisted',ca.title,
+    'Carevia ha identificato l’ente competente, ma non ha ancora collegato un modulo o servizio diretto verificato per questa pratica.',
+    firstUrl,'Apri la fonte ufficiale',ca.source,
+    (ca.documents||[]).map(d=>d.title));
 }
 
-function compilationHint(f){
+function officialActionLabel(op){
+  if(op.kind==='pdf') return 'Scarica il PDF ufficiale';
+  if(op.kind==='online') return op.actionLabel||'Apri la domanda online';
+  return op.actionLabel||'Apri il canale corretto';
+}
+
+function officialActionType(op){
+  if(op.kind==='pdf') return 'MODULO PDF UFFICIALE';
+  if(op.kind==='online') return 'DOMANDA ONLINE';
+  return 'ACCESSO ASSISTITO / TERRITORIALE';
+}
+\n\nfunction compilationHint(f){
   const hints={
     assistedName:'Inserisci i dati esattamente come risultano nei documenti anagrafici della persona assistita.',
     relationship:'Indica il rapporto reale con la persona assistita: può cambiare requisiti e dichiarazioni richieste.',
@@ -1757,12 +1848,6 @@ function missingApplicationFields(ca){
     const v=String(f.value||'').trim();
     return !v || v==='Non so';
   });
-}
-
-function officialActionLabel(op){
-  if(op.download) return 'Scarica il modulo ufficiale';
-  if(op.kind==='online') return 'Apri la pratica ufficiale';
-  return 'Apri il canale ufficiale';
 }
 
 function continueToOfficialPractice(caseId){
