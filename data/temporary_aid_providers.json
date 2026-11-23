@@ -84,7 +84,7 @@
         "Montascale",
         "Sedia doccia/WC"
       ],
-      "price_summary": "Prezzi al giorno pubblicati; carrozzina standard €3,90/giorno min. 5 giorni; carrozzina elettronica €10/giorno min. 20 giorni",
+      "price_summary": "Prezzo dell'ausilio da verificare; per le carrozzine sono pubblicati prezzi specifici",
       "membership_required": false,
       "delivery": "Consegna a domicilio disponibile; costo dipendente dalla distanza. Montaggio e ritiro disponibili.",
       "phone": "045 609 0290",
@@ -92,7 +92,10 @@
       "url": "https://www.ortopedicascaligera.it/noleggio-carrozzine-ausili-per-anziani-e-disabili-a-verona/",
       "source_url": "https://www.ortopedicascaligera.it/noleggio-carrozzine-ausili-per-anziani-e-disabili-a-verona/",
       "verified_at": "2026-11-23",
-      "notes": "Disponibilità dichiarata di oltre 100 articoli; confermare sempre disponibilità e preventivo per l'ausilio specifico."
+      "notes": "Disponibilità dichiarata di oltre 100 articoli; confermare sempre disponibilità e preventivo per l'ausilio specifico.",
+      "prices": {
+        "Carrozzina": "Standard €3,90/giorno (min. 5 giorni); elettronica €10/giorno (min. 20 giorni)"
+      }
     },
     {
       "id": "sanitaria_san_marco_verona",
@@ -240,7 +243,8 @@
       "url": "https://www.ausilium.it/prodotti-noleggio.htm",
       "source_url": "https://www.ausilium.it/prodotti-noleggio.htm",
       "verified_at": "2026-11-23",
-      "notes": "Servizio dichiarato disponibile in tutta Italia ad eccezione della Sardegna. Prezzo del singolo ausilio da verificare sul catalogo."
+      "notes": "Servizio dichiarato disponibile in tutta Italia ad eccezione della Sardegna. Prezzo del singolo ausilio da verificare sul catalogo.",
+      "prices": {}
     }
   ]
 }
