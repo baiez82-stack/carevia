@@ -95,6 +95,13 @@
         "territory_social",
         "law104_gravity"
       ]
+    },
+    "temporary_aid": {
+      "label": "Ausilio temporaneo già indicato",
+      "kind": "practical_support",
+      "support_id": "temporary_aid",
+      "depends_on": [],
+      "note": "Carevia confronta prestiti associativi e noleggi. Non prescrive l'ausilio."
     }
   }
 }
