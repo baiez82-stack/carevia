@@ -558,6 +558,14 @@ body{background:var(--canvas);color:var(--ink)}
 .manual-tracking{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;padding:14px;border:1px solid #dce4e0;border-radius:10px;background:#fafbf9}.manual-tracking .wide{grid-column:1/-1}.manual-tracking label{display:block;margin-bottom:5px;color:#64716c;font-size:9px;font-weight:760}.manual-tracking input{width:100%;height:38px;padding:0 10px;border:1px solid #d5dbd7;border-radius:7px;background:#fff;font-size:10px}
 @media(max-width:620px){.manual-tracking{grid-template-columns:1fr}.manual-tracking .wide{grid-column:auto}}
 
+
+.temporary-aid-setup{display:grid;gap:16px;margin-bottom:24px;padding:22px;border:1px solid #d8e5df;border-radius:14px;background:#fff}
+.temporary-aid-warning{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border-radius:10px;background:#f2f8f5}.temporary-aid-warning svg{color:#176858;flex:0 0 auto}.temporary-aid-warning strong,.temporary-aid-warning span{display:block}.temporary-aid-warning strong{font-size:11px}.temporary-aid-warning span{margin-top:3px;color:#62716b;font-size:10px;line-height:1.5}
+.temporary-aid-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.temporary-aid-fields label>span{display:block;margin-bottom:6px;color:#4e5d57;font-size:9px;font-weight:780;text-transform:uppercase;letter-spacing:.04em}.temporary-aid-fields select{width:100%;height:42px;padding:0 10px;border:1px solid #d1d9d5;border-radius:8px;background:#fff;font-size:11px}
+.temporary-aid-results{margin:26px 0}.temporary-aid-summary{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.temporary-aid-summary span{padding:7px 9px;border-radius:7px;background:#eef4f1;color:#52635d;font-size:9px}.temporary-aid-summary strong{color:#173f37}
+.temporary-aid-provider-list{display:grid;gap:10px}.temporary-aid-provider{display:grid;grid-template-columns:34px minmax(0,1fr) 180px;gap:14px;align-items:center;padding:16px;border:1px solid #dde4e0;border-radius:11px;background:#fff}.temporary-aid-rank{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#e6f2ed;color:#176858;font-size:10px;font-weight:850}.provider-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.provider-badges span{padding:4px 6px;border-radius:5px;background:#e8f3ee;color:#176858;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.provider-badges .membership{background:#fff1d7;color:#7a571b}.temporary-aid-provider h4{margin:0 0 7px;font-size:14px}.temporary-aid-provider p{margin:4px 0;color:#5d6b65;font-size:10px;line-height:1.45}.temporary-aid-provider .provider-note{color:#7a817d}.temporary-aid-provider small{display:block;margin-top:7px;color:#8a918d;font-size:8px}.temporary-aid-actions{display:grid;gap:7px}.temporary-aid-actions .primary-button,.temporary-aid-actions .secondary-button{width:100%;min-height:36px;font-size:10px}.temporary-aid-ssn{margin-top:18px}.temporary-aid-ssn p{color:#66756f;font-size:11px;line-height:1.55}
+@media(max-width:800px){.temporary-aid-fields{grid-template-columns:1fr}.temporary-aid-provider{grid-template-columns:30px 1fr}.temporary-aid-actions{grid-column:2;grid-template-columns:1fr 1fr}.temporary-aid-actions a:last-child:nth-child(odd){grid-column:1/-1}}
+
 </style>
   </head>
   <body>
@@ -595,6 +603,16 @@ let territorialStats = {
   social_source_updated: '06 mar 2025',
   sync: 'settimanale'
 };
+
+let temporaryAidRegistry = {verified_at:null,providers:[],aid_types:[]};
+
+async function loadTemporaryAidRegistry(){
+  try{
+    const res=await fetch('data/temporary_aid_providers.json',{cache:'no-cache'});
+    if(res.ok) temporaryAidRegistry=await res.json();
+  }catch{}
+  render();
+}
 
 async function loadTerritorialStats(){
   try{
@@ -1216,6 +1234,7 @@ function supportDetails(id, profile) {
     dementia: {sourceLabel:'ISS', legalState:'Servizio sanitario territoriale', missing:'Individuare il CDCD competente e le modalita locali di accesso.'},
     palliative: {sourceLabel:'Ministero Salute', legalState:'Rete SSN', missing:'Valutazione clinica e attivazione attraverso medico/struttura territoriale.'},
     aids: {sourceLabel:'SSN', legalState:'LEA', missing:'Prescrizione e verifica che l’ausilio rientri nel percorso di assistenza protesica.'},
+    temporary_aid: {sourceLabel:'Carevia provider registry', legalState:'Servizio temporaneo non sanitario', missing:'Ausilio già indicato da un professionista, durata e disponibilità reale presso il fornitore.'},
     auu: {sourceLabel:'INPS', legalState:'Misura vigente', missing:'Verificare posizione del figlio a carico e dati della domanda AUU.'},
     afterus: {sourceLabel:'Ministero Lavoro', legalState:'Misura vigente con attuazione territoriale', missing:'Disabilita grave e requisiti/programma dell’Ambito territoriale.'},
     adi: {sourceLabel:'SSN', legalState:'Servizio territoriale', missing:'Valutazione multidimensionale e presa in carico da parte del servizio competente.'},
@@ -1298,6 +1317,19 @@ function evaluateSupport(profile) {
 
   if (profile.needs.includes('Adeguamento della casa') || ['Disabilita fisica','Malattia neurologica'].includes(profile.condition)) {
     results.push({id:'aids',title:'Ausili e assistenza protesica SSN',status:'Da verificare',tone:'neutral',value:'Ausili e dispositivi',reason:'Il SSN prevede assistenza protesica per dispositivi, ausili e tecnologie inclusi nei LEA, secondo prescrizione e requisiti.',next:'Chiedi al medico/servizio specialistico se e indicato un percorso di prescrizione.',source:'https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/'});
+  }
+
+  if (profile.needs.includes('Ausilio temporaneo già indicato')) {
+    results.push({
+      id:'temporary_aid',
+      title:'Trova un ausilio temporaneo',
+      status:'Confronto territoriale',
+      tone:'positive',
+      value:'Prestito associativo / noleggio',
+      reason:'Hai indicato che serve temporaneamente un ausilio già suggerito da un professionista. Carevia confronta solo disponibilità di prestito e noleggio: non sceglie né prescrive il dispositivo.',
+      next:'Indica quale ausilio serve e per quanto tempo: Carevia ordina prima i prestiti gratuiti verificati, poi i noleggi locali e infine quelli nazionali.',
+      source:'data/temporary_aid_providers.json'
+    });
   }
 
   if (profile.relationship === 'Genitore' && age < 18 && (profile.invalidity === 'Si' || profile.law104 === 'Si')) {
@@ -1641,6 +1673,23 @@ practiceTemplates.regional = {
     {id:'submission',title:'Presenta domanda o richiesta di valutazione',text:'Usa esclusivamente modulo, portale o sportello indicato dall’ente competente.',phase:'submit'},
     {id:'wait',title:'Segui graduatoria o valutazione',text:'Registra integrazioni, convocazioni e comunicazioni.',phase:'wait'},
     {id:'outcome',title:'Registra l’esito',text:'Concludi solo sulla base della comunicazione ufficiale.',phase:'outcome'}
+  ]
+};
+
+practiceTemplates.temporary_aid = {
+  humanTitle:'Ausilio temporaneo già indicato',
+  adminTitle:'Ricerca territoriale di prestito associativo e noleggio',
+  type:'Supporto pratico',
+  authority:p=>({name:'Prestiti e noleggi verificati',detail:'Carevia confronta fornitori e associazioni che dichiarano il servizio nel territorio.',url:null}),
+  documents:p=>[
+    {id:'indication',title:'Indicazione del professionista',reason:'Serve per sapere esattamente quale ausilio cercare; Carevia non prescrive né sostituisce la valutazione clinica.',ready:false},
+    {id:'duration',title:'Durata stimata',reason:'Aiuta a confrontare prestito gratuito e noleggio.',ready:false}
+  ],
+  steps:p=>[
+    {id:'identify',title:'Conferma ausilio e durata',text:'Usa la denominazione indicata dal professionista e la durata prevista.',phase:'prepare'},
+    {id:'compare',title:'Confronta le opzioni disponibili',text:'Prestito associativo gratuito, noleggio locale e noleggio nazionale vengono ordinati in modo neutrale.',phase:'prepare'},
+    {id:'contact',title:'Conferma disponibilità e condizioni',text:'Contatta direttamente il fornitore prima di spostarti o pagare.',phase:'submit'},
+    {id:'obtained',title:'Registra quando hai ottenuto l’ausilio',text:'Segna concluso solo quando l’ausilio è stato effettivamente consegnato o ritirato.',phase:'outcome'}
   ]
 };
 
@@ -2536,7 +2585,113 @@ function documentRecoveryResources(ca,op){
   return practiceOperationalGuide(ca,op).resources.filter(r=>r.type==='DOCUMENT');
 }
 
+
+function normalizeAidMatch(value=''){ return normalizePlace(value).replace(/\s+/g,' '); }
+
+function temporaryAidTerritoryScore(provider,profile){
+  const scope=provider.scope||{};
+  if((scope.excluded_regions||[]).some(r=>normalizeAidMatch(r)===normalizeAidMatch(profile.region))) return -1;
+  const city=normalizeAidMatch(profile.city), province=normalizeAidMatch(profile.province), region=normalizeAidMatch(profile.region);
+  const cities=(scope.cities||[]).map(normalizeAidMatch), provinces=(scope.provinces||[]).map(normalizeAidMatch), regions=(scope.regions||[]).map(normalizeAidMatch);
+  if(cities.includes(city)) return 40;
+  if(provinces.includes(province)) return 30;
+  if(regions.includes(region)) return 20;
+  if(regions.includes('*') || provinces.includes('*') || cities.includes('*')) return 10;
+  return -1;
+}
+
+function temporaryAidProvidersFor(profile,aid){
+  const selected=normalizeAidMatch(aid);
+  const modelOrder={association_loan:0,local_rental:1,national_rental:2};
+  return (temporaryAidRegistry.providers||[])
+    .map(p=>({...p,_territory:temporaryAidTerritoryScore(p,profile)}))
+    .filter(p=>p._territory>=0 && (p.aids||[]).some(a=>normalizeAidMatch(a)===selected || normalizeAidMatch(a)==='altro'))
+    .sort((a,b)=>(modelOrder[a.model]??9)-(modelOrder[b.model]??9) || b._territory-a._territory || a.name.localeCompare(b.name,'it'));
+}
+
+function updateTemporaryAidField(caseId,key,value){
+  const ca=state.cases.find(c=>c.id===caseId); if(!ca) return;
+  ca.applicationData=ca.applicationData||{};
+  ca.applicationData[key]=value;
+  ca.updatedAt=new Date().toISOString();
+  saveState();
+  render();
+}
+
+function temporaryAidPrice(provider,aid){
+  return provider.prices?.[aid] || provider.price_summary || 'Prezzo da verificare';
+}
+
+function temporaryAidActionButtons(provider){
+  const buttons=[];
+  if(provider.phone) buttons.push(`<a class="secondary-button" href="tel:${provider.phone.replace(/\s+/g,'')}">${icon('arrow',14)} Chiama</a>`);
+  if(provider.email) buttons.push(`<a class="secondary-button" href="mailto:${provider.email}">${icon('arrow',14)} Email</a>`);
+  if(provider.url) buttons.push(`<a class="primary-button" href="${provider.url}" target="_blank" rel="noreferrer">${icon('arrow',14)} Apri servizio</a>`);
+  return buttons.join('');
+}
+
+function temporaryAidCaseView(ca){
+  const data=ca.applicationData||{};
+  const confirmed=data.professionalConfirmed||'Non so';
+  const aid=data.aidType||'';
+  const duration=data.duration||'';
+  const providers=confirmed==='Si' && aid ? temporaryAidProvidersFor(state.profile,aid) : [];
+  const associationCount=providers.filter(p=>p.model==='association_loan').length;
+  const localCount=providers.filter(p=>p.model==='local_rental').length;
+  const nationalCount=providers.filter(p=>p.model==='national_rental').length;
+  const aidOptions=temporaryAidRegistry.aid_types?.length?temporaryAidRegistry.aid_types:['Carrozzina','Deambulatore','Letto da degenza','Sollevatore','Materasso antidecubito','Stampelle','Sedia doccia/WC','Montascale','Altro'];
+  return `<div class="page enter practice-page temporary-aid-page">
+    <button class="text-button practice-back" onclick="closeCaseDetail()">${icon('back',15)} Tutte le pratiche</button>
+    <div class="practice-title-row">
+      <div><span class="eyebrow">Ausilio temporaneo</span><h2>Trova prestito o noleggio senza chiamare a caso</h2><p>Carevia confronta servizi verificati nel territorio per un ausilio già indicato da un professionista.</p></div>
+      <div class="practice-meta"><span class="case-status-pill">Confronto territoriale</span><small>Dati verificati ${esc(temporaryAidRegistry.verified_at||'')}</small></div>
+    </div>
+
+    <section class="temporary-aid-setup">
+      <div class="temporary-aid-warning">${icon('shield',18)}<div><strong>Carevia non sceglie l’ausilio.</strong><span>Questa funzione serve solo dopo che medico, fisioterapista, terapista occupazionale o altro professionista competente ha già indicato cosa serve.</span></div></div>
+      <div class="temporary-aid-fields">
+        <label><span>L’ausilio è già stato indicato da un professionista?</span><select onchange="updateTemporaryAidField('${ca.id}','professionalConfirmed',this.value)"><option ${confirmed==='Non so'?'selected':''}>Non so</option><option ${confirmed==='No'?'selected':''}>No</option><option ${confirmed==='Si'?'selected':''}>Si</option></select></label>
+        <label><span>Quale ausilio?</span><select onchange="updateTemporaryAidField('${ca.id}','aidType',this.value)" ${confirmed==='Si'?'':'disabled'}><option value="">Seleziona</option>${aidOptions.map(x=>`<option ${x===aid?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+        <label><span>Per quanto tempo circa?</span><select onchange="updateTemporaryAidField('${ca.id}','duration',this.value)" ${confirmed==='Si'?'':'disabled'}><option value="">Seleziona</option>${['1-7 giorni','1-4 settimane','1-3 mesi','Oltre 3 mesi'].map(x=>`<option ${x===duration?'selected':''}>${x}</option>`).join('')}</select></label>
+      </div>
+      ${confirmed==='No'?`<div class="source-note">${icon('info',18)}<div><strong>Prima serve l’indicazione corretta</strong><p>Parlane con il professionista che segue la persona. Carevia non deve suggerire un dispositivo senza una valutazione competente.</p></div></div>`:''}
+    </section>
+
+    ${confirmed==='Si' && aid ? `
+      <section class="temporary-aid-results">
+        <div class="home-section-head"><span class="eyebrow">Confronto per ${esc(aid)} · ${esc(state.profile.city)}</span><h3>${providers.length} opzioni verificate trovate</h3><p>Ordine neutrale: prestito associativo → noleggio locale → noleggio nazionale. La disponibilità reale va sempre confermata al fornitore.</p></div>
+        <div class="temporary-aid-summary">
+          <span><strong>${associationCount}</strong> prestiti associativi</span>
+          <span><strong>${localCount}</strong> noleggi locali</span>
+          <span><strong>${nationalCount}</strong> noleggi nazionali</span>
+        </div>
+        ${providers.length?`<div class="temporary-aid-provider-list">${providers.map((p,i)=>`<article class="temporary-aid-provider">
+          <div class="temporary-aid-rank">${i+1}</div>
+          <div>
+            <div class="provider-badges"><span>${esc(p.label)}</span>${p.membership_required?'<span class="membership">Richiede adesione/socio</span>':''}</div>
+            <h4>${esc(p.name)}</h4>
+            <p><b>Costo:</b> ${esc(temporaryAidPrice(p,aid))}</p>
+            <p><b>Consegna/ritiro:</b> ${esc(p.delivery||'Da verificare')}</p>
+            <p class="provider-note">${esc(p.notes||'')}</p>
+            <small>Fonte verificata ${esc(p.verified_at||'')} · disponibilità non garantita da Carevia</small>
+          </div>
+          <div class="temporary-aid-actions">${temporaryAidActionButtons(p)}</div>
+        </article>`).join('')}</div>`:`<div class="empty-state"><strong>Nessuna opzione specifica verificata per questo ausilio nel territorio.</strong><p>Carevia non mostra fornitori non verificati. La copertura locale viene ampliata in base all’uso reale.</p></div>`}
+      </section>
+      <section class="simple-card temporary-aid-ssn">
+        <span class="eyebrow">Se non è davvero temporaneo</span>
+        <h3>Valuta anche il percorso SSN</h3>
+        <p>Se l’ausilio è destinato a un uso continuativo o il professionista ha predisposto una prescrizione specialistica, può avere senso verificare l’assistenza protesica SSN invece di sostenere un noleggio prolungato.</p>
+        <a class="secondary-button" href="https://www.salute.gov.it/new/it/tema/livelli-essenziali-di-assistenza/assistenza-protesica/" target="_blank" rel="noreferrer">Assistenza protesica SSN ${icon('arrow',14)}</a>
+      </section>
+    `:''}
+
+    <div class="practice-global-disclaimer"><strong>Importante</strong><span>Carevia confronta servizi pubblicamente dichiarati e non prescrive ausili. Prezzi, disponibilità, cauzioni, consegna e idoneità del dispositivo devono essere confermati direttamente con il fornitore e con il professionista che segue la persona.</span></div>
+  </div>`;
+}
+
 function caseDetailView(ca){
+  if(ca.supportId==='temporary_aid') return temporaryAidCaseView(ca);
   const status=deriveCaseStatus(ca);
   const g=hydrateApplicationGuide(ca.supportId,state.profile,ca.applicationData||{});
   const op=officialPracticeGuide(ca,g);
@@ -2701,6 +2856,7 @@ function careDependencyGraph(profile,supports){
     {id:'isee_sociosanitario',label:'ISEE sociosanitario',kind:'Documento',relevant:iseeNeeded,done:done.isee_sociosanitario,depends:[],supportId:null,why:'Sblocca o completa la verifica di più misure economiche e territoriali.'},
     {id:'territory_social',label:'Ambito / Comune competente',kind:'Territorio',relevant:socialNeeded,done:territorySocialDone,depends:[],supportId:null,why:'Serve per misure sociali e regionali che non hanno un unico sportello nazionale.'},
     {id:'adi',label:'Assistenza Domiciliare Integrata',kind:'Servizio sanitario',relevant:ids.has('adi'),done:state.cases.some(c=>c.supportId==='adi'&&c.outcome==='approved'),depends:[],supportId:'adi',why:'Può essere attivata in parallelo ai riconoscimenti economici.'},
+    {id:'temporary_aid',label:'Ausilio temporaneo',kind:'Supporto pratico',relevant:ids.has('temporary_aid'),done:state.cases.some(c=>c.supportId==='temporary_aid'&&c.outcome==='approved'),depends:[],supportId:'temporary_aid',why:'Se un professionista ha già indicato l’ausilio, puoi cercare subito prestito o noleggio senza attendere altre pratiche.'},
     {id:'permits104',label:'Permessi Legge 104',kind:'Tutela lavoro',relevant:ids.has('law104work'),done:state.cases.some(c=>c.supportId==='law104work'&&c.outcome==='approved'),depends:['law104_gravity'],supportId:'law104work',why:'Diventa azionabile quando il requisito di gravità è verificato.'},
     {id:'leave',label:'Congedo straordinario',kind:'Tutela lavoro',relevant:ids.has('leave'),done:state.cases.some(c=>c.supportId==='leave'&&c.outcome==='approved'),depends:['law104_gravity'],supportId:'leave',why:'Richiede ulteriori verifiche su priorità familiare e convivenza.'},
     {id:'universal',label:'Prestazione Universale',kind:'Prestazione',relevant:ids.has('universal'),done:state.cases.some(c=>c.supportId==='universal'&&c.outcome==='approved'),depends:['isee_sociosanitario'],supportId:'universal',why:'L’ISEE è uno dei prerequisiti da avere pronto prima della domanda.'},
@@ -2985,7 +3141,7 @@ function wizard() {
   if (step === 1) body = `<div class="form-step"><h3>Dove vive la persona assistita?</h3><p>Possiamo compilare automaticamente Regione, Provincia e Comune usando la posizione del dispositivo, oppure puoi inserire il Comune e completare gli altri campi.</p><div class="field-grid"><div class="location-tools">${button('secondary-button','Usa la posizione','detectLocation()','search')}<span id="location-status" class="location-status">La posizione viene usata solo per compilare questi campi e non viene salvata come coordinate.</span></div>${field('Regione',select('region',f.region,['Seleziona','Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna','Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche','Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana','Trentino-Alto Adige','Umbria','Valle d’Aosta','Veneto']))}${field('Provincia',input('province',f.province))}${field('Comune',`<input type="text" value="${esc(f.city)}" oninput="updateDraft('city',this.value)" onblur="if(this.value.trim()) completeFromMunicipality()"><span class="field-help">Scrivi il Comune: Carevia prova a completare Provincia e Regione automaticamente.</span>`)}${field('Situazione principale',select('condition',f.condition,['Anziano non autosufficiente','Demenza o declino cognitivo','Disabilita fisica','Disabilita intellettiva o autismo','Malattia neurologica','Malattia oncologica','Cure palliative','Salute mentale','Patologia cronica complessa','Altro']))}</div></div>`;
   if (step === 2) body = `<div class="form-step"><h3>Qual e la situazione assistenziale?</h3><p>Indica solo i riconoscimenti gia noti. Carevia li tratta come informazioni preliminari, non come certificazioni.</p><div class="field-grid">${field('La persona vive',select('living',f.living,['Sola','Con il coniuge o partner','Con familiari','In struttura']))}${field('Invalidita/disabilita riconosciuta',select('invalidity',f.invalidity,['No','In corso','Si']))}${field('Legge 104',select('law104',f.law104,['No','In corso','Si']))}${field('Se 104 gia riconosciuta: quale verbale?',select('law104Level',f.law104Level,['Non so','Art. 3 comma 1','Art. 3 comma 3 (gravita)']))}${field('Indennita di accompagnamento',select('allowance',f.allowance,['No','In corso','Si']))}</div><div class="info-box">${icon('info',18)}<span>Invalidita/disabilita, Legge 104 e accompagnamento sono riconoscimenti distinti. Nel 2026 la procedura di accertamento cambia in 60 province sperimentali.</span></div></div>`;
   if (step === 3) body = `<div class="form-step"><h3>Lavoro e informazioni economiche essenziali</h3><p>Servono per capire quali tutele del caregiver e quali misure vale la pena approfondire.</p><div class="field-grid">${field('Situazione lavorativa del caregiver',select('caregiverWork',f.caregiverWork,['Non lavoro','Dipendente','Autonomo','Pensionato']))}${f.caregiverWork==='Dipendente'?field('Sei dipendente pubblico o privato?',select('caregiverSector',f.caregiverSector,['Non so','Privato','Pubblico'])):''}${field('Nel nucleo c’è un dipendente o pensionato pubblico?',`${select('publicEmployee',f.publicEmployee,['No','Si','Non so'])}<span class="field-help"><b>Perché lo chiediamo:</b> potrebbe aprire l’accesso a Home Care Premium (HCP), programma INPS per assistenza domiciliare rivolto agli iscritti alla Gestione Unitaria delle prestazioni creditizie e sociali e ai loro familiari non autosufficienti.</span>`)}${field('ISEE sociosanitario',select('isee',f.isee,['Non disponibile','0-6.000','6.001-15.000','15.001-30.000','Oltre 30.000']))}</div><div class="privacy-note">${icon('shield',20)}<div><strong>Minimizzazione dei dati</strong><span>Non chiediamo codici fiscali, redditi puntuali, diagnosi dettagliate o IBAN.</span></div></div></div>`;
-  if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
+  if (step === 4) { const needs=['Assistenza a domicilio','Pratiche e agevolazioni','Farmaci e visite','Ricerca di una badante','Sostegno al caregiver','Adeguamento della casa','Ausilio temporaneo già indicato']; body=`<div class="form-step"><h3>Dove serve piu aiuto?</h3><p>Seleziona tutte le aree rilevanti. Carevia usera queste priorita per costruire il piano operativo.</p><div class="choice-grid">${needs.map(n => `<button class="choice ${f.needs.includes(n)?'active':''}" onclick="toggleNeed('${n.replace(/'/g,"\\'")}')"><span>${f.needs.includes(n)?icon('check',15):''}</span>${n}</button>`).join('')}</div></div>`; }
   return `<div class="modal-backdrop"><div class="wizard"><header><div><span class="eyebrow">Valutazione guidata</span><h2>Costruiamo il percorso</h2></div><button class="icon-button" onclick="closeWizard()">${icon('close',21)}</button></header><div class="wizard-progress">${labels.map((l,i)=>`<div class="${i<=step?'active':''}"><span>${i<step?icon('check',13):i+1}</span><b>${l}</b></div>`).join('')}</div><div class="wizard-body">${body}</div><footer>${button('secondary-button',step===0?'Annulla':'Indietro',step===0?'closeWizard()':'wizardBack()','back')}<div class="wizard-save"><button class="text-button" onclick="persistDraft(true)">Salva e continua dopo</button><span>Passaggio ${step+1} di 5</span></div>${button('primary-button',step===4?'Crea il piano':'Continua',step===4?'completeWizard()':'wizardNext()','arrow')}</footer></div></div>`;
 }
 
@@ -3097,9 +3253,10 @@ async function completeWizard(){
 }
 function showToast(message){ clearTimeout(toastTimer); const old=document.querySelector('.toast'); if(old)old.remove(); const toast=document.createElement('div'); toast.className='toast'; toast.innerHTML=`${icon('check',18)}${esc(message)}`; document.body.appendChild(toast); toastTimer=setTimeout(()=>toast.remove(),3000); }
 
-window.navigateTo=navigateTo; window.copyPreparedField=copyPreparedField; window.updateCaseSubmissionMeta=updateCaseSubmissionMeta; window.copyPracticeMessage=copyPracticeMessage; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
+window.navigateTo=navigateTo; window.updateTemporaryAidField=updateTemporaryAidField; window.copyPreparedField=copyPreparedField; window.updateCaseSubmissionMeta=updateCaseSubmissionMeta; window.copyPracticeMessage=copyPracticeMessage; window.resetCareviaData=resetCareviaData; window.openMobileNav=openMobileNav; window.closeMobileNav=closeMobileNav; window.toggleTask=toggleTask; window.setTaskFilter=setTaskFilter; window.addTask=addTask; window.triggerUpload=triggerUpload; window.uploadFiles=uploadFiles; window.openWizard=openWizard; window.closeWizard=closeWizard; window.wizardNext=wizardNext; window.wizardBack=wizardBack; window.updateDraft=updateDraft; window.toggleNeed=toggleNeed; window.completeWizard=completeWizard; window.persistDraft=persistDraft; window.detectLocation=detectLocation; window.completeFromMunicipality=completeFromMunicipality; window.printSummary=printSummary; window.openCaseFromSupport=openCaseFromSupport; window.openCase=openCase; window.closeCaseDetail=closeCaseDetail; window.toggleCaseDocument=toggleCaseDocument; window.toggleCaseStep=toggleCaseStep; window.setCaseOutcome=setCaseOutcome; window.setCaseFilter=setCaseFilter; window.updateCaseApplicationField=updateCaseApplicationField; window.copyPracticeSummary=copyPracticeSummary;
 
 render();
+loadTemporaryAidRegistry();
 loadTerritorialStats();
 resolveProfileTerritoryData().then(()=>render()).catch(()=>{});
 </script>
