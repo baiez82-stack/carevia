@@ -190,6 +190,17 @@
       "prefill_strategy": "prepare_documents_and_script",
       "handoff_policy": "resolve_territory_then_contact",
       "primary_cta_must_be_exact": true
+    },
+    "temporary_aid": {
+      "scope": "territorial-service-comparison",
+      "mode": "verified-provider-comparison",
+      "authority": "Associazioni e noleggiatori verificati",
+      "title": "Ausilio temporaneo già indicato da un professionista",
+      "registry_file": "data/temporary_aid_providers.json",
+      "action_class": "verified_provider_comparison",
+      "prefill_strategy": "collect_aid_and_duration_only",
+      "handoff_policy": "show_free_association_loans_then_local_rentals_then_national_rentals",
+      "primary_cta_must_be_exact": true
     }
   }
 }
