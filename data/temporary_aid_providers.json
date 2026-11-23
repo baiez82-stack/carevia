@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-11-23",
+  "purpose": "Temporary aid finder for devices already indicated by a healthcare professional. Carevia does not select or prescribe the device.",
+  "ranking_policy": [
+    "Show verified free/association loans first when they serve the user's territory and aid type.",
+    "Then show verified local rentals.",
+    "Then show nationwide rentals.",
+    "Never rank by sponsorship or affiliate payment.",
+    "Only display prices explicitly published by the provider; otherwise show 'prezzo da verificare'.",
+    "Availability is never inferred: the user must confirm it with the provider."
+  ],
+  "aid_types": [
+    "Carrozzina",
+    "Deambulatore",
+    "Letto da degenza",
+    "Sollevatore",
+    "Materasso antidecubito",
+    "Stampelle",
+    "Sedia doccia/WC",
+    "Montascale",
+    "Altro"
+  ],
+  "providers": [
+    {
+      "id": "san_martino_calle_lazise",
+      "name": "Associazione San Martino in Calle O.N.L.U.S.",
+      "model": "association_loan",
+      "label": "Prestito associativo gratuito",
+      "scope": {
+        "regions": [
+          "Veneto"
+        ],
+        "provinces": [
+          "Verona"
+        ],
+        "cities": [
+          "Lazise"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Letto da degenza",
+        "Stampelle",
+        "Sedia doccia/WC",
+        "Altro"
+      ],
+      "price_summary": "Prestito temporaneo gratuito",
+      "membership_required": false,
+      "delivery": "Da concordare con l'associazione",
+      "phone": "348 2762663",
+      "email": null,
+      "url": "https://reteassociazioni.it/san-martino-in-calle/servizio-sussidi-ortopedici",
+      "source_url": "https://reteassociazioni.it/san-martino-in-calle/servizio-sussidi-ortopedici",
+      "verified_at": "2026-11-23",
+      "notes": "Servizio realizzato in collaborazione con i Servizi Sociali del Comune di Lazise. Disponibilità da confermare al contatto."
+    },
+    {
+      "id": "ortopedica_scaligera_verona",
+      "name": "Ortopedica Scaligera",
+      "model": "local_rental",
+      "label": "Noleggio locale",
+      "scope": {
+        "regions": [
+          "Veneto"
+        ],
+        "provinces": [
+          "Verona"
+        ],
+        "cities": [
+          "Verona",
+          "Sona",
+          "Castelnuovo del Garda"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Letto da degenza",
+        "Sollevatore",
+        "Materasso antidecubito",
+        "Stampelle",
+        "Montascale",
+        "Sedia doccia/WC"
+      ],
+      "price_summary": "Prezzi al giorno pubblicati; carrozzina standard €3,90/giorno min. 5 giorni; carrozzina elettronica €10/giorno min. 20 giorni",
+      "membership_required": false,
+      "delivery": "Consegna a domicilio disponibile; costo dipendente dalla distanza. Montaggio e ritiro disponibili.",
+      "phone": "045 609 0290",
+      "email": null,
+      "url": "https://www.ortopedicascaligera.it/noleggio-carrozzine-ausili-per-anziani-e-disabili-a-verona/",
+      "source_url": "https://www.ortopedicascaligera.it/noleggio-carrozzine-ausili-per-anziani-e-disabili-a-verona/",
+      "verified_at": "2026-11-23",
+      "notes": "Disponibilità dichiarata di oltre 100 articoli; confermare sempre disponibilità e preventivo per l'ausilio specifico."
+    },
+    {
+      "id": "sanitaria_san_marco_verona",
+      "name": "Sanitaria San Marco",
+      "model": "local_rental",
+      "label": "Noleggio locale",
+      "scope": {
+        "regions": [
+          "Veneto"
+        ],
+        "provinces": [
+          "Verona"
+        ],
+        "cities": [
+          "Verona"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Stampelle",
+        "Altro"
+      ],
+      "price_summary": "Prezzo da verificare",
+      "membership_required": false,
+      "delivery": "Consegne a domicilio disponibili",
+      "phone": "045 7113779",
+      "email": "info@sanitariasanmarco.it",
+      "url": "https://sanitariasanmarco.it/",
+      "source_url": "https://sanitariasanmarco.it/",
+      "verified_at": "2026-11-23",
+      "notes": "Il sito dichiara noleggio a breve e lungo termine di dispositivi per la deambulazione. Disponibilità e modello da confermare."
+    },
+    {
+      "id": "farmacia_bacchini_verona",
+      "name": "Farmacia Bacchini - Home Care",
+      "model": "local_rental",
+      "label": "Noleggio locale",
+      "scope": {
+        "regions": [
+          "Veneto"
+        ],
+        "provinces": [
+          "Verona"
+        ],
+        "cities": [
+          "Verona"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Letto da degenza",
+        "Sollevatore",
+        "Materasso antidecubito",
+        "Stampelle",
+        "Sedia doccia/WC",
+        "Altro"
+      ],
+      "price_summary": "Prezzo da verificare",
+      "membership_required": false,
+      "delivery": "Contattare il servizio Home Care",
+      "phone": "045 8203790",
+      "email": "info@farmaciabacchini.it",
+      "url": "https://www.farmaciabacchini.com/servizi/home-care/",
+      "source_url": "https://www.farmaciabacchini.com/servizi/home-care/",
+      "verified_at": "2026-11-23",
+      "notes": "Il servizio dichiara vendita, convenzione e noleggio di varie categorie di ausili. Disponibilità e condizioni da confermare."
+    },
+    {
+      "id": "solidarieta_in_rete_firenze",
+      "name": "Solidarietà in Rete - Pubbliche Assistenze",
+      "model": "association_loan",
+      "label": "Prestito / noleggio sociale associativo",
+      "scope": {
+        "regions": [
+          "Toscana"
+        ],
+        "provinces": [
+          "Firenze"
+        ],
+        "cities": [
+          "Firenze",
+          "Scandicci",
+          "Pontassieve",
+          "Greve in Chianti",
+          "Fiesole",
+          "Campi Bisenzio"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Letto da degenza",
+        "Stampelle",
+        "Sedia doccia/WC",
+        "Sollevatore",
+        "Materasso antidecubito",
+        "Altro"
+      ],
+      "price_summary": "Tariffe sociali; importo da verificare. Richiesta iscrizione/adesione a una Pubblica Assistenza.",
+      "membership_required": true,
+      "delivery": "Richiesta tramite modulo online; sede di preferenza selezionabile",
+      "phone": null,
+      "email": null,
+      "url": "https://solidarietainrete.it/ausili-ortopedici/",
+      "source_url": "https://solidarietainrete.it/ausili-ortopedici/",
+      "verified_at": "2026-11-23",
+      "notes": "Servizio associativo nella provincia di Firenze. Disponibilità valutata dallo staff dopo richiesta."
+    },
+    {
+      "id": "ausilium_nazionale",
+      "name": "Ausilium",
+      "model": "national_rental",
+      "label": "Noleggio nazionale",
+      "scope": {
+        "regions": [
+          "*"
+        ],
+        "excluded_regions": [
+          "Sardegna"
+        ],
+        "provinces": [
+          "*"
+        ],
+        "cities": [
+          "*"
+        ]
+      },
+      "aids": [
+        "Carrozzina",
+        "Deambulatore",
+        "Letto da degenza",
+        "Sollevatore",
+        "Stampelle",
+        "Sedia doccia/WC",
+        "Montascale",
+        "Altro"
+      ],
+      "price_summary": "Durata minima 15 giorni; costo servizio pubblicato €25 oltre al noleggio del prodotto",
+      "membership_required": false,
+      "delivery": "Consegna, montaggio e dimostrazione inclusi nel costo servizio dichiarato",
+      "phone": "011 196 20 906",
+      "email": null,
+      "url": "https://www.ausilium.it/prodotti-noleggio.htm",
+      "source_url": "https://www.ausilium.it/prodotti-noleggio.htm",
+      "verified_at": "2026-11-23",
+      "notes": "Servizio dichiarato disponibile in tutta Italia ad eccezione della Sardegna. Prezzo del singolo ausilio da verificare sul catalogo."
+    }
+  ]
+}
