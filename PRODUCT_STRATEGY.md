@@ -198,3 +198,27 @@ Non tentare di mantenere manualmente ogni PDF di ogni Comune. Il livello naziona
 
 ### Promessa corretta
 Carevia accompagna fino all'azione ufficiale verificata e consente di registrare manualmente protocollo, integrazioni ed esito. Non promette tracking automatico dell'ente senza integrazioni.
+
+
+## Modulo operativo: ausilio temporaneo già indicato
+
+Carevia può ridurre il lavoro pratico anche quando il bisogno non è una pratica amministrativa ma un ausilio temporaneo già individuato da un professionista.
+
+### Perimetro
+- Carevia NON sceglie né prescrive l’ausilio.
+- L’utente conferma che medico, fisioterapista, terapista occupazionale o altro professionista competente ha già indicato cosa serve.
+- Carevia raccoglie solo tipo di ausilio e durata stimata.
+
+### Output
+1. prestiti gratuiti/associativi verificati nel territorio;
+2. noleggi locali verificati;
+3. noleggi nazionali compatibili;
+4. prezzi solo se pubblicati dalla fonte;
+5. telefono/email/pagina richiesta diretta;
+6. disponibilità sempre da confermare al fornitore.
+
+### Ranking
+Il ranking è neutrale e non dipende da sponsorizzazioni:
+**prestito associativo → noleggio locale → noleggio nazionale**.
+
+Questa funzione è coerente con il moat solo perché elimina ricerca e telefonate inutili; non va trasformata in marketplace generalista di dispositivi medici.
